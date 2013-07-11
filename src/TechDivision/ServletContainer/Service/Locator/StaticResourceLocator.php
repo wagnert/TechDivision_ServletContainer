@@ -42,6 +42,8 @@ class StaticResourceLocator extends AbstractResourceLocator {
             throw new FileNotFoundException(sprintf('404 - file %s does not exist.', $path));
         }
 
+        error_log("Now try to open path $path");
+
         $file = new \SplFileObject($path);
 
         if (!($file->isReadable() && $file->isFile())) {
