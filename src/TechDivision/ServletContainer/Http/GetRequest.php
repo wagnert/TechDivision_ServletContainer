@@ -29,7 +29,7 @@ class GetRequest extends Request {
      */
     public function ParseUriInformation() {
 
-        $uriMod = explode("?", $this->getUri() );
+        $uriMod = explode("?", $this->getUri());
 
         if (array_key_exists(0, $uriMod)) {
             $this->setPathInfo($uriMod[0]);
@@ -46,21 +46,5 @@ class GetRequest extends Request {
         $this->_parameter = $this->getQueryString();
         $this->setParameterMap();
         return $this;
-    }
-
-    /**
-     * @deprec is not used anymore
-     * @return string
-     */
-    public function getRequestUrl() {
-        return $this->getPathInfo();
-    }
-
-    public function getRequestUri() {
-        return $this->getUri();
-    }
-
-    public function getRequestMethod() {
-        return $this->getMethod();
     }
 }

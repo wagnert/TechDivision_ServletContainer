@@ -13,7 +13,7 @@
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ServletContainer\Interfaces\Servlet;
-use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
+use TechDivision\ServletContainer\Servlets\DefaultServlet;
 use TechDivision\ServletContainer\Exceptions\InvalidApplicationArchiveException;
 
 /**
@@ -77,18 +77,6 @@ class ServletManager {
     }
 
     /**
-     * Registers the default servlet for the passed webapp.
-     *
-     * @param $key The webapp name to register the default servlet for
-     * @return false
-     */
-    protected function addDefaultServlet($key) {
-        $defaultServlet = new StaticResourceServlet();
-        $defaultServlet->init();
-        $this->addServlet("/$key/*", $defaultServlet);
-    }
-
-    /**
      * Finds all servlets which are provided by the webapps and initializes them.
      *
      * @param void
@@ -109,6 +97,9 @@ class ServletManager {
 
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
+
+            // add the default servlet (DefaultServlet)
+            $this->addDefaultServlet(basename($folder));
 
             /** @var $mapping \SimpleXMLElement */
             foreach ($config->xpath('/web-app/servlet-mapping') as $mapping) {
@@ -144,10 +135,19 @@ class ServletManager {
                 // the servlet is added to the dictionary using the complete request path as the key
                 $this->addServlet('/' . basename($folder) . '/' . $urlPattern,  $servlet);
             }
-
-            // add the default servlet (StaticResourceServlet)
-            $this->addDefaultServlet(basename($folder));
         }
+    }
+
+    /**
+     * Registers the default servlet for the passed webapp.
+     *
+     * @param $key The webapp name to register the default servlet for
+     * @return false
+     */
+    protected function addDefaultServlet($key) {
+        $defaultServlet = new DefaultServlet();
+        $defaultServlet->init();
+        $this->addServlet("/$key/*", $defaultServlet);
     }
 
     /**
@@ -165,8 +165,10 @@ class ServletManager {
     }
 
     /**
-     * @param string              $key
-     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet
+     * Registers a servlet under the passed key.
+     *
+     * @param string $key The servlet to key to register with
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet The servlet to be registered
      */
     public function addServlet($key, Servlet $servlet) {
         $this->servlets[$key] = $servlet;

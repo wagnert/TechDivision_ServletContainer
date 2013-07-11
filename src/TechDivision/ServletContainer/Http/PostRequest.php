@@ -28,8 +28,8 @@ class PostRequest extends Request {
      * @return $this
      */
     public function ParseUriInformation() {
-        $uriMod = explode( "?", $this->getUri() );
-        $this->setPathInfo( $uriMod[0] );
+        $uriMod = explode("?", $this->getUri());
+        $this->setPathInfo($uriMod[0]);
         return $this;
     }
 
@@ -42,21 +42,5 @@ class PostRequest extends Request {
         $this->_parameter = $content;
         $this->setParameterMap();
         return $this;
-    }
-
-    /**
-     * @deprec is not used anymore
-     * @return string
-     */
-    public function getRequestUrl() {
-        return $this->getPathInfo();
-    }
-
-    public function getRequestUri() {
-        return $this->getUri();
-    }
-
-    public function getRequestMethod() {
-        return $this->getMethod();
     }
 }

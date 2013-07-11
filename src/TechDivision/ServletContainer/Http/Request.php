@@ -335,7 +335,13 @@ class Request implements ServletRequest {
         $requestInfo = explode(" ", $transformedInputStream[0]);
 
         $this->setMethod($requestInfo[0]);
-        $this->setUri($requestInfo[1]);
+
+        if (empty($requestInfo[1])) {
+            $this->setUri('/');
+        } else {
+            $this->setUri($requestInfo[1]);
+        }
+
         $this->setProtocol($requestInfo[2]);
 
         return $this;
@@ -463,7 +469,7 @@ class Request implements ServletRequest {
             'GATEWAY_INTERFACE' => 'CGI/1.1',
             'SERVER_PROTOCOL' => 'HTTP/1.1',
             'REQUEST_METHOD' => $this->getMethod(),
-            'QUERY_STRING' => '',
+            'QUERY_STRING' => $this->getQueryString(),
             'REQUEST_URI' => $this->getUri(),
             'SCRIPT_NAME' => $this->getScriptName(),
             'PATH_INFO' => '/webapps/',
@@ -504,5 +510,21 @@ class Request implements ServletRequest {
         }
 
         return $this->session;
+    }
+
+    /**
+     * @deprec is not used anymore
+     * @return string
+     */
+    public function getRequestUrl() {
+        return $this->getPathInfo();
+    }
+
+    public function getRequestUri() {
+        return $this->getUri();
+    }
+
+    public function getRequestMethod() {
+        return $this->getMethod();
     }
 }
