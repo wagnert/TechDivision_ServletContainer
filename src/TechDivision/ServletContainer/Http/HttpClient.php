@@ -10,7 +10,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  */
 
-namespace TechDivision\ServletContainer;
+namespace TechDivision\ServletContainer\Http;
 
 use TechDivision\Socket\Client;
 use TechDivision\ServletContainer\Http\Request;

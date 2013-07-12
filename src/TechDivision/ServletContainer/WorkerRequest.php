@@ -12,7 +12,7 @@
 
 namespace TechDivision\ServletContainer;
 
-use TechDivision\ServletContainer\HttpClient;
+use TechDivision\ServletContainer\Http\HttpClient;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 use TechDivision\ServletContainer\Http\HttpServletResponse;
 use TechDivision\ServletContainer\Http\HttpServletRequest;
