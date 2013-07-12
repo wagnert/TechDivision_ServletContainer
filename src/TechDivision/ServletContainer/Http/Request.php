@@ -136,7 +136,6 @@ class Request implements ServletRequest {
      * @return mixed
      */
     static function parse($inputStream) {
-
         $method = strstr($inputStream, " ", true);
 
         $req = Request::factory($method);
@@ -464,9 +463,9 @@ class Request implements ServletRequest {
             'SERVER_PORT' => '8586',
             'REMOTE_HOST' => 'localhost',
             'REMOTE_ADDR' => '::1',
-            'DOCUMENT_ROOT' => '/Library/WebServer/Documents/appserver',
-            'SERVER_ADMIN' => 'you@example.com',
-            'SCRIPT_FILENAME' => '/Library/WebServer/Documents/appserver' . $this->getScriptName(),
+            'DOCUMENT_ROOT' => '/opt/appserver/webapps/',
+            'SERVER_ADMIN' => 'admin@appserver.io',
+            'SCRIPT_FILENAME' => '/opt/appserver/webapps' . $this->getScriptName(),
             'REMOTE_PORT' => '53983',
             'GATEWAY_INTERFACE' => 'CGI/1.1',
             'SERVER_PROTOCOL' => 'HTTP/1.1',
