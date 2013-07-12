@@ -298,7 +298,9 @@ class Request implements ServletRequest {
      * @return array
      */
     public function parseHeaders() {
+
         $transformedInputStream = $this->getTransformedInputStream();
+
         $headers = array();
         for ($i = 1; $i < count($transformedInputStream); $i++) {
             if (trim($transformedInputStream[$i]) == '') {

@@ -72,25 +72,20 @@ class RequestHandler extends \Worker {
      * @return \TechDivision\ServletContainer\Application The application instance
      * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found for the passed application name
      */
-    public function findApplication($request) {
+    public function findApplication($servletRequest) {
 
-        // load the servlet request
-        // if ($servletRequest = $request->getRequest()) {
-        if ($servletRequest = $request) {
+        // load the path info
+        $pathInfo = $servletRequest->getPathInfo();
 
-            // load the path info
-            $pathInfo = $servletRequest->getPathInfo();
+        // strip the leading slash and explode the application name
+        list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
 
-            // strip the leading slash and explode the application name
-            list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
+        // load the array with the applications
+        $applications = $this->getApplications();
 
-            // load the array with the applications
-            $applications = $this->getApplications();
-
-            // check if the requested application has been deployed
-            if (array_key_exists($applicationName, $applications)) {
-                return $applications[$applicationName];
-            }
+        // check if the requested application has been deployed
+        if (array_key_exists($applicationName, $applications)) {
+            return $applications[$applicationName];
         }
 
         // if not throw an exception

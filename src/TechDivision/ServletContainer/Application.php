@@ -45,6 +45,12 @@ class Application {
      * @var \TechDivision\ServletContainer\ServletManager
      */
     protected $servletManager;
+
+    /**
+     * Array with available VHost configurations.
+     * @array
+     */
+    protected $vhosts = array();
     
     /**
      * Passes the application name That has to be the class namespace.
@@ -133,5 +139,25 @@ class Application {
     public function locate(ServletRequest $request) {
         $servletLocator = new ServletLocator($this->getServletManager());
         return $servletLocator->locate($request);
+    }
+
+    /**
+     * Set's the applications available VHost configurations.
+     *
+     * @param array $vhosts The available VHost configurations
+     * @return \TechDivision\ServletContainer\Application The application instance
+     */
+    public function setVhosts(array $vhosts) {
+        $this->vhosts = $vhosts;
+        return $this;
+    }
+
+    /**
+     * Return's the applications available VHost configurations.
+     *
+     * @return array The available VHost configurations
+     */
+    public function getVhosts() {
+        return $this->vhosts;
     }
 }
