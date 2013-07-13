@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\HttpServlet
+ * TechDivision\ServletContainer\DefaultServlet
  *
  * NOTICE OF LICENSE
  *
@@ -12,13 +12,9 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
-use TechDivision\ServletContainer\Servlets\GenericServlet;
-use TechDivision\ServletContainer\Exceptions\MethodNotImplementedException;
-use TechDivision\ServletContainer\Exceptions\ServletException;
-use TechDivision\ServletContainer\Exceptions\IOException;
+use TechDivision\ServletContainer\Servlets\HttpServlet;
 
 /**
  * Default Http servlet implementation.
@@ -30,7 +26,7 @@ use TechDivision\ServletContainer\Exceptions\IOException;
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
  */
-class DefaultServlet extends HttpServlet implements Servlet {
+class DefaultServlet extends HttpServlet {
 
     /**
      * @param Request $req
@@ -42,15 +38,11 @@ class DefaultServlet extends HttpServlet implements Servlet {
      */
     public function service(ServletRequest $req, ServletResponse $res) {
 
+        // load the information about the requested path
         $pathInfo = $req->getPathInfo();
 
-        error_log("Found path info: " . pathinfo($pathInfo, PATHINFO_DIRNAME));
-        error_log(substr($pathInfo, -1));
-
+        // if ending slash is missing, redirect to same folder but with slash appended
         if (substr($pathInfo, -1) !== '/') {
-
-            error_log("Now redirecting to $pathInfo/");
-
             $res->addHeader("location", $pathInfo . '/');
             $res->addHeader("status", 'HTTP/1.1 301 OK');
             $res->setContent(PHP_EOL);

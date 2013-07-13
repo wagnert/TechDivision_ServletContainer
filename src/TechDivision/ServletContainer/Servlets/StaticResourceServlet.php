@@ -12,8 +12,7 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Servlets\HttpServlet;
-use TechDivision\ServletContainer\Interfaces\Servlet;
+use TechDivision\ServletContainer\Servlets\DefaultServlet;
 use TechDivision\ServletContainer\Interfaces\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
 use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
@@ -28,7 +27,7 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
  */
-class StaticResourceServlet extends HttpServlet implements Servlet {
+class StaticResourceServlet extends HttpServlet {
 
     /**
      * Tries to load the requested file and adds the content to the response.

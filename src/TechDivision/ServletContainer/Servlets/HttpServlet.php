@@ -12,13 +12,10 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
 use TechDivision\ServletContainer\Servlets\GenericServlet;
 use TechDivision\ServletContainer\Exceptions\MethodNotImplementedException;
-use TechDivision\ServletContainer\Exceptions\ServletException;
-use TechDivision\ServletContainer\Exceptions\IOException;
 
 /**
  * Abstract Http servlet implementation.
@@ -30,7 +27,27 @@ use TechDivision\ServletContainer\Exceptions\IOException;
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
  */
-abstract class HttpServlet extends GenericServlet implements Servlet {
+abstract class HttpServlet extends GenericServlet {
+
+    /**
+     * @param Request $req
+     * @param Response $res
+     * @throws MethodNotImplementedException
+     * @return void
+     */
+    public function doConnect(ServletRequest $req, ServletResponse $res) {
+        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
+    }
+
+    /**
+     * @param Request $req
+     * @param Response $res
+     * @throws MethodNotImplementedException
+     * @return void
+     */
+    public function doDelete(ServletRequest $req, ServletResponse $res) {
+        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
+    }
 
     /**
      * @param Request $req
@@ -48,7 +65,47 @@ abstract class HttpServlet extends GenericServlet implements Servlet {
      * @throws MethodNotImplementedException
      * @return void
      */
+    public function doHead(ServletRequest $req, ServletResponse $res) {
+        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
+    }
+
+    /**
+     * @param Request $req
+     * @param Response $res
+     * @throws MethodNotImplementedException
+     * @return void
+     */
+    public function doOptions(ServletRequest $req, ServletResponse $res) {
+        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
+    }
+
+    /**
+     * @param Request $req
+     * @param Response $res
+     * @throws MethodNotImplementedException
+     * @return void
+     */
     public function doPost(ServletRequest $req, ServletResponse $res) {
+        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
+    }
+
+    /**
+     * @param Request $req
+     * @param Response $res
+     * @throws MethodNotImplementedException
+     * @return void
+     */
+    public function doPut(ServletRequest $req, ServletResponse $res) {
+        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
+    }
+
+    /**
+     * @param Request $req
+     * @param Response $res
+     * @throws MethodNotImplementedException
+     * @return void
+     */
+    public function doTrace(ServletRequest $req, ServletResponse $res) {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
@@ -64,11 +121,29 @@ abstract class HttpServlet extends GenericServlet implements Servlet {
 
         /** @var $req \TechDivision\ServletContainer\Http\HttpServletRequest */
         switch($req->getRequestMethod()) {
-            case 'POST':
-                $this->doPost($req, $res);
+            case 'CONNECT':
+                $this->doConnect($req, $res);
+                break;
+            case 'DELETE':
+                $this->doDelete($req, $res);
                 break;
             case 'GET':
                 $this->doGet($req, $res);
+                break;
+            case 'HEAD':
+                $this->doHead($req, $res);
+                break;
+            case 'OPTIONS':
+                $this->doOptions($req, $res);
+                break;
+            case 'POST':
+                $this->doPost($req, $res);
+                break;
+            case 'PUT':
+                $this->doPut($req, $res);
+                break;
+            case 'TRACE':
+                $this->doTrace($req, $res);
                 break;
             default:
                 throw new MethodNotImplementedException(sprintf('%s is not implemented yet.', $req->getRequestMethod()));

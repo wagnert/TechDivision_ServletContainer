@@ -12,15 +12,11 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
-use TechDivision\ServletContainer\Servlets\HttpServlet;
+use TechDivision\ServletContainer\Servlets\DefaultServlet;
 use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
-use TechDivision\ServletContainer\Exceptions\MethodNotImplementedException;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
-use TechDivision\ServletContainer\Exceptions\ServletException;
-use TechDivision\ServletContainer\Exceptions\IOException;
 
 /**
  * Abstract Http servlet implementation.
@@ -32,7 +28,7 @@ use TechDivision\ServletContainer\Exceptions\IOException;
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
  */
-class PhpServlet extends HttpServlet implements Servlet {
+class PhpServlet extends DefaultServlet {
 
     /**
      * Tries to load the requested file and adds the content to the response.
@@ -67,25 +63,9 @@ class PhpServlet extends HttpServlet implements Servlet {
     }
 
     /**
-     * Tries to load the requested file and adds the content to the response.
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\ServletResponse $res The servlet response
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
-     * @return void
+     * @see \TechDivision\ServletContainer\Servlets\PhpServlet::doGet()
      */
     public function doPost(ServletRequest $req, ServletResponse $res) {
-        throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
-    }
-
-    /**
-     * @param Request $req
-     * @param Response $res
-     * @throws ServletException
-     * @throws IOException
-     * @return mixed
-     */
-    public function service(ServletRequest $req, ServletResponse $res) {
         $this->doGet($req, $res);
     }
 }
