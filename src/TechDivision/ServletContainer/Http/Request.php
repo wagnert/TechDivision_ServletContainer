@@ -126,6 +126,17 @@ class Request implements ServletRequest {
 
     protected $session;
 
+    protected static $requestMethods = array(
+        'Connect' => 'ConnectRequest',
+        'Delete' => 'DeleteRequest',
+        'Get' => 'GetRequest',
+        'Head' => 'HeadRequest',
+        'Options' => 'OptionsRequest',
+        'Post' => 'PostRequest',
+        'Put' => 'PutRequest',
+        'Trace' => 'TraceRequest'
+    );
+
     public function __construct() {
         $this->sessionManager = new PersistentSessionManager();
     }
@@ -159,12 +170,18 @@ class Request implements ServletRequest {
     }
 
     /**
-     * load request class based on method
-     * @param $method
-     * @return mixed
+     * Creates a new request class based on passed request method.
+     *
+     * @param string $method Request method to create the class for
+     * @return \TechDivision\ServletContainer\Interfaces\ServletRequest The request instance
+     * @throws \Exception Is thrown if an unknown request method is requested
      */
     public static function factory($method) {
-        $className =  __NAMESPACE__ . '\\' . ucfirst(strtolower($method))."Request";
+        $requestMethod =  ucfirst(strtolower($method));
+        if (!array_key_exists($requestMethod, self::$requestMethods)) {
+            throw new \Exception("Found invalid request method '$requestMethod'");
+        }
+        $className =  __NAMESPACE__ . '\\' . self::$requestMethods[$requestMethod];
         return new $className;
     }
 
