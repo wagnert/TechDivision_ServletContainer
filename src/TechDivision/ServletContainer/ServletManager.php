@@ -15,6 +15,7 @@ namespace TechDivision\ServletContainer;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Servlets\DefaultServlet;
 use TechDivision\ServletContainer\Exceptions\InvalidApplicationArchiveException;
+use TechDivision\ServletContainer\Servlets\ServletConfiguration;
 
 /**
  * The servlet manager handles the servlets registered for the application.
@@ -30,15 +31,25 @@ use TechDivision\ServletContainer\Exceptions\InvalidApplicationArchiveException;
 class ServletManager {
 
     /**
-     * The path to the web application.
-     * @var string
+     * The application instance.
+     * @var \TechDivision\ServletContainer\Application
      */
-    protected $webappPath;
+    protected $application;
 
     /**
      * @var array
      */
     protected $servlets = array();
+
+    /**
+     * Set's the application instance.
+     *
+     * @param TechDivision\ServletContainer\Application $application The application instance
+     * @return void
+     */
+    public function __construct($application) {
+        $this->application = $application;
+    }
     
     /**
      * Has been automatically invoked by the container after the application
@@ -120,11 +131,9 @@ class ServletManager {
                 set_include_path($folder . DS . 'WEB-INF' . DS . 'classes' . PS . get_include_path());
                 set_include_path($folder . DS . 'WEB-INF' . DS . 'lib' . PS . get_include_path());
 
-                // instanciate the servlet
+                // instantiate the servlet
                 $servlet = new $className();
-
-                // initialize the servlet
-                $servlet->init();
+                $servlet->init(new ServletConfiguration($this));
 
                 // load the url pattern
                 $urlPattern = (string) $mapping->{'url-pattern'};
@@ -146,7 +155,7 @@ class ServletManager {
      */
     protected function addDefaultServlet($key) {
         $defaultServlet = new DefaultServlet();
-        $defaultServlet->init();
+        $defaultServlet->init(new ServletConfiguration($this));
         $this->addServlet("/$key/*", $defaultServlet);
     }
 
@@ -175,16 +184,27 @@ class ServletManager {
     }
 
     /**
-     * @param String $webappPath
-     */
-    public function setWebappPath($webappPath) {
-        $this->webappPath = $webappPath;
-    }
-
-    /**
      * @return String
      */
     public function getWebappPath() {
-        return $this->webappPath;
+        return $this->getApplication()->getWebappPath();
+    }
+
+    /**
+     * Returns the application instance.
+     *
+     * @return TechDivision\ServletContainer\Application The application instance
+     */
+    public function getApplication() {
+        return $this->application;
+    }
+
+    /**
+     * Returns the host configuration.
+     *
+     * @return \TechDivision\ApplicationServer\Configuration The host configuration
+     */
+    public function getConfiguration() {
+        return $this->getApplication()->getConfiguration();
     }
 }

@@ -126,6 +126,15 @@ class Request implements ServletRequest {
 
     protected $session;
 
+    protected $serverName;
+    protected $httpConnection;
+    protected $httpAccept;
+    protected $httpCookie;
+    protected $httpReferer;
+    protected $httpUserAgent;
+    protected $httpAcceptEncoding;
+    protected $httpAcceptLanguage;
+
     protected static $requestMethods = array(
         'Connect' => 'ConnectRequest',
         'Delete' => 'DeleteRequest',
@@ -151,6 +160,7 @@ class Request implements ServletRequest {
 
         $req = Request::factory($method);
         $req->transform($inputStream)
+            ->ParseServerInformation()
             ->ParseRequestInformation()
             ->ParseUriInformation()
             ->setHeaders()
@@ -308,6 +318,56 @@ class Request implements ServletRequest {
     public function ParseUriInformation() {
         return $this;
     }
+    public function parseServerInformation() {
+
+        $transformedInputStream = $this->getTransformedInputStream();
+
+        $serverVars = array(
+            'Host' => 'serverName',
+            'Port' => 'serverPort',
+            'Connection' => 'httpConnection',
+            'Cache-Control' => 'httpCacheControl',
+            'Accept' => 'httpAccept',
+            'Accept-Encoding' => 'httpAcceptEncoding',
+            'Accept-Language' => 'httpAcceptLanguage',
+            'Pragma' => 'pragma',
+            'User-Agent' => 'httpUserAgent',
+            'Cookie' => 'httpCookie',
+            'Referer' => 'httpReferer'
+        );
+
+        for ($i = 1; $i < count($transformedInputStream); $i++) {
+            if (trim($transformedInputStream[$i]) == '') {
+                //empty line, after this the content should follow
+
+                $i++;
+                $this->setContentHelper($i);
+                break;
+            }
+            $regs = array();
+
+            if (preg_match("'([^: ]+): (.+)'", $transformedInputStream[$i], $regs)) {
+
+                if (!array_key_exists($regs[1], $serverVars)) {
+                    continue;
+                }
+
+                $propertyName = $serverVars[$regs[1]];
+                $propertyValue = $regs[2];
+
+
+                if ($propertyName == 'serverName' && !empty($propertyName)) {
+                    list ($this->$propertyName, $this->serverPort) = explode(':', $propertyValue);
+                } elseif (!empty($propertyName)) {
+                    $this->$propertyName = $propertyValue;
+                } else {
+                    // propertyName is empty
+                }
+            }
+        }
+
+        return $this;
+    }
 
     /**
      * parsing the Header content and return as Array
@@ -461,7 +521,8 @@ class Request implements ServletRequest {
     }
 
     public function getServerVars() {
-        return array(
+
+       return array(
             'HTTP_HOST' => 'localhost',
             'HTTP_CONNECTION' => 'keep-alive',
             'HTTP_CACHE_CONTROL' => 'max-age=0',
@@ -528,6 +589,10 @@ class Request implements ServletRequest {
         }
 
         return $this->session;
+    }
+
+    public function getServerName() {
+        return $this->serverName;
     }
 
     /**

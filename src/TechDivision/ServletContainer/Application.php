@@ -15,6 +15,8 @@ namespace TechDivision\ServletContainer;
 use TechDivision\ServletContainer\ServletManager;
 use TechDivision\ServletContainer\Service\Locator\ServletLocator;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ApplicationServer\Configuration;
+use TechDivision\ApplicationServer\InitialContext;
 
 /**
  * The application instance holds all information about the deployed application
@@ -27,6 +29,18 @@ use TechDivision\ServletContainer\Interfaces\ServletRequest;
  * @author      Tim Wagner <tw@techdivision.com>
  */
 class Application {
+
+    /**
+     * Path to the container's host configuration.
+     * @var string
+     */
+    const CONTAINER_HOST = '/container/host';
+
+    /**
+     * Path to the container's VHost configuration.
+     * @var string
+     */
+    const CONTAINER_VHOSTS = '/container/host/vhosts/vhost';
     
     /**
      * The unique application name.
@@ -45,6 +59,12 @@ class Application {
      * @var \TechDivision\ServletContainer\ServletManager
      */
     protected $servletManager;
+
+    /**
+     * The host configuration.
+     * @var \TechDivision\ApplicationServer\Configuration
+     */
+    protected $configuration;
 
     /**
      * Array with available VHost configurations.
@@ -68,10 +88,24 @@ class Application {
      * @return \TechDivision\ServletContainer\Application The connected application
      */
     public function connect() {
+
+        // prepare the VHost configurations
+        foreach ($this->getConfiguration()->getChilds(self::CONTAINER_VHOSTS) as $vhost) {
+
+            // check if vhost configuration belongs to application
+            if ($vhost->getAppBase() == $this->getName()) {
+
+                // initialize VHost classname and parameters
+                $vhostClassname = '\TechDivision\ServletContainer\Vhost';
+                $vhostParameter = array($vhost->getName(), $vhost->getAppBase(), array());
+
+                // register VHost in array with app base folder
+                $this->vhosts[] = $this->newInstance($vhostClassname, $vhostParameter);
+            }
+        }
         
         // initialize the servlet manager instance
-        $servletManager = new ServletManager();
-        $servletManager->setWebappPath($this->getWebappPath());
+        $servletManager = new ServletManager($this);
         $servletManager->initialize();
         
         // set the entity manager
@@ -90,16 +124,25 @@ class Application {
     public function getName() {
         return $this->name;
     }
-    
+
     /**
-     * Set's the path to the web application.
-     * 
-     * @param string $webappPath The path to the web application
+     * Set's the host configuration.
+     *
+     * @param TechDivision\ApplicationServer\Configuration $configuration The host configuration
      * @return \TechDivision\ServletContainer\Application The application instance
      */
-    public function setWebappPath($webappPath) {
-        $this->webappPath = $webappPath;
+    public function setConfiguration($configuration) {
+        $this->configuration = $configuration;
         return $this;
+    }
+
+    /**
+     * Returns the host configuration.
+     *
+     * @return \TechDivision\ApplicationServer\Configuration The host configuration
+     */
+    public function getConfiguration() {
+        return $this->configuration;
     }
     
     /**
@@ -108,7 +151,7 @@ class Application {
      * @return string The path to the web application
      */
     public function getWebappPath() {
-        return $this->webappPath;
+        return $this->getConfiguration()->getChild(self::CONTAINER_HOST)->getAppBase() . DS . $this->getName();
     }
     
     /**
@@ -130,6 +173,39 @@ class Application {
     public function getServletManager() {
         return $this->servletManager;
     }
+
+    /**
+     * Return's the applications available VHost configurations.
+     *
+     * @return array The available VHost configurations
+     */
+    public function getVhosts() {
+        return $this->vhosts;
+    }
+
+    /**
+     * Checks if the application is the VHost for the passed server name.
+     *
+     * @param $serverName The server name to check the application beeing a VHost of
+     * @return boolean TRUE if the application is the VHost, else FALSE
+     */
+    public function isVhostOf($serverName) {
+
+        foreach ($this->getVhosts() as $vhost) {
+
+            if (strcmp($vhost->getName(), $serverName) === 0) {
+                return true;
+            }
+
+            foreach ($vhost->getAliases() as $alias) {
+                if (strcmp($alias, $serverName) === 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
     
     /**
      * 
@@ -142,22 +218,14 @@ class Application {
     }
 
     /**
-     * Set's the applications available VHost configurations.
+     * Creates a new instance of the passed class name and passes the
+     * args to the instance constructor.
      *
-     * @param array $vhosts The available VHost configurations
-     * @return \TechDivision\ServletContainer\Application The application instance
+     * @param string $className The class name to create the instance of
+     * @param array $args The parameters to pass to the constructor
+     * @return object The created instance
      */
-    public function setVhosts(array $vhosts) {
-        $this->vhosts = $vhosts;
-        return $this;
-    }
-
-    /**
-     * Return's the applications available VHost configurations.
-     *
-     * @return array The available VHost configurations
-     */
-    public function getVhosts() {
-        return $this->vhosts;
+    public function newInstance($className, array $args = array()) {
+        return InitialContext::get()->newInstance($className, $args);
     }
 }

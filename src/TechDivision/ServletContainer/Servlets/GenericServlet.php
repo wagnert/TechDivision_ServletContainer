@@ -28,13 +28,19 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
 abstract class GenericServlet implements Servlet {
 
     /**
+     * The host configuration.
+     * @var TechDivision\ServletContainer\ServletConfig
+     */
+    protected $config;
+
+    /**
      * @param ServletConfig $config
      * @throws ServletException;
      * @return mixed
      * @todo Implement init() method
      */
-    public function init(ServletConfig $config = null) {
-
+    public function init(ServletConfig $config) {
+        $this->config = $config;
     }
 
     /**
@@ -42,6 +48,7 @@ abstract class GenericServlet implements Servlet {
      * @todo Implement getServletConfig() method
      */
     public function getServletConfig() {
+        return $this->config;
     }
 
     /**
@@ -49,6 +56,7 @@ abstract class GenericServlet implements Servlet {
      * @todo Implement getServletInfo() method
      */
     public function getServletInfo() {
+        return $this->getServletConfig()->getServerVars();
     }
 
     /**

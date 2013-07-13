@@ -33,7 +33,7 @@ interface Servlet {
      * @throws ServletException;
      * @return mixed
      */
-    public function init(ServletConfig $config = null);
+    public function init(ServletConfig $config);
 
     /**
      * @abstract

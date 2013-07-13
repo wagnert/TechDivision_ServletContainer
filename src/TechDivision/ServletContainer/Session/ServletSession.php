@@ -247,8 +247,6 @@ class ServletSession {
      */
     public function start() {
 
-        error_log(__METHOD__ . ':' . __LINE__);
-
         if ($this->request === NULL) {
             $this->initializeHttpAndCookie();
         }

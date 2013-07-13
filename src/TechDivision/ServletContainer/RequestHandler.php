@@ -75,6 +75,7 @@ class RequestHandler extends \Worker {
     public function findApplication($servletRequest) {
 
         // load the path info
+        $serverName = $servletRequest->getServerName();
         $pathInfo = $servletRequest->getPathInfo();
 
         // strip the leading slash and explode the application name
@@ -82,6 +83,12 @@ class RequestHandler extends \Worker {
 
         // load the array with the applications
         $applications = $this->getApplications();
+
+        foreach ($applications as $application) {
+            if ($application->isVhostOf($serverName)) {
+                return $application;
+            }
+        }
 
         // check if the requested application has been deployed
         if (array_key_exists($applicationName, $applications)) {
