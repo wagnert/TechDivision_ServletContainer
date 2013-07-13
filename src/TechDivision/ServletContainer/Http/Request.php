@@ -159,7 +159,7 @@ class Request implements ServletRequest {
     }
 
     /**
-     * load requestclass based on method
+     * load request class based on method
      * @param $method
      * @return mixed
      */
