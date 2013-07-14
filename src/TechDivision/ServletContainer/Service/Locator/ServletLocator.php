@@ -104,7 +104,7 @@ class ServletLocator implements ResourceLocatorInterface {
         $routes = $this->getRouteCollection();
 
         // initialize the context for the routing
-        $context = new RequestContext('/', $request->getRequestMethod(), $request->getServerName());
+        $context = new RequestContext($path, $request->getRequestMethod(), $request->getServerName());
 
         // initialize the URL matcher
         $matcher = new UrlMatcher($routes, $context);
