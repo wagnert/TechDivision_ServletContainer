@@ -144,6 +144,15 @@ class Application {
     public function getConfiguration() {
         return $this->configuration;
     }
+
+    /**
+     * Returns the path to the appserver webapp base directory.
+     *
+     * @return string The path to the appserver webapp base directory
+     */
+    public function getAppBase() {
+        return $this->getConfiguration()->getChild(self::CONTAINER_HOST)->getAppBase();
+    }
     
     /**
      * Return's the path to the web application.
@@ -151,7 +160,7 @@ class Application {
      * @return string The path to the web application
      */
     public function getWebappPath() {
-        return $this->getConfiguration()->getChild(self::CONTAINER_HOST)->getAppBase() . DS . $this->getName();
+        return $this->getAppBase() . DS . $this->getName();
     }
     
     /**

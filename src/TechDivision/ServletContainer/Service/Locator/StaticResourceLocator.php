@@ -63,14 +63,16 @@ class StaticResourceLocator extends AbstractResourceLocator {
     public function locate(ServletRequest $request) {
 
         // build the path from url part and base path
-        $path = $this->getServlet()->getServletConfig()->getWebappPath() . urldecode($request->getRequestUrl());
+        $path = $request->getDocumentRoot() . urldecode($request->getRequestUrl());
+
+        if (is_dir($path)) {
+            throw new \Exception("Requested file $path is a directory");
+        }
 
         // make sure the requested file exists
         if (!file_exists($path)) {
             throw new FileNotFoundException(sprintf('404 - file %s does not exist.', $path));
         }
-
-        error_log("Now try to open path $path");
 
         $file = new \SplFileObject($path);
 

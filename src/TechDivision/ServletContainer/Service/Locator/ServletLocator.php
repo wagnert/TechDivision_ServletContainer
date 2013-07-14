@@ -74,7 +74,7 @@ class ServletLocator implements ResourceLocatorInterface {
 
         // iterate over the available servlets and prepare the routes
         foreach ($servlets as $urlPattern => $servlet) {
-            $pattern = str_replace('/*', "/{placeholder_$counter}", rtrim($urlPattern, '/*'));
+            $pattern = str_replace('/*', "/{placeholder_$counter}", $urlPattern);
             $route = new Route($pattern, array($servlet), array("{placeholder_$counter}" => '.*'));
             $routes->add($counter++, $route);
         }

@@ -28,18 +28,27 @@ class ServletConfiguration implements ServletConfig {
 
     /**
      * The application instance.
-     * @var \TechDivision\ServletContainer\Application
+     * @var \TechDivision\ServletContainer\ServletManager
      */
-    protected $application;
+    protected $servletManager;
 
     /**
-     * Initializes the servlet configuration with the application instance.
+     * Initializes the servlet configuration with the servlet manager instance.
      *
-     * @param \TechDivision\ServletContainer\Application $application The application instance
+     * @param \TechDivision\ServletContainer\ServletManager $servletManager The servlet manager instance
      * @return void
      */
-    public function __construct($application) {
-        $this->application = $application;
+    public function __construct($servletManager) {
+        $this->servletManager = $servletManager;
+    }
+
+    /**
+     * Returns the servlet manager instance.
+     *
+     * @return \TechDivision\ServletContainer\ServletManager The servlet manager instance
+     */
+    public function getServletManager() {
+        return $this->servletManager;
     }
 
     /**
@@ -48,7 +57,7 @@ class ServletConfiguration implements ServletConfig {
      * @return \TechDivision\ServletContainer\Application The application instance
      */
     public function getApplication() {
-        return $this->application;
+        return $this->getServletManager()->getApplication();
     }
 
     /**
@@ -67,6 +76,15 @@ class ServletConfiguration implements ServletConfig {
      */
     public function getWebappPath() {
         return $this->getApplication()->getWebappPath();
+    }
+
+    /**
+     * Returns the path to the appserver webapp base directory.
+     *
+     * @return string The path to the appserver webapp base directory
+     */
+    public function getAppBase() {
+        return $this->getApplication()->getAppBase();
     }
 
     /**

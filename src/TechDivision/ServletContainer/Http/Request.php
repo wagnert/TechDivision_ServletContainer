@@ -135,6 +135,8 @@ class Request implements ServletRequest {
     protected $httpAcceptEncoding;
     protected $httpAcceptLanguage;
 
+    protected $documentRoot;
+
     protected static $requestMethods = array(
         'Connect' => 'ConnectRequest',
         'Delete' => 'DeleteRequest',
@@ -609,5 +611,13 @@ class Request implements ServletRequest {
 
     public function getRequestMethod() {
         return $this->getMethod();
+    }
+
+    public function setDocumentRoot($documentRoot) {
+        $this->documentRoot = $documentRoot;
+    }
+
+    public function getDocumentRoot() {
+        return $this->documentRoot;
     }
 }

@@ -86,12 +86,14 @@ class RequestHandler extends \Worker {
 
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
+                $servletRequest->setDocumentRoot($application->getWebappPath());
                 return $application;
             }
         }
 
         // check if the requested application has been deployed
         if (array_key_exists($applicationName, $applications)) {
+            $servletRequest->setDocumentRoot($application->getAppBase());
             return $applications[$applicationName];
         }
 
