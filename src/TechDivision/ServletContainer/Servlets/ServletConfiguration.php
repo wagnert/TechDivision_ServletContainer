@@ -61,6 +61,15 @@ class ServletConfiguration implements ServletConfig {
     }
 
     /**
+     * Returns the webapp base path.
+     *
+     * @return string The webapp base path
+     */
+    public function getWebappPath() {
+        return $this->getApplication()->getWebappPath();
+    }
+
+    /**
      * Returns the server variables.
      *
      * @return array The array with the server variables
@@ -69,7 +78,7 @@ class ServletConfiguration implements ServletConfig {
         return array(
             'SERVER_ADMIN' => $this->getConfiguration()->getServerAdmin(),
             'SERVER_SOFTWARE' => $this->getConfiguration()->getServerAdmin(),
-            'DOCUMENT_ROOT' => $this->getApplication()->getWebappPath()
+            'DOCUMENT_ROOT' => $this->getWebappPath()
         );
     }
 }
