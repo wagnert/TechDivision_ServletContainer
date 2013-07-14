@@ -13,7 +13,7 @@
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ServletContainer\Interfaces\Servlet;
-use TechDivision\ServletContainer\Servlets\DefaultServlet;
+use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 use TechDivision\ServletContainer\Exceptions\InvalidApplicationArchiveException;
 use TechDivision\ServletContainer\Servlets\ServletConfiguration;
 
@@ -109,8 +109,8 @@ class ServletManager {
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
 
-            // add the default servlet (DefaultServlet)
-            $this->addDefaultServlet(basename($folder));
+            // add the default servlet (StaticResourceServlet)
+            $this->addDefaultServlet();
 
             /** @var $mapping \SimpleXMLElement */
             foreach ($config->xpath('/web-app/servlet-mapping') as $mapping) {
@@ -142,7 +142,7 @@ class ServletManager {
                 $urlPattern = ltrim($urlPattern, '/');
 
                 // the servlet is added to the dictionary using the complete request path as the key
-                $this->addServlet('/' . basename($folder) . '/' . $urlPattern,  $servlet);
+                $this->addServlet('/' . $urlPattern,  $servlet);
             }
         }
     }
@@ -153,10 +153,10 @@ class ServletManager {
      * @param $key The webapp name to register the default servlet for
      * @return false
      */
-    protected function addDefaultServlet($key) {
-        $defaultServlet = new DefaultServlet();
+    protected function addDefaultServlet() {
+        $defaultServlet = new StaticResourceServlet();
         $defaultServlet->init(new ServletConfiguration($this));
-        $this->addServlet("/$key/*", $defaultServlet);
+        $this->addServlet('/', $defaultServlet);
     }
 
     /**

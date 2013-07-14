@@ -14,7 +14,7 @@ namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\Interfaces\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
-use TechDivision\ServletContainer\Servlets\HttpServlet;
+use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 
 /**
  * Default Http servlet implementation.
@@ -26,7 +26,7 @@ use TechDivision\ServletContainer\Servlets\HttpServlet;
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
  */
-class DefaultServlet extends HttpServlet {
+class DefaultServlet extends StaticResourceServlet {
 
     /**
      * @param Request $req

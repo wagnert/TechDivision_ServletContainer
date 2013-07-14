@@ -12,6 +12,7 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
+use Symfony\Component\Security\Acl\Exception\Exception;
 use TechDivision\ServletContainer\Servlets\DefaultServlet;
 use TechDivision\ServletContainer\Interfaces\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
@@ -39,11 +40,32 @@ class StaticResourceServlet extends HttpServlet {
      */
     public function doGet(ServletRequest $req, ServletResponse $res) {
 
-        // instanciate the resource locator
-        $locator = new StaticResourceLocator();
 
-        // let the locator retrieve the file
-        $file = $locator->locate($req);
+        try {
+
+            // instanciate the resource locator
+            $locator = new StaticResourceLocator($this);
+
+            // let the locator retrieve the file
+            $file = $locator->locate($req);
+
+        } catch(\Exception $e) {
+
+            error_log($e->__toString());
+
+            // load the information about the requested path
+            $pathInfo = $req->getPathInfo();
+
+            // if ending slash is missing, redirect to same folder but with slash appended
+            if (substr($pathInfo, -1) !== '/') {
+
+                $res->addHeader("location", $pathInfo . '/');
+                $res->addHeader("status", 'HTTP/1.1 301 OK');
+                $res->setContent(PHP_EOL);
+
+                return;
+            }
+        }
 
         // do not directly serve php files
         if (strpos($file->getFilename(), '.php') !== false) {

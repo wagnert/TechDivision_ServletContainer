@@ -12,6 +12,7 @@
 
 namespace TechDivision\ServletContainer\Service\Locator;
 
+use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletRequest;
 use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
 
@@ -27,6 +28,33 @@ use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
 class StaticResourceLocator extends AbstractResourceLocator {
 
     /**
+     * The servlet that called the locator.
+     *
+     * @var \TechDivision\ServletContainer\Interfaces\Servlet
+     */
+    protected $servlet;
+
+    /**
+     * Initializes the locator with the calling servlet.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet The servlet instance
+     * @return \TechDivision\ServletContainer\Service\Locator\StaticResourceLocator
+     */
+    public function __construct(Servlet $servlet) {
+        $this->servlet = $servlet;
+        return $this;
+    }
+
+    /**
+     * Returns the calling servlet instance.
+     *
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet $servlet The servlet instance
+     */
+    public function getServlet() {
+        return $this->servlet;
+    }
+
+    /**
      * @param ServletRequest $request
      * @throws \TechDivision\ServletContainer\Exceptions\FileNotFoundException
      * @throws \Exception Is thrown if the requested file has not been found or is not readable
@@ -35,7 +63,7 @@ class StaticResourceLocator extends AbstractResourceLocator {
     public function locate(ServletRequest $request) {
 
         // build the path from url part and base path
-        $path = BP . DS . 'webapps' . urldecode($request->getRequestUrl());
+        $path = $this->getServlet()->getServletConfig()->getWebappPath() . urldecode($request->getRequestUrl());
 
         // make sure the requested file exists
         if (!file_exists($path)) {

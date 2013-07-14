@@ -49,6 +49,14 @@ class ServletLocator implements ResourceLocatorInterface {
         $this->servletManager = $servletManager;
     }
 
+    public function getServletManager() {
+        return $this->servletManager;
+    }
+
+    public function getApplication() {
+        return $this->getServletManager()->getApplication();
+    }
+
     /**
      * Prepares a collection with routes generated from the available servlets
      * ans their servlet mappings.
@@ -87,11 +95,19 @@ class ServletLocator implements ResourceLocatorInterface {
         // build the file-path of the request
         $path = $request->getRequestUrl();
 
+        // check if the application is loaded by a VHost
+        if (!$this->getApplication()->isVhostOf($request->getServerName())) {
+            $path = '/' . ltrim(str_replace("/{$this->getApplication()->getName()}", "/", $path), '/');
+        }
+
         // load the route collection
         $routes = $this->getRouteCollection();
 
+        // initialize the context for the routing
+        $context = new RequestContext('/', $request->getRequestMethod(), $request->getServerName());
+
         // initialize the URL matcher
-        $matcher = new UrlMatcher($routes, new RequestContext($path));
+        $matcher = new UrlMatcher($routes, $context);
 
         // traverse the path to find matching servlet
         do {
