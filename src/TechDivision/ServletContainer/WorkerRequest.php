@@ -12,10 +12,13 @@
 
 namespace TechDivision\ServletContainer;
 
-use TechDivision\ServletContainer\Http\HttpClient;
+use TechDivision\ServletContainer\Http\HttpRequest;
+use TechDivision\ServletContainer\Http\HttpResponse;
+use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\Socket\Client;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
-use TechDivision\ServletContainer\Http\HttpServletResponse;
-use TechDivision\ServletContainer\Http\HttpServletRequest;
+
 
 /**
  * The stackable implementation that handles the request.
@@ -51,18 +54,18 @@ class WorkerRequest extends \Stackable {
 
         if ($this->worker) {
             // initialize a new client socket
-            $client = new HttpClient();
+            $client = new Client();
 
             // set the client socket resource
             $client->setResource($this->resource);
 
             // read a line from the client
-            $request = $client->receive();
+            $request = new HttpRequest($client->readLine());
 
             try {
 
                 // initialize response container
-                $request->setResponse($response = new HttpServletResponse());
+                $request->setResponse($response = new HttpResponse());
 
                 // load the application to handle the request
                 $application = $this->worker->findApplication($request);
@@ -96,11 +99,11 @@ class WorkerRequest extends \Stackable {
     /**
      * Prepares the headers for the given response and returns them.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletResponse $response The response to prepare the header for
+     * @param Response $response The response to prepare the header for
      * @return string The headers
      * @todo This is a dummy implementation, headers has to be handled in request/response
      */
-    public function prepareHeader(HttpServletResponse $response)
+    public function prepareHeader(Response $response)
     {
         // prepare the content length
         $contentLength = strlen($response->getContent());

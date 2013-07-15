@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Interfaces\ServletRequest
+ * TechDivision\ServletContainer\Interfaces\Response
  *
  * NOTICE OF LICENSE
  *
@@ -13,18 +13,27 @@
 namespace TechDivision\ServletContainer\Interfaces;
 
 /**
- * Interface for the servlet request.
+ * Interface for the servlet response.
  *
  * @package     TechDivision\ServletContainer
  * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
+ *              Johann Zelger <j.zelger@techdivision.com>
  */
-interface ServletRequest {
+interface Response {
 
     /**
-     * @throws IOException
+     * @abstract
+     * @return string
      */
-    public function getInputStream();
+    public function getContent();
+
+    /**
+     * @abstract
+     * @param string $content
+     * @return void
+     */
+    public function setContent($content);
 }

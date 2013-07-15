@@ -14,8 +14,8 @@ namespace TechDivision\ServletContainer\Session;
 
 use TechDivision\ServletContainer\Http\Cookie;
 use TechDivision\ApplicationServer\Utilities\Algorithms;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
+use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Session\Storage\StorageInterface;
 use TechDivision\ServletContainer\Session\Exceptions\SessionNotStartedException;
 use TechDivision\ServletContainer\Session\Exceptions\OperationNotSupportedException;
@@ -134,12 +134,12 @@ class ServletSession {
     protected $remote = FALSE;
 
     /**
-     * @var \TechDivision\ServletContainer\Interfaces\ServletRequest
+     * @var \TechDivision\ServletContainer\Interfaces\Request
      */
     protected $request;
 
     /**
-     * @var \TechDivision\ServletContainer\Interfaces\ServletResponse
+     * @var \TechDivision\ServletContainer\Interfaces\Response
      */
     protected $response;
 
@@ -153,15 +153,15 @@ class ServletSession {
      * Session instances MUST NOT be created manually! They should be retrieved via
      * the Session Manager or through dependency injection (use SessionInterface!).
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\ServletResponse The response instance
+     * @param \TechDivision\ServletContainer\Interfaces\Request The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response The response instance
      * @param string $sessionIdentifier The public session identifier which is also used in the session cookie
      * @param string $storageIdentifier The private storage identifier which is used for cache entries
      * @param integer $lastActivityTimestamp Unix timestamp of the last known activity for this session
      * @param array $tags A list of tags set for this session
      * @throws \InvalidArgumentException
      */
-    public function __construct(ServletRequest $request, $sessionIdentifier = NULL, $storageIdentifier = NULL, $lastActivityTimestamp = NULL, array $tags = array()) {
+    public function __construct(Request $request, $sessionIdentifier = NULL, $storageIdentifier = NULL, $lastActivityTimestamp = NULL, array $tags = array()) {
 
         $this->request = $request;
         $this->response = $request->getResponse();

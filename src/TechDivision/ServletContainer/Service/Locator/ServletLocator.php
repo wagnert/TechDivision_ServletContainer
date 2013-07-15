@@ -13,7 +13,7 @@
 namespace TechDivision\ServletContainer\Service\Locator;
 
 use TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -86,14 +86,14 @@ class ServletLocator implements ResourceLocatorInterface {
     /**
      * Tries to locate the servlet that handles the request and returns the instance if one can be found.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest $request
-     * @return \TechDivision\ServletContainer\Interfaces\Servlet
+     * @param Request $request
+     * @return Servlet
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
      */
-    public function locate(ServletRequest $request) {
+    public function locate(Request $request) {
 
         // build the file-path of the request
-        $path = $request->getRequestUrl();
+        $path = $request->getUri();
 
         // check if the application is loaded by a VHost
         if (!$this->getApplication()->isVhostOf($request->getServerName())) {
@@ -104,7 +104,7 @@ class ServletLocator implements ResourceLocatorInterface {
         $routes = $this->getRouteCollection();
 
         // initialize the context for the routing
-        $context = new RequestContext($path, $request->getRequestMethod(), $request->getServerName());
+        $context = new RequestContext($path, $request->getMethod(), $request->getServerName());
 
         // initialize the URL matcher
         $matcher = new UrlMatcher($routes, $context);
@@ -114,7 +114,6 @@ class ServletLocator implements ResourceLocatorInterface {
 
             try {
                 $servlet = $matcher->match($path);
-                $request->setScriptName($path);
                 break;
             } catch(ResourceNotFoundException $rnfe) {
                 $path = substr($path, 0, strrpos($path, '/'));

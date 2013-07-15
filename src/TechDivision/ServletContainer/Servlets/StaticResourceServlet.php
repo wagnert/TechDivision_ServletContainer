@@ -13,9 +13,11 @@
 namespace TechDivision\ServletContainer\Servlets;
 
 use Symfony\Component\Security\Acl\Exception\Exception;
+use TechDivision\ServletContainer\Utilities\MimeTypeDictionary;
+use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Servlets\DefaultServlet;
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 
@@ -23,23 +25,41 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
  * A servlet implementation to handle static file requests.
  *
  * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
+ * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
+ * @author      Johann Zelger <j.zelger@techdivision.com>
  */
 class StaticResourceServlet extends HttpServlet {
 
     /**
+     * Hold dictionary for mimetypes
+     *
+     * @var MimeTypeDictionary
+     */
+    protected $mimeTypeDictionary;
+
+    /**
+     * @param ServletConfig $config
+     * @throws ServletException;
+     * @return mixed
+     */
+    public function init(ServletConfig $config) {
+        parent::init($config);
+        // init mimetype dictionary
+        $this->mimeTypeDictionary = new MimeTypeDictionary();
+    }
+
+    /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\ServletResponse $res The servlet response
+     * @param Request $req The servlet request
+     * @param Response $res The servlet response
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
-    public function doGet(ServletRequest $req, ServletResponse $res) {
-
+    public function doGet(Request $req, Response $res) {
 
         try {
 
@@ -73,19 +93,17 @@ class StaticResourceServlet extends HttpServlet {
                 '403 - You do not have permission to access %s', $file->getFilename()));
         }
 
-        if (strpos($file->getFilename(), '.css') !== false) {
-            $res->addHeader('Content-Type', 'text/css');
-        } elseif (strpos($file->getFilename(), '.gif') !== false) {
-            $res->addHeader('Content-Type', 'image/gif');
-        } elseif (strpos($file->getFilename(), '.jpg') !== false) {
-            $res->addHeader('Content-Type', 'image/jpg');
-        } elseif (strpos($file->getFilename(), '.js') !== false) {
-            $res->addHeader('Content-Type', 'text/javascript');
-        }  else {
-            error_log("Can't serve filename: " . $file->getFilename());
-        }
+        // set mimetypes to header
+        $res->addHeader('Content-Type',
+            $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
+        );
+
+        // set last modified date from file
+        $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
 
         // store the file's contents in the response
-        $res->setContent(file_get_contents($file->getRealPath()));
+        $res->setContent(
+            file_get_contents($file->getRealPath())
+        );
     }
 }

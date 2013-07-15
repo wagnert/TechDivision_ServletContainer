@@ -13,7 +13,7 @@
 namespace TechDivision\ServletContainer\Service\Locator;
 
 use TechDivision\ServletContainer\Interfaces\Servlet;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
 
 /**
@@ -55,15 +55,15 @@ class StaticResourceLocator extends AbstractResourceLocator {
     }
 
     /**
-     * @param ServletRequest $request
+     * @param Request $request
      * @throws \TechDivision\ServletContainer\Exceptions\FileNotFoundException
      * @throws \Exception Is thrown if the requested file has not been found or is not readable
      * @return \SplFileObject The located file
      */
-    public function locate(ServletRequest $request) {
+    public function locate(Request $request) {
 
         // build the path from url part and base path
-        $path = $request->getDocumentRoot() . urldecode($request->getRequestUrl());
+        $path = $request->getDocumentRoot() . urldecode($request->getUri());
 
         if (is_dir($path)) {
             throw new \Exception("Requested file $path is a directory");

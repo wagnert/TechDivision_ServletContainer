@@ -12,8 +12,8 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 
 /**
@@ -36,7 +36,7 @@ class DefaultServlet extends StaticResourceServlet {
      * @throws MethodNotImplementedException
      * @return mixed
      */
-    public function service(ServletRequest $req, ServletResponse $res) {
+    public function service(Request $req, Response $res) {
 
         // load the information about the requested path
         $pathInfo = $req->getPathInfo();

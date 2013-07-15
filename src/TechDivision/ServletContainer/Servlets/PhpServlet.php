@@ -12,8 +12,8 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Servlets\DefaultServlet;
 use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
@@ -27,18 +27,19 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
+ * @author      Johann Zelger <j.zelger@techdivision.com>
  */
 class PhpServlet extends DefaultServlet {
 
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\ServletResponse $res The servlet response
+     * @param Request $req The servlet request
+     * @param Response $res The servlet response
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
-    public function doGet(ServletRequest $req, ServletResponse $res) {
+    public function doGet(Request $req, Response $res) {
 
         // instanciate the resource locator
         $locator = new StaticResourceLocator();
@@ -65,7 +66,7 @@ class PhpServlet extends DefaultServlet {
     /**
      * @see \TechDivision\ServletContainer\Servlets\PhpServlet::doGet()
      */
-    public function doPost(ServletRequest $req, ServletResponse $res) {
+    public function doPost(Request $req, Response $res) {
         $this->doGet($req, $res);
     }
 }

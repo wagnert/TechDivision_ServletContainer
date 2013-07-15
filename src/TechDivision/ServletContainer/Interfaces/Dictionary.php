@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Interfaces\ServletResponse
+ * TechDivision\ServletContainer\Interfaces\Dictionary
  *
  * NOTICE OF LICENSE
  *
@@ -13,26 +13,22 @@
 namespace TechDivision\ServletContainer\Interfaces;
 
 /**
- * Interface for the servlet response.
+ * A dictionary interface.
  *
  * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
+ * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
- * @author      Markus Stockbauer <ms@techdivision.com>
+ * @author      Johann Zelger <j.zelger@techdivision.com>
  */
-interface ServletResponse {
+interface Dictionary {
 
     /**
-     * @abstract
+     * Returns value by given key from dictionary data.
+     *
+     * @param string $key
      * @return string
      */
-    public function getContent();
+    public function find($key);
 
-    /**
-     * @abstract
-     * @param string $content
-     * @return void
-     */
-    public function setContent($content);
 }

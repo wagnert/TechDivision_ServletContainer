@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Interfaces\LocatorInterface
+ * TechDivision\ServletContainer\Interfaces\Request
  *
  * NOTICE OF LICENSE
  *
@@ -12,22 +12,16 @@
 
 namespace TechDivision\ServletContainer\Interfaces;
 
-use TechDivision\ServletContainer\Interfaces\Request;
-
 /**
- * Interface for all resource locators.
+ * Interface for the servlet request.
  *
  * @package     TechDivision\ServletContainer
  * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
+ *              Johann Zelger <j.zelger@techdivision.com>
  */
-interface LocatorInterface {
+interface Request {
 
-    /**
-     * @param Request $request
-     * @return mixed
-     */
-    public function locate(Request $request);
 }

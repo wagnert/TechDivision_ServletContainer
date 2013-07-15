@@ -13,8 +13,8 @@
 namespace TechDivision\ServletContainer\Interfaces;
 
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
+use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Interfaces\Response;
 
 /**
  * Interface for all servlets.
@@ -43,13 +43,13 @@ interface Servlet {
 
     /**
      * @abstract
-     * @param ServletRequest $req
-     * @param ServletResponse $res
+     * @param Request $req
+     * @param Response $res
      * @throws ServletException
      * @throws IOException
      * @return mixed
      */
-    public function service(ServletRequest $req, ServletResponse $res);
+    public function service(Request $req, Response $res);
 
     /**
      * @abstract

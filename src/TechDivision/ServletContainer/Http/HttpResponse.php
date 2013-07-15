@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Http\HttpServletResponse
+ * TechDivision\ServletContainer\Http\HttpResponse
  *
  * NOTICE OF LICENSE
  *
@@ -12,20 +12,24 @@
 
 namespace TechDivision\ServletContainer\Http;
 
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
+use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Http\Cookie;
 
 /**
  * A servlet response implementation.
  *
  * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
+ * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
+ * @author      Johann Zelger <j.zelger@techdivision.com>
  */
-class HttpServletResponse implements ServletResponse {
+class HttpResponse implements Response {
 
+    /**
+     * @var status
+     */
     const HEADER_NAME_STATUS = 'status';
 
     /**
@@ -38,8 +42,19 @@ class HttpServletResponse implements ServletResponse {
      */
     protected $headers = array();
 
+    /**
+     * @var array
+     */
     protected $cookies = array();
 
+    /**
+     * @var array
+     */
+    protected $acceptedEncodings = array();
+
+    /**
+     * Constructor
+     */
     public function __construct()
     {
         // prepare the headers
@@ -48,7 +63,7 @@ class HttpServletResponse implements ServletResponse {
                 self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
                 "Date"                   => gmdate('D, d M Y H:i:s \G\M\T', time()),
                 "Last-Modified"          => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                "Expires"                => gmdate('D, d M Y H:i:s \G\M\T', time() - 3600),
+                "Expires"                => gmdate('D, d M Y H:i:s \G\M\T', time() + 3600),
                 "Server"                 => "Apache/4.3.29 (Unix) PHP/5.4.10",
                 "Content-Language"       => "de",
                 "Connection"             => "close",
@@ -120,6 +135,23 @@ class HttpServletResponse implements ServletResponse {
      * @return string
      */
     public function getContent() {
+        // check if encoding is available
+        foreach ($this->getAcceptedEncodings() as $acceptedEncoding) {
+            // check if gzip is possible
+            if ($acceptedEncoding == 'gzip') {
+                // set correct header encoding information
+                $this->addHeader('Content-Encoding', 'gzip');
+                // return content encoded by gzip
+                return gzencode($this->content);
+            // check if deflate is possible
+            } elseif ($acceptedEncoding == 'deflate') {
+                // set correct header encoding information
+                $this->addHeader('Content-Encoding', 'deflate');
+                // return content deflate
+                return gzdeflate($this->content);
+            }
+        }
+        // return content as default
         return $this->content;
     }
 
@@ -131,7 +163,32 @@ class HttpServletResponse implements ServletResponse {
         $this->content = $content;
     }
 
+    /**
+     * @param Cookie $cookie
+     * @return void
+     */
     public function addCookie(Cookie $cookie) {
         $this->cookies[] = $cookie;
     }
+
+    /**
+     * Sets accepted encodings data
+     *
+     * @param $acceptedEncodings
+     */
+    public function setAcceptedEncodings($acceptedEncodings)
+    {
+        $this->acceptedEncodings = $acceptedEncodings;
+    }
+
+    /**
+     * Returns accepted encodings data
+     *
+     * @return array
+     */
+    public function getAcceptedEncodings()
+    {
+        return $this->acceptedEncodings;
+    }
+
 }

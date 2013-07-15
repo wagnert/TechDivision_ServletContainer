@@ -12,7 +12,8 @@
 
 namespace TechDivision\ServletContainer\Service\Locator;
 
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Interfaces\Servlet;
 
 /**
  * Interface for the resource locator instances.
@@ -23,14 +24,15 @@ use TechDivision\ServletContainer\Interfaces\ServletRequest;
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
+ * @author      Johann Zelger <j.zelger@techdivision.com>
  */
 interface ResourceLocatorInterface {
 
     /**
      * Tries to locate the resource related with the request.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest $request
-     * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet that serves the request
+     * @param Request $request
+     * @return Servlet The servlet that serves the request
      */
-    public function locate(ServletRequest $request);
+    public function locate(Request $request);
 }

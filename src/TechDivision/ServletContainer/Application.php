@@ -14,7 +14,7 @@ namespace TechDivision\ServletContainer;
 
 use TechDivision\ServletContainer\ServletManager;
 use TechDivision\ServletContainer\Service\Locator\ServletLocator;
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ApplicationServer\Configuration;
 use TechDivision\ApplicationServer\InitialContext;
 
@@ -218,10 +218,10 @@ class Application {
     
     /**
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\ServletRequest $request
+     * @param Request $request
      * @return type
      */
-    public function locate(ServletRequest $request) {
+    public function locate(Request $request) {
         $servletLocator = new ServletLocator($this->getServletManager());
         return $servletLocator->locate($request);
     }

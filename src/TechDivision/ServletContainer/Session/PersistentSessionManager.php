@@ -9,9 +9,8 @@
 
 namespace TechDivision\ServletContainer\Session;
 
-use TechDivision\ServletContainer\Interfaces\ServletRequest;
-use TechDivision\ServletContainer\Interfaces\ServletResponse;
-use TechDivision\ServletContainer\Http\HttpServletRequest;
+use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Session\Storage\MemcachedStorage;
 
 class PersistentSessionManager implements SessionManager {
@@ -29,20 +28,19 @@ class PersistentSessionManager implements SessionManager {
      * in the query string takes precedence. If no session id
      * is found, a new one is created and assigned to the request.
      *
-     * @param ServletRequest $request
+     * @param Request $request
      * @return ServletSession
      */
-    public function getSessionForRequest(ServletRequest $request)
+    public function getSessionForRequest(Request $request)
     {
-        /** @var $request HttpServletRequest */
         // @todo merge refactoring for headers getter by bcmzero
         $headers = $request->getHeaders();
         $sessionId = null;
 
         // try to retrieve the session id from the cookies in request header
-        if (isset($headers['cookie'])) {
+        if (isset($headers['Cookie'])) {
 
-            foreach (explode(';', $headers['cookie']) as $cookie) {
+            foreach (explode(';', $headers['Cookie']) as $cookie) {
 
                 list($name, $value) = explode('=', $cookie);
 

@@ -37,7 +37,6 @@ abstract class GenericServlet implements Servlet {
      * @param ServletConfig $config
      * @throws ServletException;
      * @return mixed
-     * @todo Implement init() method
      */
     public function init(ServletConfig $config) {
         $this->config = $config;
@@ -45,7 +44,6 @@ abstract class GenericServlet implements Servlet {
 
     /**
      * @return ServletConfig
-     * @todo Implement getServletConfig() method
      */
     public function getServletConfig() {
         return $this->config;
@@ -53,7 +51,6 @@ abstract class GenericServlet implements Servlet {
 
     /**
      * @return mixed|void
-     * @todo Implement getServletInfo() method
      */
     public function getServletInfo() {
         return $this->getServletConfig()->getServerVars();
