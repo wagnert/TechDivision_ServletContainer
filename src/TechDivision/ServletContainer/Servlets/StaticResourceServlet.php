@@ -93,6 +93,17 @@ class StaticResourceServlet extends HttpServlet {
                 '403 - You do not have permission to access %s', $file->getFilename()));
         }
 
+        // check if If-Modified-Since header info is set
+        if ($req->getHeader('If-Modified-Since')) {
+            // check if file is modified since header given header date
+            if (strtotime($req->getHeader('If-Modified-Since'))>=$file->getMTime()) {
+                // send 304 Not Modified Header information without content
+                $res->addHeader('status', 'HTTP/1.1 304 Not Modified');
+                $res->getContent(PHP_EOL);
+                return;
+            }
+        }
+
         // set mimetypes to header
         $res->addHeader('Content-Type',
             $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
