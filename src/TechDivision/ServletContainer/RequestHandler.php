@@ -39,7 +39,6 @@ class RequestHandler extends \Worker {
      */
     public function __construct($container) {
         $this->container = $container;
-        error_log(spl_object_hash($this->container));
     }
 
     /**
