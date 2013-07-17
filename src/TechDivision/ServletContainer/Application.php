@@ -47,12 +47,6 @@ class Application {
      * @var string
      */
     protected $name;
-    
-    /**
-     * The path to the web application.
-     * @var string
-     */
-    protected $webappPath;
 
     /**
      * The servlet manager.
