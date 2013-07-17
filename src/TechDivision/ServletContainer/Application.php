@@ -200,19 +200,21 @@ class Application {
      */
     public function isVhostOf($serverName) {
 
+        // check if the application is VHost for the passed server name
         foreach ($this->getVhosts() as $vhost) {
 
+            // compare the VHost name itself
             if (strcmp($vhost->getName(), $serverName) === 0) {
                 return true;
             }
 
+            // then compare all aliases
             foreach ($vhost->getAliases() as $alias) {
                 if (strcmp($alias, $serverName) === 0) {
                     return true;
                 }
             }
         }
-
         return false;
     }
     

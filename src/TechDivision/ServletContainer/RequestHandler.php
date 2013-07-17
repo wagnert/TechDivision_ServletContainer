@@ -32,12 +32,6 @@ class RequestHandler extends \Worker {
     protected $container;
 
     /**
-     * Array with the available applications.
-     * @var array
-     */
-    protected $applications;
-
-    /**
      * Passes a reference to the container instance.
      *
      * @param \TechDivision\ServletContainer\Container $container The container instance
@@ -45,6 +39,7 @@ class RequestHandler extends \Worker {
      */
     public function __construct($container) {
         $this->container = $container;
+        error_log(spl_object_hash($this->container));
     }
 
     /**
@@ -62,7 +57,7 @@ class RequestHandler extends \Worker {
      * @return array The available applications
      */
     public function getApplications() {
-        return $this->applications;
+        return $this->getContainer()->getApplications();
     }
 
     /**
@@ -74,16 +69,13 @@ class RequestHandler extends \Worker {
      */
     public function findApplication($servletRequest) {
 
-        // load the path info
+        // load the server name
         $serverName = $servletRequest->getServerName();
-        $pathInfo = $servletRequest->getPathInfo();
-
-        // strip the leading slash and explode the application name
-        list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
 
         // load the array with the applications
         $applications = $this->getApplications();
 
+        // iterate over the applications and check if one of the VHosts match the request
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
                 $servletRequest->setDocumentRoot($application->getWebappPath());
@@ -91,7 +83,13 @@ class RequestHandler extends \Worker {
             }
         }
 
-        // check if the requested application has been deployed
+        // load path information
+        $pathInfo = $servletRequest->getPathInfo();
+
+        // strip the leading slash and explode the application name
+        list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
+
+        // if not, check if the request matches a folder
         if (array_key_exists($applicationName, $applications)) {
             $servletRequest->setDocumentRoot($application->getAppBase());
             return $applications[$applicationName];
@@ -105,21 +103,9 @@ class RequestHandler extends \Worker {
      * @see \Worker::run()
      */
     public function run() {
-        
+
         // register class loader again, because we are in a thread
         $classLoader = new SplClassLoader();
         $classLoader->register();
-
-        // initialize the array for the applications
-        $applications = array();
-
-        // load the available applications from the container
-        foreach ($this->getContainer()->getApplications() as $name => $application) {
-            // set the applications and connect the entity manager
-            $applications[$name] = $application->connect();
-        }
-
-        // set the applications in the worker instance
-        $this->applications = $applications;
     }
 }
