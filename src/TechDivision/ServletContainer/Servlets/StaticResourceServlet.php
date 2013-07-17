@@ -93,6 +93,14 @@ class StaticResourceServlet extends HttpServlet {
                 '403 - You do not have permission to access %s', $file->getFilename()));
         }
 
+        // set mimetypes to header
+        $res->addHeader('Content-Type',
+            $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
+        );
+
+        // set last modified date from file
+        $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
+
         // check if If-Modified-Since header info is set
         if ($req->getHeader('If-Modified-Since')) {
             // check if file is modified since header given header date
@@ -103,14 +111,6 @@ class StaticResourceServlet extends HttpServlet {
                 return;
             }
         }
-
-        // set mimetypes to header
-        $res->addHeader('Content-Type',
-            $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
-        );
-
-        // set last modified date from file
-        $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
 
         // store the file's contents in the response
         $res->setContent(
