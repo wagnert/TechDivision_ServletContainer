@@ -77,7 +77,9 @@ class RequestHandler extends \Worker {
         // iterate over the applications and check if one of the VHosts match the request
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
-                $servletRequest->setDocumentRoot($application->getWebappPath());
+                $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
+                $servletRequest->setServerVar('SERVER_SOFTWARE', $application->getServerSoftware());
+                $servletRequest->setServerVar('SERVER_ADMIN', $application->getServerAdmin());
                 return $application;
             }
         }
@@ -90,7 +92,9 @@ class RequestHandler extends \Worker {
 
         // if not, check if the request matches a folder
         if (array_key_exists($applicationName, $applications)) {
-            $servletRequest->setDocumentRoot($application->getAppBase());
+            $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getAppBase());
+            $servletRequest->setServerVar('SERVER_SOFTWARE', $applications[$applicationName]->getServerSoftware());
+            $servletRequest->setServerVar('SERVER_ADMIN', $applications[$applicationName]->getServerAdmin());
             return $applications[$applicationName];
         }
 

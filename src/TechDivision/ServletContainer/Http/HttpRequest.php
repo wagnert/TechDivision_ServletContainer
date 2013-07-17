@@ -101,13 +101,6 @@ class HttpRequest implements Request
     protected $queryString;
 
     /**
-     * Document root to filesystem
-     *
-     * @var string
-     */
-    protected $documentRoot;
-
-    /**
      * Params data
      *
      * @var array
@@ -194,13 +187,13 @@ class HttpRequest implements Request
             'HTTP_REFERER' => $this->getHeader('Referer'),
             'PATH' => '/opt/appserver/bin',
             'SERVER_SIGNATURE' => '',
-            'SERVER_SOFTWARE' => 'Apache/2.2.22 (Unix) DAV/2 PHP/5.3.26 mod_ssl/2.2.22 OpenSSL/0.9.8x',
+            'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
             'SERVER_NAME' => $this->getServerName(),
             'SERVER_ADDR' => '127.0.0.1',
             'SERVER_PORT' => $this->getServerPort(),
             'REMOTE_ADDR' => '127.0.0.1',
-            'DOCUMENT_ROOT' => $this->getDocumentRoot(),
-            'SERVER_ADMIN' => 'appserver@localhost',
+            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
+            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
             'SERVER_PROTOCOL' => $this->getVersion(),
             'REQUEST_METHOD' => $this->getMethod(),
             'QUERY_STRING' => $this->getQueryString(),
@@ -209,7 +202,7 @@ class HttpRequest implements Request
         );
         // check if php script is called to set script and php info
         if (pathinfo($this->pathInfo, PATHINFO_EXTENSION) == 'php') {
-            $this->setServerVar('SCRIPT_FILENAME', $this->getDocumentRoot() . $this->getPathInfo());
+            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
             $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
             $this->setServerVar('PHP_SELF', $this->getPathInfo());
         }
@@ -344,26 +337,6 @@ class HttpRequest implements Request
     }
 
     /**
-     * Set document root
-     *
-     * @param string $documentRoot
-     */
-    public function setDocumentRoot($documentRoot)
-    {
-        $this->documentRoot = $documentRoot;
-    }
-
-    /**
-     * Returns document root
-     *
-     * @return string
-     */
-    public function getDocumentRoot()
-    {
-        return $this->documentRoot;
-    }
-
-    /**
      * Returns params data
      *
      * @return array
@@ -420,5 +393,4 @@ class HttpRequest implements Request
             return $this->server[$key];
         }
     }
-
 }

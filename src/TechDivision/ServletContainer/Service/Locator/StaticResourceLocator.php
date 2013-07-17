@@ -63,7 +63,7 @@ class StaticResourceLocator extends AbstractResourceLocator {
     public function locate(Request $request) {
 
         // build the path from url part and base path
-        $path = $request->getDocumentRoot() . urldecode($request->getUri());
+        $path = $request->getServerVar('DOCUMENT_ROOT') . urldecode($request->getUri());
 
         if (is_dir($path)) {
             throw new \Exception("Requested file $path is a directory");

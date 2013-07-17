@@ -156,6 +156,24 @@ class Application {
     public function getWebappPath() {
         return $this->getAppBase() . DS . $this->getName();
     }
+
+    /**
+     * Return's the server software.
+     *
+     * @return string The server software
+     */
+    public function getServerSoftware() {
+        return $this->getConfiguration()->getChild(self::CONTAINER_HOST)->getServerSoftware();
+    }
+
+    /**
+     * Return's the server admin email.
+     *
+     * @return string The server admin email
+     */
+    public function getServerAdmin() {
+        return $this->getConfiguration()->getChild(self::CONTAINER_HOST)->getServerAdmin();
+    }
     
     /**
      * Sets the applications entity manager instance.
