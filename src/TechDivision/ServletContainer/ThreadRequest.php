@@ -15,12 +15,13 @@ namespace TechDivision\ServletContainer;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\Socket\Client;
+use TechDivision\ServletContainer\Socket\HttpClient;
 use TechDivision\SplClassLoader;
+use TechDivision\ServletContainer\Container;
 use TechDivision\ServletContainer\Exceptions\BadRequestException;
 
 /**
- * The stackable implementation that handles the request.
+ * The thread implementation that handles the request.
  *
  * @package     TechDivision\ServletContainer
  * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
@@ -31,15 +32,23 @@ use TechDivision\ServletContainer\Exceptions\BadRequestException;
 class ThreadRequest extends \Thread {
 
     /**
-     * The client socket resource.
-     * @var string
+     * Holds the container instance
+     *
+     * @var Container
+     */
+    public $container;
+
+    /**
+     * Holds the main socket resource
+     *
+     * @var resource
      */
     public $resource;
-    public $container;
 
     /**
      * Initializes the request with the client socket.
      *
+     * @param Container $container The ServletContainer
      * @param resource $resource The client socket instance
      * @return void
      */
@@ -49,7 +58,7 @@ class ThreadRequest extends \Thread {
     }
 
     /**
-     * @see \Stackable::run()
+     * @see \Thread::run()
      */
     public function run() {
 
@@ -57,9 +66,8 @@ class ThreadRequest extends \Thread {
         $classLoader = new SplClassLoader();
         $classLoader->register();
 
-
         // initialize a new client socket
-        $client = new Client();
+        $client = new HttpClient();
 
         // set the client socket resource
         $client->setResource($this->resource);
@@ -96,8 +104,10 @@ class ThreadRequest extends \Thread {
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());
 
-        // close the socket connection to the client
-        $client->close();
+        // shutdown the socket connection to the client
+        $client->shutdown();
+
+        unset($client);
     }
 
     /**
