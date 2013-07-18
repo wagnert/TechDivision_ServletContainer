@@ -41,6 +41,12 @@ class Application {
      * @var string
      */
     const CONTAINER_VHOSTS = '/container/host/vhosts/vhost';
+
+    /**
+     * Path to the container's VHost alias configuration.
+     * @var string
+     */
+    const CONTAINER_ALIAS = '/vhost/aliases/alias';
     
     /**
      * The unique application name.
@@ -89,9 +95,15 @@ class Application {
             // check if vhost configuration belongs to application
             if ($vhost->getAppBase() == $this->getName()) {
 
+                // prepare the aliases if available
+                $aliases = array();
+                foreach ($vhost->getChilds(self::CONTAINER_ALIAS) as $alias) {
+                    $aliases[] = $alias->getValue();
+                }
+
                 // initialize VHost classname and parameters
                 $vhostClassname = '\TechDivision\ServletContainer\Vhost';
-                $vhostParameter = array($vhost->getName(), $vhost->getAppBase(), array());
+                $vhostParameter = array($vhost->getName(), $vhost->getAppBase(), $aliases);
 
                 // register VHost in array with app base folder
                 $this->vhosts[] = $this->newInstance($vhostClassname, $vhostParameter);
@@ -207,7 +219,7 @@ class Application {
     /**
      * Checks if the application is the VHost for the passed server name.
      *
-     * @param $serverName The server name to check the application beeing a VHost of
+     * @param string $serverName The server name to check the application being a VHost of
      * @return boolean TRUE if the application is the VHost, else FALSE
      */
     public function isVhostOf($serverName) {
@@ -221,10 +233,8 @@ class Application {
             }
 
             // then compare all aliases
-            foreach ($vhost->getAliases() as $alias) {
-                if (strcmp($alias, $serverName) === 0) {
-                    return true;
-                }
+            if (in_array($serverName, $vhost->getAliases())) {
+                return true;
             }
         }
         return false;
