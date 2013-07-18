@@ -104,8 +104,12 @@ class ThreadRequest extends \Thread {
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());
 
-        // shutdown the socket connection to the client
-        $client->shutdown();
+        // try to shutdown the socket connection to the client
+        try {
+            $client->shutdown();
+        } catch (SocketException $se) {
+            // connection reset by peer before.
+        }
 
         unset($client);
     }
