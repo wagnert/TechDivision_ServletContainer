@@ -118,6 +118,11 @@ abstract class HttpServlet extends GenericServlet {
      * @return mixed
      */
     public function service(Request $req, Response $res) {
+
+        // pre-initialize response
+        $res->addHeader('Server', $req->getServerVar('SERVER_SOFTWARE'));
+
+        // check the request method to invoke the appropriate method
         switch($req->getMethod()) {
             case 'CONNECT':
                 $this->doConnect($req, $res);

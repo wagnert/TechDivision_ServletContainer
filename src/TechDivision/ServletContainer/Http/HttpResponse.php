@@ -64,8 +64,7 @@ class HttpResponse implements Response {
                 "Date"                   => gmdate('D, d M Y H:i:s \G\M\T', time()),
                 "Last-Modified"          => gmdate('D, d M Y H:i:s \G\M\T', time()),
                 "Expires"                => gmdate('D, d M Y H:i:s \G\M\T', time() + 3600),
-                "Server"                 => "Apache/4.3.29 (Unix) PHP/5.4.10",
-                "Content-Language"       => "de",
+                "Content-Language"       => "en",
                 "Connection"             => "close",
                 "Content-Type"           => "text/html",
             )
