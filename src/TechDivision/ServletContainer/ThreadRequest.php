@@ -73,8 +73,8 @@ class ThreadRequest extends \Thread {
         // set the client socket resource
         $client->setResource($this->resource);
 
-        // read a line from the client
-        $request = new HttpRequest($client->readLine());
+        // receive vom client a Request Object
+        $request = $client->receive();
 
         try {
 

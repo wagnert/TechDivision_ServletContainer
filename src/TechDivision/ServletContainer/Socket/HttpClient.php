@@ -13,6 +13,7 @@
 namespace TechDivision\ServletContainer\Socket;
 
 use TechDivision\Socket\Client;
+use TechDivision\ServletContainer\Http\Request;
 
 /**
  * The http client implementation that handles the request like a webserver
@@ -27,11 +28,69 @@ class HttpClient extends Client
 {
 
     /**
-     * New line character.
-     * @var string
+     * Receive a Stream from Socket an check it is valid
+     * @return mixed
+     * @throws InvalidHeaderException Is thrown if the header is complete but not valid
      */
-    protected $newLine = "\r\n\r\n";
+    public function receive()
+    {
 
+        // initialize the buffer
+        $buffer = '';
+
+
+
+        // read a chunk from the socket
+        while ($buffer .= $this->read($this->getLineLength())) {
+
+
+            if (!isset ($validator)) {
+
+                // extract requesttype from inputstream
+                $requestType = $this->getRequestType($buffer);
+
+                switch ($requestType) {
+                    case "GET":
+                        $validator = new GetHttpRequestValidator();
+                        break;
+                    case "POST":
+                        $validator = new PostHttpRequestValidator();
+                        break;
+                    default:
+                        // Throw Exception if method is unknown
+                        break;
+                }
+            }
+
+
+
+            // check if request complete is valid
+            if ($validator->isHeaderCompleteAndValid($buffer)) {
+
+                // check if content-length is reached (e.g. on POST Request)
+                if ( $validator->isComplete()) {
+
+                    // return a valid request object
+                    return $validator->getRequest();
+                }
+            }
+        }
+    }
+
+    /**
+     * extract request method from inputstream
+     * @param string $buffer inputstream from socket
+     * @return string
+     */
+    protected function getRequestType($buffer)
+    {
+        // extract request method
+        list($method ) = explode(" ", trim(strtok($buffer, "\n")));
+        return $method;
+    }
+
+
+// kann weg
     /**
      * Reads a line (ends with the new line character) from the socket.
      *
@@ -53,5 +112,5 @@ class HttpClient extends Client
             }
         }
     }
-
+// ende kann weg
 }
