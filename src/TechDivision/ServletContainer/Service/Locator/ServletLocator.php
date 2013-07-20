@@ -49,10 +49,20 @@ class ServletLocator implements ResourceLocatorInterface {
         $this->servletManager = $servletManager;
     }
 
+    /**
+     * Returns the servlet manager instance to use.
+     *
+     * @return \TechDivision\ServletContainer\ServletManager The servlet manager instance to use
+     */
     public function getServletManager() {
         return $this->servletManager;
     }
 
+    /**
+     * Returns the actual application instance.
+     *
+     * @return \TechDivision\ServletContainer\TechDivision\ServletContainer\Application The application instance
+     */
     public function getApplication() {
         return $this->getServletManager()->getApplication();
     }
