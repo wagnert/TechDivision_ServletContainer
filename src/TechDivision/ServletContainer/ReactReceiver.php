@@ -14,7 +14,6 @@ namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\InitialContext;
 use TechDivision\ApplicationServer\AbstractReceiver;
-use TechDivision\ServletContainer\Exceptions\BadRequestException;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Http\ReactHttpRequest;
@@ -67,7 +66,7 @@ class ReactReceiver extends AbstractReceiver {
                     $req->setResponse($res = new HttpResponse());
 
                     // load the application to handle the request
-                    $application = $this->findApplication($req);
+                    $application = $this->getContainer()->findApplication($req);
 
                     // try to locate a servlet which could service the current request
                     $servlet = $application->locate($req);
@@ -109,57 +108,5 @@ class ReactReceiver extends AbstractReceiver {
         } catch (\Exception $ge) {
             error_log($ge->__toString());
         }
-    }
-
-    /**
-     * Returns the array with the available applications.
-     *
-     * @return array The available applications
-     */
-    public function getApplications() {
-        return $this->getContainer()->getApplications();
-    }
-
-    /**
-     * Tries to find and return the application for the passed request.
-     *
-     * @param string $request The request to find and return the application instance for
-     * @return \TechDivision\ServletContainer\Application The application instance
-     * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found for the passed application name
-     */
-    public function findApplication($servletRequest) {
-
-        // load the server name
-        $serverName = $servletRequest->getServerName();
-
-        // load the array with the applications
-        $applications = $this->getApplications();
-
-        // iterate over the applications and check if one of the VHosts match the request
-        foreach ($applications as $application) {
-            if ($application->isVhostOf($serverName)) {
-                $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
-                $servletRequest->setServerVar('SERVER_SOFTWARE', $application->getServerSoftware());
-                $servletRequest->setServerVar('SERVER_ADMIN', $application->getServerAdmin());
-                return $application;
-            }
-        }
-
-        // load path information
-        $pathInfo = $servletRequest->getPathInfo();
-
-        // strip the leading slash and explode the application name
-        list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
-
-        // if not, check if the request matches a folder
-        if (array_key_exists($applicationName, $applications)) {
-            $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getAppBase());
-            $servletRequest->setServerVar('SERVER_SOFTWARE', $applications[$applicationName]->getServerSoftware());
-            $servletRequest->setServerVar('SERVER_ADMIN', $applications[$applicationName]->getServerAdmin());
-            return $applications[$applicationName];
-        }
-
-        // if not throw an exception
-        throw new BadRequestException("Can\'t find application for '$applicationName'");
     }
 }
