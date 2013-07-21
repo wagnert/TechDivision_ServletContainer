@@ -12,8 +12,11 @@
 
 namespace TechDivision\ServletContainer\Socket;
 
+use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\Socket\Client;
 use TechDivision\ServletContainer\Http\Request;
+use TechDivision\ServletContainer\Utilities\Http\GetRequestValidator;
+use TechDivision\ServletContainer\Utilities\Http\PostRequestValidator;
 
 /**
  * The http client implementation that handles the request like a webserver
@@ -23,6 +26,7 @@ use TechDivision\ServletContainer\Http\Request;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <j.zelger@techdivision.com>
+ * @author      Philipp Dittert <p.dittert@techdivision.com>
  */
 class HttpClient extends Client
 {
@@ -38,37 +42,36 @@ class HttpClient extends Client
         // initialize the buffer
         $buffer = '';
 
-
-
         // read a chunk from the socket
         while ($buffer .= $this->read($this->getLineLength())) {
 
-
+            // create validator if not set
             if (!isset ($validator)) {
 
-                // extract requesttype from inputstream
+                // extract Request-Type from InputStream
                 $requestType = $this->getRequestType($buffer);
 
+                // select fitting validator
                 switch ($requestType) {
                     case "GET":
-                        $validator = new GetHttpRequestValidator();
+                        $validator = new GetRequestValidator();
                         break;
                     case "POST":
-                        $validator = new PostHttpRequestValidator();
+                        $validator = new PostRequestValidator();
                         break;
                     default:
-                        // Throw Exception if method is unknown
+
+                        // Throw InvalidHeaderException if method is unknown
+                        throw new InvalidHeaderException("Invalid Request Method");
                         break;
                 }
             }
-
-
 
             // check if request complete is valid
             if ($validator->isHeaderCompleteAndValid($buffer)) {
 
                 // check if content-length is reached (e.g. on POST Request)
-                if ( $validator->isComplete()) {
+                if ($validator->isComplete()) {
 
                     // return a valid request object
                     return $validator->getRequest();
@@ -80,12 +83,14 @@ class HttpClient extends Client
     /**
      * extract request method from inputstream
      * @param string $buffer inputstream from socket
-     * @return string
+     * @return string $method
      */
     protected function getRequestType($buffer)
     {
         // extract request method
         list($method ) = explode(" ", trim(strtok($buffer, "\n")));
+
+        // return Request-Type as String (e.g. POST, GET )
         return $method;
     }
 
