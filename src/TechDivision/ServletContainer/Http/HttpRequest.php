@@ -25,11 +25,19 @@ use TechDivision\ServletContainer\Session\ServletSession;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <j.zelger@techdivision.com>
- * @author      Philipp Dittert <p.dittert@techdivision.com>
+ *              Philipp Dittert <p.dittert@techdivision.com>
  */
 
 class HttpRequest implements Request
 {
+
+    /**
+     * Separator between Header and Content (e.g. POST-Request)
+     *
+     * @var string
+     */
+    protected $headerContentSeparator = "\r\n\r\n";
+
 
     /**
      * Request header data
@@ -140,6 +148,102 @@ class HttpRequest implements Request
     }
 
     /**
+     * validate actual InputStream
+     *
+     * @param string $buffer InputStream
+     * @return void
+     */
+    protected function validate($buffer)
+    {
+        // parse method uri and http version
+        list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
+
+        $this->setMethod($method);
+        $this->setUri($uri);
+        $this->setVersion($version);
+        $this->setHeaders($this->parseHeaders($buffer));
+
+        list($serverName, $serverPort) = explode(":", $this->getHeader('Host'));
+
+        $this->setServerName($serverName);
+        $this->setServerPort($serverPort);
+
+        $pathInfo = $this->parsePathInfo($this->getUri());
+        $this->setPathInfo($pathInfo);
+
+        $this->initServerVars();
+    }
+
+    /**
+     * Parsing URI for PathInfo
+     *
+     * @param string $uri
+     * @return string
+     */
+    public function parsePathInfo($uri)
+    {
+        $url = parse_url($uri);
+        // parse path
+        if (array_key_exists('path', $url)) {
+            return $url['path'];
+        }
+    }
+
+    /**
+     * init basic Server Vars
+     *
+     *@return void
+     */
+    public function initServerVars()
+    {
+        $this->server = array(
+            'HTTP_HOST' => $this->getServerName(),
+            'HTTP_CONNECTION' => $this->getHeader('Connection'),
+            'HTTP_ACCEPT' => $this->getHeader('Accept'),
+            'HTTP_USER_AGENT' => $this->getHeader('User-Agent:'),
+            'HTTP_ACCEPT_ENCODING' => $this->getHeader('Accept-Encoding'),
+            'HTTP_ACCEPT_LANGUAGE' => $this->getHeader('Accept-Language'),
+            'HTTP_REFERER' => $this->getHeader('Referer'),
+            'PATH' => '/opt/appserver/bin',
+            'SERVER_SIGNATURE' => '',
+            'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
+            'SERVER_NAME' => $this->getServerName(),
+            'SERVER_ADDR' => '127.0.0.1',
+            'SERVER_PORT' => $this->getServerPort(),
+            'REMOTE_ADDR' => '127.0.0.1',
+            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
+            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
+            'SERVER_PROTOCOL' => $this->getVersion(),
+            'REQUEST_METHOD' => $this->getMethod(),
+            //'QUERY_STRING' => $this->getQueryString(),
+            'REQUEST_URI' => $this->getUri(),
+            'REQUEST_TIME' => time(),
+        );
+    }
+
+    /**
+     * parsing header
+     *
+     * @param string $var RawHeader
+     * @return array
+     */
+    public function parseHeaders($var)
+    {
+        $headers=array();
+        if (!function_exists('http_parse_headers')) {
+            foreach (explode("\n", $var) as $i => $h) {
+                $h = explode(':', $h, 2);
+                if (isset($h[1])) {
+                    $headers[$h[0]] = trim($h[1]);
+                }
+            }
+        } else {
+            $headers = http_parse_headers($var);
+        }
+        return $headers;
+    }
+
+    /**
      * Creates Request by given raw header data
      *
      * @param string $rawHeaderData
@@ -221,6 +325,27 @@ class HttpRequest implements Request
     }
 
     /**
+     * save complete QueryString into Parameters var (Tomcat 6 compatibility)
+     *
+     * @param string $qs QueryString
+     * @return void
+     */
+    public function setParameters($qs)
+    {
+        $this->parameters = $qs;
+    }
+
+    /**
+     * Transform QueryString into Array
+     * @param $queryString
+     * @return mixed
+     */
+    public function parseParameterMap($queryString) {
+        parse_str($queryString, $paramMap);
+        return $paramMap;
+    }
+
+    /**
      * Sets response object
      *
      * @param Response $response
@@ -290,7 +415,8 @@ class HttpRequest implements Request
      *
      * @return string
      */
-    public function getPathInfo() {
+    public function getPathInfo()
+    {
         return $this->pathInfo;
     }
 
@@ -349,7 +475,8 @@ class HttpRequest implements Request
      *
      * @return ServletSession
      */
-    public function getSession() {
+    public function getSession()
+    {
 
         if ($this->session == null) {
             $this->session = $this->sessionManager->getSessionForRequest($this);
@@ -409,7 +536,8 @@ class HttpRequest implements Request
      *
      * @return boolean
      */
-    public function isComplete() {
+    public function isComplete()
+    {
         if ($this->getHeader('content-length') == strlen($this->getContent())) {
             return TRUE;
         }else{

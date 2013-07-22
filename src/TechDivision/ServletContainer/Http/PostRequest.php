@@ -23,23 +23,62 @@ namespace TechDivision\ServletContainer\Http;
  */
 class PostRequest extends HttpRequest
 {
+
+    /**
+     * @var string
+     */
+    protected $content;
+
     /**
      * Constructor
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
     /**
-     * setting post-vars as string and as array
-     *
-     * @return $this
+     * Additonal Header Validation for POST Request
+     * @param string $buffer
+     * @return void
      */
-    public function setParameter() {
-        $content = $this->getContent();
-        $this->_parameter = $content;
-        $this->setParameterMap();
-        return $this;
+    public function validate($buffer)
+    {
+        // call parent validate method for basic parsing
+        parent::validate($buffer);
+
+        // searching for POST-Content
+        $content = $this->parseContent($buffer);
+        $this->setContent($content);
+
+        $this->setParameters($content);
+        $paramMap = $this->parseParameterMap($content);
+        $this->setParameterMap($paramMap);
     }
+
+    /**
+     * Sets content
+     *
+     * @param $content
+     * @return void
+     */
+    protected function setContent($content)
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * Parsing Raw Header for Post-Content
+     *
+     * @param string $buffer Raw Header
+     * @return string Post-Content
+     */
+    public function parseContent($buffer)
+    {
+        //search for first upcoming Separataor, trim and return until end
+        //@todo: trim possible buggy at this point?!
+        return trim(strstr($buffer, $this->headerContentSeparator));
+    }
+
 }

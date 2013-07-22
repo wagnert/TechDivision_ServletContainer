@@ -32,27 +32,38 @@ class GetRequest extends HttpRequest {
     }
 
     /**
-     * splice uri into PathInfo and QueryString
-     * @return $this
+     * Additonal Header Validation for GET Request
+     * @param string $buffer
+     * @return void
      */
-    public function ParseUriInformation() {
+    public function validate($buffer)
+    {
+        // call parent validate method for basic parsing
+        parent::validate($buffer);
 
-        $uriMod = explode("?", $this->getUri());
+        //querystring is only available on GET Method
+        $qs = $this->parseQueryString($this->getUri());
+        $this->setQueryString($qs);
 
-        if (array_key_exists(0, $uriMod)) {
-            $this->setPathInfo($uriMod[0]);
-        }
+        $this->setServerVar('QUERY_STRING', $qs);
 
-        if (array_key_exists(1, $uriMod)) {
-            $this->setQueryString($uriMod[1]);
-        }
-
-        return $this;
+        $this->setParameters($qs);
+        $paramMap = $this->parseParameterMap($qs);
+        $this->setParameterMap($paramMap);
     }
 
-    public function setParameter() {
-        $this->_parameter = $this->getQueryString();
-        $this->setParameterMap();
-        return $this;
+    /**
+     * Parsing QueryString out of URI
+     *
+     * @param string $uri
+     * @return mixed
+     */
+    public function parseQueryString($uri)
+    {
+        $url = parse_url($uri);
+        // parse path
+        if (array_key_exists('query', $url)) {
+            return $url['query'];
+        }
     }
 }
