@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Utilities\Http\PostRequestValidator
+ * TechDivision\ServletContainer\Utilities\Http\HeadRequestValidator
  *
  * NOTICE OF LICENSE
  *
@@ -25,7 +25,7 @@ use TechDivision\ServletContainer\Interfaces\Validator;
  */
 
 
-class PostRequestValidator extends RequestValidator implements Validator
+class HeadRequestValidator extends RequestValidator implements Validator
 {
 
     /**

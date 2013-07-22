@@ -132,12 +132,9 @@ class HttpRequest implements Request
     /**
      * Constructor
      *
-     * @param $data The raw header data
      */
-    public function __construct($data)
+    public function __construct()
     {
-        // init from raw header
-        $this->initFromRawHeader($data);
         // init session manager
         $this->sessionManager = new PersistentSessionManager();
     }
@@ -394,4 +391,30 @@ class HttpRequest implements Request
             return $this->server[$key];
         }
     }
+
+    /**
+     * validates the header
+     *
+     * @param string $buffer Inputstream from socket
+     * @return mixed
+     */
+    public function isHeaderCompleteAndValid($buffer) {
+
+        $this->initFromRawHeader($buffer);
+        return TRUE;
+    }
+
+    /**
+     * checks if the Request is received completely
+     *
+     * @return boolean
+     */
+    public function isComplete() {
+        if ($this->getHeader('content-length') == strlen($this->getContent())) {
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+    }
+
 }

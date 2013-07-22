@@ -73,10 +73,10 @@ class ThreadRequest extends \Thread {
         // set the client socket resource
         $client->setResource($this->resource);
 
-        // receive vom client a Request Object
-        $request = $client->receive();
-
         try {
+
+            // receive Request Object from client
+            $request = $client->receive();
 
             // initialize response container
             $request->setResponse($response = new HttpResponse());

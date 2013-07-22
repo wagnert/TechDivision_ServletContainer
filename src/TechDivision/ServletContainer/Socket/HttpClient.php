@@ -54,10 +54,13 @@ class HttpClient extends Client
                 // select fitting validator
                 switch ($requestType) {
                     case "GET":
-                        $validator = new GetRequestValidator();
+                        $request = new GetRequest();
                         break;
                     case "POST":
-                        $validator = new PostRequestValidator();
+                        $request = new PostRequest();
+                        break;
+                    case "HEAD":
+                        $request = new HeadRequest();
                         break;
                     default:
 
@@ -68,13 +71,13 @@ class HttpClient extends Client
             }
 
             // check if request complete is valid
-            if ($validator->isHeaderCompleteAndValid($buffer)) {
+            if ($request->isHeaderCompleteAndValid($buffer)) {
 
                 // check if content-length is reached (e.g. on POST Request)
-                if ($validator->isComplete()) {
+                if ($request->isComplete()) {
 
                     // return a valid request object
-                    return $validator->getRequest();
+                    return $request->getRequest();
                 }
             }
         }

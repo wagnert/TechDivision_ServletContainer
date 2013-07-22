@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Http\Request
+ * TechDivision\ServletContainer\Http\GetRequest
  *
  * NOTICE OF LICENSE
  *
@@ -19,9 +19,17 @@ namespace TechDivision\ServletContainer\Http;
  * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
- * @author      Philipp Dittert <pd@techdivision.com>
+ * @author      Philipp Dittert <p.dittert@techdivision.com>
  */
-class GetRequest extends Request {
+class GetRequest extends HttpRequest {
+
+    /**
+     * Constructor
+     *
+     */
+    public function __construct() {
+        parent::__construct();
+    }
 
     /**
      * splice uri into PathInfo and QueryString

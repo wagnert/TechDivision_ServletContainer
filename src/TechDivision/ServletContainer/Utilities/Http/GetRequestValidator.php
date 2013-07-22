@@ -28,4 +28,35 @@ use TechDivision\ServletContainer\Interfaces\Validator;
 class GetRequestValidator extends RequestValidator implements Validator
 {
 
+    /**
+     * Constructor
+     *
+     */
+    public function __construct() {
+
+        parent::__construct();
+    }
+
+    /**
+     * validates the header
+     *
+     * @param string $buffer Inputstream from socket
+     * @return mixed
+     */
+    public function isHeaderCompleteAndValid($buffer) {
+
+        $this->initFromRawHeader($buffer);
+
+        $this->getRequest()->setServerVar('QUERY_STRING', $this->getRequest()->getQueryString());
+
+    }
+
+    /**
+     * checks if the Request is received completely
+     *
+     * @return boolean
+     */
+    public function isComplete() {
+
+    }
 }
