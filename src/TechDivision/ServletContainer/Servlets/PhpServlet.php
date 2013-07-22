@@ -14,7 +14,7 @@ namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Servlets\DefaultServlet;
+use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 
@@ -29,7 +29,7 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
  * @author      Tim Wagner <tw@techdivision.com>
  * @author      Johann Zelger <j.zelger@techdivision.com>
  */
-class PhpServlet extends DefaultServlet {
+class PhpServlet extends StaticResourceServlet {
 
     /**
      * Tries to load the requested file and adds the content to the response.
@@ -42,7 +42,7 @@ class PhpServlet extends DefaultServlet {
     public function doGet(Request $req, Response $res) {
 
         // instanciate the resource locator
-        $locator = new StaticResourceLocator();
+        $locator = new StaticResourceLocator($this);
 
         // let the locator retrieve the file
         $file = $locator->locate($req);
