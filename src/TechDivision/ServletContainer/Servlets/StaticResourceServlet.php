@@ -101,6 +101,9 @@ class StaticResourceServlet extends HttpServlet {
         // set last modified date from file
         $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
 
+        // set expires date
+        $res->addHeader('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
+
         // check if If-Modified-Since header info is set
         if ($req->getHeader('If-Modified-Since')) {
             // check if file is modified since header given header date

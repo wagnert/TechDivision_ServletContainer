@@ -62,9 +62,6 @@ class HttpResponse implements Response {
             array(
                 self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
                 "Date"                   => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                "Last-Modified"          => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                "Expires"                => gmdate('D, d M Y H:i:s \G\M\T', time() + 3600),
-                "Content-Language"       => "en",
                 "Connection"             => "close",
                 "Content-Type"           => "text/html",
             )
