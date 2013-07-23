@@ -39,7 +39,7 @@ class PostRequest extends HttpRequest
     }
 
     /**
-     * Additonal Header Validation for POST Request
+     * extended Header Validation for POST Request
      * @param string $buffer
      * @return void
      */
@@ -55,17 +55,6 @@ class PostRequest extends HttpRequest
         $this->setParameters($content);
         $paramMap = $this->parseParameterMap($content);
         $this->setParameterMap($paramMap);
-    }
-
-    /**
-     * Sets content
-     *
-     * @param $content
-     * @return void
-     */
-    protected function setContent($content)
-    {
-        $this->content = $content;
     }
 
     /**

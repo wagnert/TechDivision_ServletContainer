@@ -14,9 +14,8 @@ namespace TechDivision\ServletContainer\Socket;
 
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\Socket\Client;
-use TechDivision\ServletContainer\Http\Request;
-use TechDivision\ServletContainer\Utilities\Http\GetRequestValidator;
-use TechDivision\ServletContainer\Utilities\Http\PostRequestValidator;
+use TechDivision\ServletContainer\Http\GetRequest;
+use TechDivision\ServletContainer\Http\PostRequest;
 
 /**
  * The http client implementation that handles the request like a webserver
@@ -77,7 +76,7 @@ class HttpClient extends Client
             if ($request->isComplete()) {
 
                 // return a valid request object
-                return $request->getRequest();
+                return $request;
             }
 
         }

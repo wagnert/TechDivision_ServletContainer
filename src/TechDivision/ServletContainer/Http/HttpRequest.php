@@ -258,79 +258,6 @@ class HttpRequest implements Request
     }
 
     /**
-     * Creates Request by given raw header data
-     *
-     * @param string $rawHeaderData
-     * @return array
-     */
-
-    /*
-    public function initFromRawHeader($rawHeaderData)
-    {
-        // parse raw headers
-        // if PECL pecl_http >= 0.10.0 is not used
-        if (!function_exists('http_parse_headers')) {
-            foreach (explode("\n", $rawHeaderData) as $i => $h) {
-                $h = explode(':', $h, 2);
-                if (isset($h[1])) {
-                    $this->headers[$h[0]] = trim($h[1]);
-                }
-            }
-        } else {
-            $this->headers = http_parse_headers($rawHeaderData);
-        }
-        // parse method uri and http version
-        list($this->method, $this->uri, $this->version) = explode(" ", trim(strtok($rawHeaderData, "\n")));
-        // parse servername and port
-        list($this->serverName, $this->serverPort) = explode(":", $this->getHeader('Host'));
-        // parse url
-        $url = parse_url($this->uri);
-        // parse path
-        if (array_key_exists('path', $url)) {
-            $this->pathInfo = $url['path'];
-        }
-        // parse query params
-        if (array_key_exists('query', $url)) {
-            $this->queryString = $url['query'];
-            parse_str($url['query'], $this->params);
-        }
-        // set server vars
-        $this->server = array(
-            'HTTP_HOST' => $this->getServerName(),
-            'HTTP_CONNECTION' => $this->getHeader('Connection'),
-            'HTTP_ACCEPT' => $this->getHeader('Accept'),
-            'HTTP_USER_AGENT' => $this->getHeader('User-Agent:'),
-            'HTTP_ACCEPT_ENCODING' => $this->getHeader('Accept-Encoding'),
-            'HTTP_ACCEPT_LANGUAGE' => $this->getHeader('Accept-Language'),
-            'HTTP_REFERER' => $this->getHeader('Referer'),
-            'PATH' => '/opt/appserver/bin',
-            'SERVER_SIGNATURE' => '',
-            'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
-            'SERVER_NAME' => $this->getServerName(),
-            'SERVER_ADDR' => '127.0.0.1',
-            'SERVER_PORT' => $this->getServerPort(),
-            'REMOTE_ADDR' => '127.0.0.1',
-            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
-            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
-            'SERVER_PROTOCOL' => $this->getVersion(),
-            'REQUEST_METHOD' => $this->getMethod(),
-            'QUERY_STRING' => $this->getQueryString(),
-            'REQUEST_URI' => $this->getUri(),
-            'REQUEST_TIME' => time(),
-        );
-        // check if php script is called to set script and php info
-        if (pathinfo($this->pathInfo, PATHINFO_EXTENSION) == 'php') {
-            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
-            $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
-            $this->setServerVar('PHP_SELF', $this->getPathInfo());
-        }
-        // set accepted encoding data
-        $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
-    }
-
-    */
-
-    /**
      * validates the header
      *
      * @param string $buffer Inputstream from socket
@@ -361,9 +288,21 @@ class HttpRequest implements Request
      * @param $queryString
      * @return mixed
      */
-    protected function parseParameterMap($queryString) {
+    protected function parseParameterMap($queryString)
+    {
         parse_str($queryString, $paramMap);
         return $paramMap;
+    }
+
+    /**
+     * Set ParameterMap
+     *
+     * @param array $paramMap
+     * @return void
+     */
+    protected function setParameterMap($paramMap)
+    {
+        $this->paramMap = $paramMap;
     }
 
     /**
@@ -422,6 +361,27 @@ class HttpRequest implements Request
     public function getAcceptedEncodings()
     {
         return $this->acceptedEncodings;
+    }
+
+    /**
+     * Sets content
+     *
+     * @param $content
+     * @return void
+     */
+    protected function setContent($content)
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * Return content
+     *
+     * @return string $content
+     */
+    protected function getContent()
+    {
+        return $this->content;
     }
 
     /**
@@ -505,6 +465,17 @@ class HttpRequest implements Request
     public function getHeaders()
     {
         return $this->headers;
+    }
+
+    /**
+     * Set headers data
+     *
+     * @param array $headers
+     * @return void
+     */
+    protected function setHeaders($headers)
+    {
+        $this->headers = $headers;
     }
 
     /**

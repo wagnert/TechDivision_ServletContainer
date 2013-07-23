@@ -24,18 +24,20 @@ namespace TechDivision\ServletContainer\Http;
  */
 
 
-class GetRequest extends HttpRequest {
+class GetRequest extends HttpRequest
+{
 
     /**
      * Constructor
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
     /**
-     * Additonal Header Validation for GET Request
+     * extended Header Validation for GET Request
      * @param string $buffer
      * @return void
      */
@@ -61,7 +63,7 @@ class GetRequest extends HttpRequest {
      * @param string $uri
      * @return mixed
      */
-    public function parseQueryString($uri)
+    protected function parseQueryString($uri)
     {
         $url = parse_url($uri);
         // parse path
@@ -69,4 +71,16 @@ class GetRequest extends HttpRequest {
             return $url['query'];
         }
     }
+
+    /**
+     * Set QueryString
+     *
+     * @param string $qs QueryString
+     * return void
+     */
+    protected function setQueryString($qs)
+    {
+        $this->queryString = $qs;
+    }
+
 }
