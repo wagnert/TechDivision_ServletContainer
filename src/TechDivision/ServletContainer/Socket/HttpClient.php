@@ -26,7 +26,7 @@ use TechDivision\ServletContainer\Utilities\Http\PostRequestValidator;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <j.zelger@techdivision.com>
- * @author      Philipp Dittert <p.dittert@techdivision.com>
+ *              Philipp Dittert <p.dittert@techdivision.com>
  */
 class HttpClient extends Client
 {
@@ -96,29 +96,4 @@ class HttpClient extends Client
         // return Request-Type as String (e.g. POST, GET )
         return $method;
     }
-
-
-// kann weg
-    /**
-     * Reads a line (ends with the new line character) from the socket.
-     *
-     * @return string The data read from the socket
-     */
-    public function readLine() {
-
-        // initialize the buffer
-        $buffer = '';
-
-        // read a chunk from the socket
-        while ($buffer .= $this->read($this->getLineLength())) {
-
-            // check if a new line character was found
-            if (false !== strpos($buffer, $this->getNewLine())) {
-                // if yes, trim and return the data
-                // TODO: validate content when post request is comming up
-                return $buffer;
-            }
-        }
-    }
-// ende kann weg
 }
