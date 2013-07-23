@@ -552,6 +552,17 @@ class HttpRequest implements Request
         return $this->params;
     }
 
+
+    /**
+     * Returns params data
+     *
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->params;
+    }
+
     /**
      * Returns the session for this request.
      *
