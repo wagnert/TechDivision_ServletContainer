@@ -122,6 +122,22 @@ abstract class HttpServlet extends GenericServlet {
         // pre-initialize response
         $res->addHeader('Server', $req->getServerVar('SERVER_SOFTWARE'));
 
+        // check if there is no vhost call going on
+        if (!$this->getServletConfig()->getApplication()->isVhostOf($req->getServerName())) {
+
+            // load the information about the requested path
+            $pathInfo = $req->getPathInfo();
+
+            // check if webapp was called without ending slash
+            if (substr_count($pathInfo, '/') == 1) {
+                // redirect to path with ending slash
+                $res->addHeader("location", $pathInfo . '/');
+                $res->addHeader("status", 'HTTP/1.1 301 OK');
+                $res->setContent(PHP_EOL);
+                return;
+            }
+        }
+
         // check the request method to invoke the appropriate method
         switch($req->getMethod()) {
             case 'CONNECT':
