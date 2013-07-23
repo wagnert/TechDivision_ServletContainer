@@ -153,7 +153,7 @@ class HttpRequest implements Request
      * @param string $buffer InputStream
      * @return void
      */
-    protected function validate($buffer)
+    protected function initFromRawHeader($buffer)
     {
         // parse method uri and http version
         list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
@@ -163,15 +163,29 @@ class HttpRequest implements Request
         $this->setVersion($version);
         $this->setHeaders($this->parseHeaders($buffer));
 
+        // parsing for Servername and Port
         list($serverName, $serverPort) = explode(":", $this->getHeader('Host'));
 
+        // set Servername and Serverport attributes
         $this->setServerName($serverName);
         $this->setServerPort($serverPort);
 
+        // get PathInfo from URI and sets to Attribute
         $pathInfo = $this->parsePathInfo($this->getUri());
         $this->setPathInfo($pathInfo);
 
+        // set intial ServerVars
         $this->initServerVars();
+
+        // check if php script is called to set script and php info
+        if (pathinfo($this->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
+            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
+            $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
+            $this->setServerVar('PHP_SELF', $this->getPathInfo());
+        }
+
+        // set accepted encoding data
+        $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
     }
 
     /**
@@ -194,7 +208,7 @@ class HttpRequest implements Request
      *
      *@return void
      */
-    public function initServerVars()
+    protected function initServerVars()
     {
         $this->server = array(
             'HTTP_HOST' => $this->getServerName(),
@@ -215,7 +229,7 @@ class HttpRequest implements Request
             'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
             'SERVER_PROTOCOL' => $this->getVersion(),
             'REQUEST_METHOD' => $this->getMethod(),
-            //'QUERY_STRING' => $this->getQueryString(),
+            'QUERY_STRING' => $this->getQueryString(),
             'REQUEST_URI' => $this->getUri(),
             'REQUEST_TIME' => time(),
         );
@@ -227,7 +241,7 @@ class HttpRequest implements Request
      * @param string $var RawHeader
      * @return array
      */
-    public function parseHeaders($var)
+    protected function parseHeaders($var)
     {
         $headers=array();
         if (!function_exists('http_parse_headers')) {
@@ -249,6 +263,8 @@ class HttpRequest implements Request
      * @param string $rawHeaderData
      * @return array
      */
+
+    /*
     public function initFromRawHeader($rawHeaderData)
     {
         // parse raw headers
@@ -312,27 +328,32 @@ class HttpRequest implements Request
         $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
     }
 
+    */
+
     /**
-     * Returns header info by given key
+     * validates the header
      *
-     * @param string $key
+     * @param string $buffer Inputstream from socket
+     * @return mixed
      */
-    public function getHeader($key)
-    {
-        if (array_key_exists($key, $this->headers)) {
-            return $this->headers[$key];
-        }
+    public function isHeaderCompleteAndValid($buffer) {
+
+        $this->initFromRawHeader($buffer);
+        return TRUE;
     }
 
     /**
-     * save complete QueryString into Parameters var (Tomcat 6 compatibility)
+     * checks if the Request is received completely
      *
-     * @param string $qs QueryString
-     * @return void
+     * @return boolean
      */
-    public function setParameters($qs)
+    public function isComplete()
     {
-        $this->parameters = $qs;
+        if ($this->getHeader('content-length') == strlen($this->getContent())) {
+            return TRUE;
+        }else{
+            return FALSE;
+        }
     }
 
     /**
@@ -340,7 +361,7 @@ class HttpRequest implements Request
      * @param $queryString
      * @return mixed
      */
-    public function parseParameterMap($queryString) {
+    protected function parseParameterMap($queryString) {
         parse_str($queryString, $paramMap);
         return $paramMap;
     }
@@ -358,6 +379,29 @@ class HttpRequest implements Request
         $this->response->setAcceptedEncodings(
             $this->getAcceptedEncodings()
         );
+    }
+    /**
+     * Returns header info by given key
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getHeader($key)
+    {
+        if (array_key_exists($key, $this->headers)) {
+            return $this->headers[$key];
+        }
+    }
+
+    /**
+     * save complete QueryString into Parameters var (Tomcat 6 compatibility)
+     *
+     * @param string $qs QueryString
+     * @return void
+     */
+    protected function setParameters($qs)
+    {
+        $this->parameters = $qs;
     }
 
     /**
@@ -401,6 +445,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets server name
+     *
+     * @param string $serverName Servername
+     * @return void
+     */
+    protected function setServerName($serverName)
+    {
+        return $this->serverName = $serverName;
+    }
+
+    /**
      * Returns server port
      *
      * @return string
@@ -411,6 +466,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets server port
+     *
+     * @param string $serverPort Serverport
+     * @return void
+     */
+    protected function setServerPort($serverPort)
+    {
+        return $this->serverPort = $serverPort;
+    }
+
+    /**
      * Returns path info
      *
      * @return string
@@ -418,6 +484,17 @@ class HttpRequest implements Request
     public function getPathInfo()
     {
         return $this->pathInfo;
+    }
+
+    /**
+     * Sets path info
+     *
+     * @param string $pathInfo Pathinfo
+     * @return void
+     */
+    protected function setPathInfo($pathInfo)
+    {
+        return $this->pathInfo = $pathInfo;
     }
 
     /**
@@ -441,6 +518,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Set request method
+     *
+     * @param string $method Request-Method
+     * @return void
+     */
+    protected function setMethod($method)
+    {
+        $this->method = $method;
+    }
+
+    /**
      * Returns request uri
      *
      * @return string
@@ -448,6 +536,17 @@ class HttpRequest implements Request
     public function getUri()
     {
         return $this->uri;
+    }
+
+    /**
+     * Set request uri
+     *
+     * @param string $uri URI
+     * @return void
+     */
+    protected function setUri($uri)
+    {
+        $this->uri = $uri;
     }
 
     /**
@@ -461,11 +560,22 @@ class HttpRequest implements Request
     }
 
     /**
+     * Set protocol version
+     *
+     * @param string $version protocol version
+     * @return void
+     */
+    public function setVersion($version)
+    {
+        $this->version = $version;
+    }
+
+    /**
      * Returns params data
      *
      * @return array
      */
-    public function getParams()
+    public function getParameters()
     {
         return $this->params;
     }
@@ -516,32 +626,6 @@ class HttpRequest implements Request
     {
         if (array_key_exists($key, $this->server)) {
             return $this->server[$key];
-        }
-    }
-
-    /**
-     * validates the header
-     *
-     * @param string $buffer Inputstream from socket
-     * @return mixed
-     */
-    public function isHeaderCompleteAndValid($buffer) {
-
-        $this->initFromRawHeader($buffer);
-        return TRUE;
-    }
-
-    /**
-     * checks if the Request is received completely
-     *
-     * @return boolean
-     */
-    public function isComplete()
-    {
-        if ($this->getHeader('content-length') == strlen($this->getContent())) {
-            return TRUE;
-        }else{
-            return FALSE;
         }
     }
 

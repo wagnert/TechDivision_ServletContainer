@@ -71,15 +71,15 @@ class HttpClient extends Client
             }
 
             // check if request complete is valid
-            if ($request->isHeaderCompleteAndValid($buffer)) {
+            $request->validate($buffer);
 
-                // check if content-length is reached (e.g. on POST Request)
-                if ($request->isComplete()) {
+            // check if content-length is reached (e.g. on POST Request)
+            if ($request->isComplete()) {
 
-                    // return a valid request object
-                    return $request->getRequest();
-                }
+                // return a valid request object
+                return $request->getRequest();
             }
+
         }
     }
 

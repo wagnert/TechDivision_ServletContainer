@@ -20,7 +20,10 @@ namespace TechDivision\ServletContainer\Http;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Philipp Dittert <p.dittert@techdivision.com>
+ *
  */
+
+
 class GetRequest extends HttpRequest {
 
     /**
@@ -38,10 +41,10 @@ class GetRequest extends HttpRequest {
      */
     public function validate($buffer)
     {
-        // call parent validate method for basic parsing
-        parent::validate($buffer);
+        // call initial method for basic parsing
+        $this->initFromRawHeader($buffer);
 
-        //querystring is only available on GET Method
+        // queryString is only available on GET Method
         $qs = $this->parseQueryString($this->getUri());
         $this->setQueryString($qs);
 

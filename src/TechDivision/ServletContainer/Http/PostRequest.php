@@ -45,8 +45,8 @@ class PostRequest extends HttpRequest
      */
     public function validate($buffer)
     {
-        // call parent validate method for basic parsing
-        parent::validate($buffer);
+        // call initial method for basic parsing
+        $this->initFromRawHeader($buffer);
 
         // searching for POST-Content
         $content = $this->parseContent($buffer);
@@ -76,9 +76,8 @@ class PostRequest extends HttpRequest
      */
     public function parseContent($buffer)
     {
-        //search for first upcoming Separataor, trim and return until end
-        //@todo: trim possible buggy at this point?!
-        return trim(strstr($buffer, $this->headerContentSeparator));
+        // search for first upcoming Separator, strip whitespaces and return until end
+        return ltrim(strstr($buffer, $this->headerContentSeparator));
     }
 
 }
