@@ -1,6 +1,6 @@
 <?php
 
-namespace TechDivision\ServletContainer\Sessionn\Exceptions;
+namespace TechDivision\ServletContainer\Session\Exceptions;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow framework.                       *
