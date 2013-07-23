@@ -138,6 +138,13 @@ class HttpRequest implements Request
     protected $session;
 
     /**
+     * An array that contains all request parameters.
+     *
+     * @var array
+     */
+    protected $parameterMap = array();
+
+    /**
      * Constructor
      *
      */
@@ -286,19 +293,29 @@ class HttpRequest implements Request
      */
     protected function parseParameterMap($queryString)
     {
-        parse_str($queryString, $paramMap);
-        return $paramMap;
+        parse_str($queryString, $parameterMap);
+        return $parameterMap;
     }
 
     /**
      * Set ParameterMap
      *
-     * @param array $paramMap
+     * @param array $parameterMap
      * @return void
      */
-    protected function setParameterMap($paramMap)
+    protected function setParameterMap($parameterMap)
     {
-        $this->paramMap = $paramMap;
+        $this->parameterMap = $parameterMap;
+    }
+
+    /**
+     * Returns an array with all request parameters.
+     *
+     * @return array The array with the request parameters
+     */
+    public function getParameterMap()
+    {
+        return $this->parameterMap;
     }
 
     /**
