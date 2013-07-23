@@ -69,4 +69,18 @@ class PostRequest extends HttpRequest
         return ltrim(strstr($buffer, $this->headerContentSeparator));
     }
 
+    /**
+     * checks if the Request is received completely
+     *
+     * @return boolean
+     */
+    public function isComplete()
+    {
+        if ($this->getHeader('Content-Length') == strlen($this->getContent())) {
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+    }
+
 }
