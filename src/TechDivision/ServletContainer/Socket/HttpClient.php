@@ -32,6 +32,7 @@ class HttpClient extends Client
 
     /**
      * Receive a Stream from Socket an check it is valid
+     *
      * @return mixed
      * @throws InvalidHeaderException Is thrown if the header is complete but not valid
      */

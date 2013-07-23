@@ -319,6 +319,17 @@ class HttpRequest implements Request
             $this->getAcceptedEncodings()
         );
     }
+
+    /**
+     * Returns response object
+     *
+     * @return Response
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
     /**
      * Returns header info by given key
      *
@@ -341,16 +352,6 @@ class HttpRequest implements Request
     protected function setParameters($qs)
     {
         $this->parameters = $qs;
-    }
-
-    /**
-     * Returns response object
-     *
-     * @return Response
-     */
-    public function getResponse()
-    {
-        return $this->response;
     }
 
     /**
