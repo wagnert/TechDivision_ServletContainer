@@ -276,11 +276,7 @@ class HttpRequest implements Request
      */
     public function isComplete()
     {
-        if ($this->getHeader('content-length') == strlen($this->getContent())) {
-            return TRUE;
-        }else{
-            return FALSE;
-        }
+        return TRUE;
     }
 
     /**
@@ -380,7 +376,7 @@ class HttpRequest implements Request
      *
      * @return string $content
      */
-    protected function getContent()
+    public function getContent()
     {
         return $this->content;
     }
