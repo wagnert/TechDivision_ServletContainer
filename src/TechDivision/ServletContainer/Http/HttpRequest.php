@@ -25,10 +25,19 @@ use TechDivision\ServletContainer\Session\ServletSession;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <j.zelger@techdivision.com>
+ *              Philipp Dittert <p.dittert@techdivision.com>
  */
 
 class HttpRequest implements Request
 {
+
+    /**
+     * Separator between Header and Content (e.g. POST-Request)
+     *
+     * @var string
+     */
+    protected $headerContentSeparator = "\r\n\r\n";
+
 
     /**
      * Request header data
@@ -131,52 +140,76 @@ class HttpRequest implements Request
     /**
      * Constructor
      *
-     * @param $data The raw header data
      */
-    public function __construct($data)
+    public function __construct()
     {
-        // init from raw header
-        $this->initFromRawHeader($data);
         // init session manager
         $this->sessionManager = new PersistentSessionManager();
     }
 
     /**
-     * Creates Request by given raw header data
+     * validate actual InputStream
      *
-     * @param string $rawHeaderData
-     * @return array
+     * @param string $buffer InputStream
+     * @return void
      */
-    public function initFromRawHeader($rawHeaderData)
+    protected function initFromRawHeader($buffer)
     {
-        // parse raw headers
-        // if PECL pecl_http >= 0.10.0 is not used
-        if (!function_exists('http_parse_headers')) {
-            foreach (explode("\n", $rawHeaderData) as $i => $h) {
-                $h = explode(':', $h, 2);
-                if (isset($h[1])) {
-                    $this->headers[$h[0]] = trim($h[1]);
-                }
-            }
-        } else {
-            $this->headers = http_parse_headers($rawHeaderData);
-        }
         // parse method uri and http version
-        list($this->method, $this->uri, $this->version) = explode(" ", trim(strtok($rawHeaderData, "\n")));
-        // parse servername and port
-        list($this->serverName, $this->serverPort) = explode(":", $this->getHeader('Host'));
-        // parse url
-        $url = parse_url($this->uri);
+        list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
+
+        $this->setMethod($method);
+        $this->setUri($uri);
+        $this->setVersion($version);
+        $this->setHeaders($this->parseHeaders($buffer));
+
+        // parsing for Servername and Port
+        list($serverName, $serverPort) = explode(":", $this->getHeader('Host'));
+
+        // set Servername and Serverport attributes
+        $this->setServerName($serverName);
+        $this->setServerPort($serverPort);
+
+        // get PathInfo from URI and sets to Attribute
+        $pathInfo = $this->parsePathInfo($this->getUri());
+        $this->setPathInfo($pathInfo);
+
+        // set intial ServerVars
+        $this->initServerVars();
+
+        // check if php script is called to set script and php info
+        if (pathinfo($this->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
+            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
+            $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
+            $this->setServerVar('PHP_SELF', $this->getPathInfo());
+        }
+
+        // set accepted encoding data
+        $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
+    }
+
+    /**
+     * Parsing URI for PathInfo
+     *
+     * @param string $uri
+     * @return string
+     */
+    public function parsePathInfo($uri)
+    {
+        $url = parse_url($uri);
         // parse path
         if (array_key_exists('path', $url)) {
-            $this->pathInfo = $url['path'];
+            return $url['path'];
         }
-        // parse query params
-        if (array_key_exists('query', $url)) {
-            $this->queryString = $url['query'];
-            parse_str($url['query'], $this->params);
-        }
-        // set server vars
+    }
+
+    /**
+     * init basic Server Vars
+     *
+     *@return void
+     */
+    protected function initServerVars()
+    {
         $this->server = array(
             'HTTP_HOST' => $this->getServerName(),
             'HTTP_CONNECTION' => $this->getHeader('Connection'),
@@ -200,26 +233,76 @@ class HttpRequest implements Request
             'REQUEST_URI' => $this->getUri(),
             'REQUEST_TIME' => time(),
         );
-        // check if php script is called to set script and php info
-        if (pathinfo($this->pathInfo, PATHINFO_EXTENSION) == 'php') {
-            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
-            $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
-            $this->setServerVar('PHP_SELF', $this->getPathInfo());
-        }
-        // set accepted encoding data
-        $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
     }
 
     /**
-     * Returns header info by given key
+     * parsing header
      *
-     * @param string $key
+     * @param string $var RawHeader
+     * @return array
      */
-    public function getHeader($key)
+    protected function parseHeaders($var)
     {
-        if (array_key_exists($key, $this->headers)) {
-            return $this->headers[$key];
+        $headers=array();
+        if (!function_exists('http_parse_headers')) {
+            foreach (explode("\n", $var) as $i => $h) {
+                $h = explode(':', $h, 2);
+                if (isset($h[1])) {
+                    $headers[$h[0]] = trim($h[1]);
+                }
+            }
+        } else {
+            $headers = http_parse_headers($var);
         }
+        return $headers;
+    }
+
+    /**
+     * validates the header
+     *
+     * @param string $buffer Inputstream from socket
+     * @return mixed
+     */
+    public function isHeaderCompleteAndValid($buffer) {
+
+        $this->initFromRawHeader($buffer);
+        return TRUE;
+    }
+
+    /**
+     * checks if the Request is received completely
+     *
+     * @return boolean
+     */
+    public function isComplete()
+    {
+        if ($this->getHeader('content-length') == strlen($this->getContent())) {
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+    }
+
+    /**
+     * Transform QueryString into Array
+     * @param $queryString
+     * @return mixed
+     */
+    protected function parseParameterMap($queryString)
+    {
+        parse_str($queryString, $paramMap);
+        return $paramMap;
+    }
+
+    /**
+     * Set ParameterMap
+     *
+     * @param array $paramMap
+     * @return void
+     */
+    protected function setParameterMap($paramMap)
+    {
+        $this->paramMap = $paramMap;
     }
 
     /**
@@ -248,6 +331,30 @@ class HttpRequest implements Request
     }
 
     /**
+     * Returns header info by given key
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getHeader($key)
+    {
+        if (array_key_exists($key, $this->headers)) {
+            return $this->headers[$key];
+        }
+    }
+
+    /**
+     * save complete QueryString into Parameters var (Tomcat 6 compatibility)
+     *
+     * @param string $qs QueryString
+     * @return void
+     */
+    protected function setParameters($qs)
+    {
+        $this->parameters = $qs;
+    }
+
+    /**
      * Returns accepted encodings data
      *
      * @var array
@@ -255,6 +362,27 @@ class HttpRequest implements Request
     public function getAcceptedEncodings()
     {
         return $this->acceptedEncodings;
+    }
+
+    /**
+     * Sets content
+     *
+     * @param $content
+     * @return void
+     */
+    protected function setContent($content)
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * Return content
+     *
+     * @return string $content
+     */
+    protected function getContent()
+    {
+        return $this->content;
     }
 
     /**
@@ -278,6 +406,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets server name
+     *
+     * @param string $serverName Servername
+     * @return void
+     */
+    protected function setServerName($serverName)
+    {
+        return $this->serverName = $serverName;
+    }
+
+    /**
      * Returns server port
      *
      * @return string
@@ -288,12 +427,35 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets server port
+     *
+     * @param string $serverPort Serverport
+     * @return void
+     */
+    protected function setServerPort($serverPort)
+    {
+        return $this->serverPort = $serverPort;
+    }
+
+    /**
      * Returns path info
      *
      * @return string
      */
-    public function getPathInfo() {
+    public function getPathInfo()
+    {
         return $this->pathInfo;
+    }
+
+    /**
+     * Sets path info
+     *
+     * @param string $pathInfo Pathinfo
+     * @return void
+     */
+    protected function setPathInfo($pathInfo)
+    {
+        return $this->pathInfo = $pathInfo;
     }
 
     /**
@@ -307,6 +469,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Set headers data
+     *
+     * @param array $headers
+     * @return void
+     */
+    protected function setHeaders($headers)
+    {
+        $this->headers = $headers;
+    }
+
+    /**
      * Returns request method
      *
      * @return string
@@ -314,6 +487,17 @@ class HttpRequest implements Request
     public function getMethod()
     {
         return $this->method;
+    }
+
+    /**
+     * Set request method
+     *
+     * @param string $method Request-Method
+     * @return void
+     */
+    protected function setMethod($method)
+    {
+        $this->method = $method;
     }
 
     /**
@@ -327,6 +511,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Set request uri
+     *
+     * @param string $uri URI
+     * @return void
+     */
+    protected function setUri($uri)
+    {
+        $this->uri = $uri;
+    }
+
+    /**
      * Returns protocol version
      *
      * @return string
@@ -337,11 +532,22 @@ class HttpRequest implements Request
     }
 
     /**
+     * Set protocol version
+     *
+     * @param string $version protocol version
+     * @return void
+     */
+    public function setVersion($version)
+    {
+        $this->version = $version;
+    }
+
+    /**
      * Returns params data
      *
      * @return array
      */
-    public function getParams()
+    public function getParameters()
     {
         return $this->params;
     }
@@ -351,7 +557,8 @@ class HttpRequest implements Request
      *
      * @return ServletSession
      */
-    public function getSession() {
+    public function getSession()
+    {
 
         if ($this->session == null) {
             $this->session = $this->sessionManager->getSessionForRequest($this);
@@ -393,4 +600,5 @@ class HttpRequest implements Request
             return $this->server[$key];
         }
     }
+
 }

@@ -130,7 +130,6 @@ class ServletLocator implements ResourceLocatorInterface {
             }
 
         } while (strpos($path, '/') !== FALSE);
-
         // return the servlet instance
         return current($servlet);
     }
