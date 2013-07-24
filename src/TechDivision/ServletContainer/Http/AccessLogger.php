@@ -81,7 +81,7 @@ class AccessLogger
             error_log(
                 sprintf(self::LOG_FORMAT_COMBINED . PHP_EOL,
                     $request->getClientIp(),
-                    $datetime->format('d/M/Y:h:i:s O'),
+                    $datetime->format('d/M/Y:H:i:s O'),
                     $request->getMethod(),
                     $request->getUri(),
                     $request->getVersion(),
@@ -102,7 +102,7 @@ class AccessLogger
             error_log(
                 sprintf(self::LOG_FORMAT_COMMON . PHP_EOL,
                     $request->getClientIp(),
-                    $datetime->format('d/M/Y:h:i:s O'),
+                    $datetime->format('d/M/Y:H:i:s O'),
                     $request->getMethod(),
                     $request->getUri(),
                     $request->getVersion(),
