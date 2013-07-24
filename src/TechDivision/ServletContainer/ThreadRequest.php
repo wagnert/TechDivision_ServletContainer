@@ -12,6 +12,7 @@
 
 namespace TechDivision\ServletContainer;
 
+use TechDivision\ServletContainer\Http\AccessLogger;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Interfaces\Response;
@@ -33,13 +34,6 @@ use TechDivision\SocketException;
 class ThreadRequest extends \Thread {
 
     /**
-     * Define logfile path to access log
-     *
-     * @var string
-     */
-    const ACCESS_LOGFILE = '/opt/appserver/var/log/appserver-access.log';
-
-    /**
      * Holds the container instance
      *
      * @var Container
@@ -52,6 +46,13 @@ class ThreadRequest extends \Thread {
      * @var resource
      */
     public $resource;
+
+    /**
+     * Holds access logger instance
+     *
+     * @var AccessLogger
+     */
+    protected $accessLogger;
 
     /**
      * Initializes the request with the client socket.
@@ -82,6 +83,7 @@ class ThreadRequest extends \Thread {
 
         try {
 
+            /** @var HttpRequest $request */
             // receive Request Object from client
             $request = $client->receive();
 
@@ -109,19 +111,8 @@ class ThreadRequest extends \Thread {
         // prepare the headers
         $headers = $this->prepareHeader($response);
 
-        // create access log entry
-        error_log(
-            sprintf('[%s %s] %s - %s:%s %s - %s - "%s"' . PHP_EOL,
-                date('d-M-Y h:i:s'),
-                date_default_timezone_get(),
-                $request->getClientIp(),
-                $request->getServerName(),
-                $request->getServerPort(),
-                $request->getUri(),
-                $response->getHeader('status'),
-                $request->getHeader('User-Agent')
-            ), 3, self::ACCESS_LOGFILE
-        );
+        // do access log entry
+        $this->getAccessLogger()->log($request, $response);
 
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());
@@ -153,6 +144,19 @@ class ThreadRequest extends \Thread {
 
         // return the headers
         return $response->getHeadersAsString();
+    }
+
+    /**
+     * Returns and inits an accesslogger
+     *
+     * @return AccessLogger
+     */
+    public function getAccessLogger()
+    {
+        if (!$this->accessLogger) {
+            $this->accessLogger = new AccessLogger();
+        }
+        return $this->accessLogger;
     }
 
     /**

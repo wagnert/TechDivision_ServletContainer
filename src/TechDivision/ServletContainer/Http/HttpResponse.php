@@ -106,6 +106,28 @@ class HttpResponse implements Response {
     }
 
     /**
+     * Returns http response code number only
+     *
+     * @return string
+     */
+    public function getCode()
+    {
+        list($version, $code) = explode(" ", $this->getHeader('status'));
+        return $code;
+    }
+
+    /**
+     * Returns response http version
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        list($version, $code) = explode(" ", $this->getHeader('status'));
+        return $version;
+    }
+
+    /**
      * @return string
      */
     public function getHeadersAsString()
