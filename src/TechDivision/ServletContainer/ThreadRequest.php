@@ -33,6 +33,13 @@ use TechDivision\SocketException;
 class ThreadRequest extends \Thread {
 
     /**
+     * Define logfile path to access log
+     *
+     * @var string
+     */
+    const ACCESS_LOGFILE = '/opt/appserver/var/log/appserver-access.log';
+
+    /**
      * Holds the container instance
      *
      * @var Container
@@ -101,6 +108,18 @@ class ThreadRequest extends \Thread {
 
         // prepare the headers
         $headers = $this->prepareHeader($response);
+
+        // create access log entry
+        error_log(
+            sprintf('%s - %s:%s %s - %s - "%s"',
+                $request->getClientIp(),
+                $request->getServerName(),
+                $request->getServerPort(),
+                $request->getUri(),
+                $response->getHeader('status'),
+                $request->getHeader('User-Agent')
+            ), 0, self::ACCESS_LOGFILE
+        );
 
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());

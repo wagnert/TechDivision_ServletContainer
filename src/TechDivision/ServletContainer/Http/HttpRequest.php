@@ -68,6 +68,20 @@ class HttpRequest implements Request
     protected $serverPort;
 
     /**
+     * Clients name/ip
+     *
+     * @var string
+     */
+    protected $clientIp;
+
+    /**
+     * Clients port
+     *
+     * @var string
+     */
+    protected $clientPort;
+
+    /**
      * Holds the response instance
      *
      * @var Response
@@ -623,6 +637,48 @@ class HttpRequest implements Request
         if (array_key_exists($key, $this->server)) {
             return $this->server[$key];
         }
+    }
+
+    /**
+     * Sets clients ip address
+     *
+     * @param mixed $clientIp
+     * @return void
+     */
+    public function setClientIp($clientIp)
+    {
+        $this->clientIp = $clientIp;
+    }
+
+    /**
+     * Returns clients ip address
+     *
+     * @return mixed
+     */
+    public function getClientIp()
+    {
+        return $this->clientIp;
+    }
+
+    /**
+     * Sets clients port
+     *
+     * @param string $clientPort
+     * @return void
+     */
+    public function setClientPort($clientPort)
+    {
+        $this->clientPort = $clientPort;
+    }
+
+    /**
+     * Returns clients port
+     *
+     * @return string
+     */
+    public function getClientPort()
+    {
+        return $this->clientPort;
     }
 
 }

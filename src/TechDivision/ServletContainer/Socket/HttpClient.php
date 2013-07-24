@@ -29,7 +29,6 @@ use TechDivision\ServletContainer\Http\PostRequest;
  */
 class HttpClient extends Client
 {
-
     /**
      * Receive a Stream from Socket an check it is valid
      *
@@ -41,6 +40,9 @@ class HttpClient extends Client
 
         // initialize the buffer
         $buffer = '';
+
+        // get clients ip and port
+        $this->getPeerName($clientIp, $clientPort);
 
         // read a chunk from the socket
         while ($buffer .= $this->read($this->getLineLength())) {
@@ -73,14 +75,18 @@ class HttpClient extends Client
             // check if request complete is valid
             $request->validate($buffer);
 
+            // set clients info to request
+            $request->setClientIp($clientIp);
+            $request->setClientPort($clientPort);
+
             // check if content-length is reached (e.g. on POST Request)
             if ($request->isComplete()) {
 
                 // return a valid request object
                 return $request;
             }
-
         }
+
     }
 
     /**

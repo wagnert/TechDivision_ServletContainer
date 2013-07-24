@@ -94,6 +94,18 @@ class HttpResponse implements Response {
     }
 
     /**
+     * Returns header info by given key
+     *
+     * @param $key
+     */
+    public function getHeader($key)
+    {
+        if (array_key_exists($key, $this->headers)) {
+            return $this->headers[$key];
+        }
+    }
+
+    /**
      * @return string
      */
     public function getHeadersAsString()
