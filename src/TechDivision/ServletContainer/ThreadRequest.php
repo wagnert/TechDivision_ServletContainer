@@ -111,14 +111,16 @@ class ThreadRequest extends \Thread {
 
         // create access log entry
         error_log(
-            sprintf('%s - %s:%s %s - %s - "%s"',
+            sprintf('[%s %s] %s - %s:%s %s - %s - "%s"' . PHP_EOL,
+                date('d-M-Y h:i:s'),
+                date_default_timezone_get(),
                 $request->getClientIp(),
                 $request->getServerName(),
                 $request->getServerPort(),
                 $request->getUri(),
                 $response->getHeader('status'),
                 $request->getHeader('User-Agent')
-            ), 0, self::ACCESS_LOGFILE
+            ), 3, self::ACCESS_LOGFILE
         );
 
         // return the string representation of the response content to the client
