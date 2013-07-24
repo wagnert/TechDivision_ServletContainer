@@ -48,7 +48,7 @@ class HttpClient extends Client
         while ($buffer .= $this->read($this->getLineLength())) {
 
             // create validator if not set
-            if (!isset ($validator)) {
+            if (!isset($request)) {
 
                 // extract Request-Type from InputStream
                 $requestType = $this->getRequestType($buffer);
