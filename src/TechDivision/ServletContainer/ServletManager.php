@@ -44,7 +44,7 @@ class ServletManager {
     /**
      * Set's the application instance.
      *
-     * @param TechDivision\ServletContainer\Application $application The application instance
+     * @param \TechDivision\ServletContainer\Application $application The application instance
      * @return void
      */
     public function __construct($application) {
@@ -193,7 +193,7 @@ class ServletManager {
     /**
      * Returns the application instance.
      *
-     * @return TechDivision\ServletContainer\Application The application instance
+     * @return \TechDivision\ServletContainer\Application The application instance
      */
     public function getApplication() {
         return $this->application;

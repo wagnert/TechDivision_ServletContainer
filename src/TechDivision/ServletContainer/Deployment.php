@@ -22,19 +22,44 @@ namespace TechDivision\ServletContainer;
 class Deployment {
 
     /**
+     * Path to the container's base directory.
+     * @var string
+     */
+    const CONTAINER_BASE_DIRECTORY = '/container/baseDirectory';
+
+    /**
      * Path to the container's host configuration.
      * @var string
      */
     const CONTAINER_HOST = '/container/host';
 
+    /**
+     * The container thread that invokes the deployment.
+     * @var \TechDivision\ApplicationServer\ContainerThread
+     */
     protected $containerThread;
 
+    /**
+     * Array with the initialized applications.
+     * @var array
+     */
     protected $applications;
 
+    /**
+     * Initializes the deployment with the container thread.
+     *
+     * @param $containerThread \TechDivision\ApplicationServer\ContainerThread
+     * @return void
+     */
     public function __construct($containerThread) {
         $this->containerThread = $containerThread;
     }
 
+    /**
+     * Returns the container thread the invokes the deployment.
+     *
+     * @return \TechDivision\ApplicationServer\ContainerThread The container thread
+     */
     public function getContainerThread() {
         return $this->containerThread;
     }
@@ -59,11 +84,12 @@ class Deployment {
         $containerThread = $this->getContainerThread();
         $configuration = $containerThread->getConfiguration();
 
-        // load the host configuration for the path to the webapps folder
-        $host = $configuration->getChild(self::CONTAINER_HOST);
+        // load the host configuration for the path to the web application folder
+        $baseDirectory = $configuration->getChild(self::CONTAINER_BASE_DIRECTORY)->getValue();
+        $appBase = $configuration->getChild(self::CONTAINER_HOST)->getAppBase();
 
         // gather all the deployed web applications
-        foreach (new \FilesystemIterator($host->getAppBase()) as $folder) {
+        foreach (new \FilesystemIterator($baseDirectory . $appBase) as $folder) {
 
             // check if file or subdirectory has been found
             if (is_dir($folder)) {

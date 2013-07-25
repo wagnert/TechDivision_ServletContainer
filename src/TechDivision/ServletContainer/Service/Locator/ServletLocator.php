@@ -61,7 +61,7 @@ class ServletLocator implements ResourceLocatorInterface {
     /**
      * Returns the actual application instance.
      *
-     * @return \TechDivision\ServletContainer\TechDivision\ServletContainer\Application The application instance
+     * @return \TechDivision\ServletContainer\Application The application instance
      */
     public function getApplication() {
         return $this->getServletManager()->getApplication();
