@@ -12,6 +12,8 @@
 
 namespace TechDivision\ServletContainer;
 
+use TechDivision\ApplicationServer\AbstractDeployment;
+
 /**
  * @package     TechDivision\ServletContainer
  * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
@@ -19,59 +21,7 @@ namespace TechDivision\ServletContainer;
  *              Open Software License (OSL 3.0)
  * @author      Tim Wagner <tw@techdivision.com>
  */
-class Deployment {
-
-    /**
-     * Path to the container's base directory.
-     * @var string
-     */
-    const CONTAINER_BASE_DIRECTORY = '/container/baseDirectory';
-
-    /**
-     * Path to the container's host configuration.
-     * @var string
-     */
-    const CONTAINER_HOST = '/container/host';
-
-    /**
-     * The container thread that invokes the deployment.
-     * @var \TechDivision\ApplicationServer\ContainerThread
-     */
-    protected $containerThread;
-
-    /**
-     * Array with the initialized applications.
-     * @var array
-     */
-    protected $applications;
-
-    /**
-     * Initializes the deployment with the container thread.
-     *
-     * @param $containerThread \TechDivision\ApplicationServer\ContainerThread
-     * @return void
-     */
-    public function __construct($containerThread) {
-        $this->containerThread = $containerThread;
-    }
-
-    /**
-     * Returns the container thread the invokes the deployment.
-     *
-     * @return \TechDivision\ApplicationServer\ContainerThread The container thread
-     */
-    public function getContainerThread() {
-        return $this->containerThread;
-    }
-
-    /**
-     * Returns the deployed applications.
-     *
-     * @return array The deployed applications
-     */
-    public function getApplications() {
-        return $this->applications;
-    }
+class Deployment extends AbstractDeployment {
 
     /**
      * Returns an array with available applications.
