@@ -77,18 +77,21 @@ class ThreadRequest extends \Thread {
 
         // initialize a new client socket
         $client = new HttpClient();
+        $client->setNewLine("\r\n\r\n");
 
         // set the client socket resource
         $client->setResource($this->resource);
 
         try {
 
+            $response = new HttpResponse();
+
             /** @var HttpRequest $request */
             // receive Request Object from client
             $request = $client->receive();
 
             // initialize response container
-            $request->setResponse($response = new HttpResponse());
+            $request->setResponse($response);
 
             // load the application to handle the request
             $application = $this->findApplication($request);
@@ -117,11 +120,10 @@ class ThreadRequest extends \Thread {
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());
 
-        // try to shutdown the socket connection to the client
         try {
             $client->shutdown();
-        } catch (SocketException $se) {
-            // connection reset by peer before.
+        } catch (\Exception $e) {
+            // do nothing due to peer closed connection already
         }
 
         unset($client);

@@ -25,62 +25,18 @@ class PostRequest extends HttpRequest
 {
 
     /**
-     * @var string
-     */
-    protected $content;
-
-    /**
-     * Constructor
+     * Parse post request content
      *
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * extended Header Validation for POST Request
-     * @param string $buffer
+     * @param string $content
      * @return void
      */
-    public function validate($buffer)
+    public function parse($content)
     {
-        // call initial method for basic parsing
-        $this->initFromRawHeader($buffer);
-
-        // searching for POST-Content
-        $content = $this->parseContent($buffer);
         $this->setContent($content);
 
         $this->setParameters($content);
         $paramMap = $this->parseParameterMap($content);
         $this->setParameterMap($paramMap);
-    }
-
-    /**
-     * Parsing Raw Header for Post-Content
-     *
-     * @param string $buffer Raw Header
-     * @return string Post-Content
-     */
-    public function parseContent($buffer)
-    {
-        // search for first upcoming Separator, strip whitespaces and return until end
-        return ltrim(strstr($buffer, $this->headerContentSeparator));
-    }
-
-    /**
-     * checks if the Request is received completely
-     *
-     * @return boolean
-     */
-    public function isComplete()
-    {
-        if ($this->getHeader('Content-Length') == strlen($this->getContent())) {
-            return TRUE;
-        }else{
-            return FALSE;
-        }
     }
 
 }

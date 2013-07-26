@@ -23,29 +23,17 @@ namespace TechDivision\ServletContainer\Http;
  *
  */
 
-
 class GetRequest extends HttpRequest
 {
 
     /**
-     * Constructor
+     * parse get header content
      *
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * extended Header Validation for GET Request
-     * @param string $buffer
+     * @param string $content
      * @return void
      */
-    public function validate($buffer)
+    public function parse($content)
     {
-        // call initial method for basic parsing
-        $this->initFromRawHeader($buffer);
-
         // queryString is only available on GET Method
         $qs = $this->parseQueryString($this->getUri());
         $this->setQueryString($qs);

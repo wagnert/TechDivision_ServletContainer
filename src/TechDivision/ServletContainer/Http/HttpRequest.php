@@ -103,6 +103,13 @@ class HttpRequest implements Request
     protected $method;
 
     /**
+     * The request body
+     *
+     * @var string
+     */
+    protected $content;
+
+    /**
      * Uri called by client
      *
      * @var string
@@ -174,39 +181,79 @@ class HttpRequest implements Request
      * @param string $buffer InputStream
      * @return void
      */
-    protected function initFromRawHeader($buffer)
+    public function initFromRawHeader($buffer)
     {
         // parse method uri and http version
         list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
 
         $this->setMethod($method);
-        $this->setUri($uri);
-        $this->setVersion($version);
-        $this->setHeaders($this->parseHeaders($buffer));
+        $requestInstance = $this->getRequestMethodInstance();
+
+        $requestInstance->setMethod($method);
+        $requestInstance->setUri($uri);
+        $requestInstance->setVersion($version);
+        $requestInstance->setHeaders($this->parseHeaders($buffer));
 
         // parsing for Servername and Port
-        list($serverName, $serverPort) = explode(":", $this->getHeader('Host'));
+        list($serverName, $serverPort) = explode(":", $requestInstance->getHeader('Host'));
 
         // set Servername and Serverport attributes
-        $this->setServerName($serverName);
-        $this->setServerPort($serverPort);
+        $requestInstance->setServerName($serverName);
+        $requestInstance->setServerPort($serverPort);
 
         // get PathInfo from URI and sets to Attribute
-        $pathInfo = $this->parsePathInfo($this->getUri());
-        $this->setPathInfo($pathInfo);
+        $pathInfo = $requestInstance->parsePathInfo($requestInstance->getUri());
+        $requestInstance->setPathInfo($pathInfo);
 
         // set intial ServerVars
-        $this->initServerVars();
+        $requestInstance->initServerVars();
 
         // check if php script is called to set script and php info
-        if (pathinfo($this->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
-            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
-            $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
-            $this->setServerVar('PHP_SELF', $this->getPathInfo());
+        if (pathinfo($requestInstance->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
+            $requestInstance->setServerVar('SCRIPT_FILENAME', $requestInstance->getServerVar('DOCUMENT_ROOT') . $requestInstance->getPathInfo());
+            $requestInstance->setServerVar('SCRIPT_NAME', $requestInstance->getPathInfo());
+            $requestInstance->setServerVar('PHP_SELF', $requestInstance->getPathInfo());
         }
 
         // set accepted encoding data
-        $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
+        $this->acceptedEncodings = explode(',', $requestInstance->getHeader('Accept-Encoding'));
+
+        return $requestInstance;
+    }
+
+    /**
+     * Parse request content
+     *
+     * @param string $content
+     * @return void
+     */
+    public function parse($content)
+    {
+
+    }
+
+    public function getRequestMethodInstance()
+    {
+        // select fitting validator
+        switch ($this->getMethod()) {
+            case "GET":
+                $request = new GetRequest();
+                break;
+            case "POST":
+                $request = new PostRequest();
+                break;
+            case "HEAD":
+                $request = new HeadRequest();
+                break;
+            default:
+                // Throw InvalidHeaderException if method is unknown
+                throw new InvalidHeaderException("Invalid Request Method");
+                break;
+        }
+        // set parsed headers to request method type
+        $request->setHeaders($this->getHeaders());
+
+        return $request;
     }
 
     /**
@@ -680,5 +727,7 @@ class HttpRequest implements Request
     {
         return $this->clientPort;
     }
+
+
 
 }

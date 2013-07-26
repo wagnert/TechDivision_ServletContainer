@@ -13,6 +13,7 @@
 namespace TechDivision\ServletContainer\Socket;
 
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
+use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\Socket\Client;
 use TechDivision\ServletContainer\Http\GetRequest;
 use TechDivision\ServletContainer\Http\PostRequest;
@@ -29,6 +30,14 @@ use TechDivision\ServletContainer\Http\PostRequest;
  */
 class HttpClient extends Client
 {
+
+    /**
+     * @param $newLine
+     */
+    public function setNewLine($newLine) {
+        $this->newLine = $newLine;
+    }
+
     /**
      * Receive a Stream from Socket an check it is valid
      *
@@ -37,6 +46,7 @@ class HttpClient extends Client
      */
     public function receive()
     {
+        $this->lineLength = 16;
 
         // initialize the buffer
         $buffer = '';
@@ -46,47 +56,45 @@ class HttpClient extends Client
 
         // read a chunk from the socket
         while ($buffer .= $this->read($this->getLineLength())) {
-
-            // create validator if not set
-            if (!isset($request)) {
-
-                // extract Request-Type from InputStream
-                $requestType = $this->getRequestType($buffer);
-
-                // select fitting validator
-                switch ($requestType) {
-                    case "GET":
-                        $request = new GetRequest();
-                        break;
-                    case "POST":
-                        $request = new PostRequest();
-                        break;
-                    case "HEAD":
-                        $request = new HeadRequest();
-                        break;
-                    default:
-
-                        // Throw InvalidHeaderException if method is unknown
-                        throw new InvalidHeaderException("Invalid Request Method");
-                        break;
-                }
-            }
-
-            // check if request complete is valid
-            $request->validate($buffer);
-
-            // set clients info to request
-            $request->setClientIp($clientIp);
-            $request->setClientPort($clientPort);
-
-            // check if content-length is reached (e.g. on POST Request)
-            if ($request->isComplete()) {
-
-                // return a valid request object
-                return $request;
+            // check if header finished
+            if (false !== strpos($buffer, $this->getNewLine())) {
+                break;
             }
         }
 
+        // separate header from body chunk
+        list ($rawHeader, $body) = explode($this->getNewLine(), $buffer);
+
+        // get http request (factory)
+        $requestFactory = new HttpRequest();
+
+        // get method type instance inited by raw headers
+        $requestInstance = $requestFactory->initFromRawHeader($rawHeader);
+
+        // check if body-length not reached content-length already
+        if (($contentLength = $requestInstance->getHeader('Content-Length'))
+            && ($contentLength > strlen($body)))
+        {
+            // read a chunk from the socket till content length is reached
+            while ($line = $this->read($this->getLineLength())) {
+                // append body
+                $body .= $line;
+                // if length is reached break here
+                if (strlen($body) == (int)$contentLength) {
+                    break;
+                }
+            }
+        }
+
+        // parse body with request instance
+        $requestInstance->parse($body);
+
+        // set clients info to request
+        $requestInstance->setClientIp($clientIp);
+        $requestInstance->setClientPort($clientPort);
+
+        // return fully qualified request instance
+        return $requestInstance;
     }
 
     /**

@@ -24,4 +24,20 @@ namespace TechDivision\ServletContainer\Interfaces;
  */
 interface Request {
 
+    /**
+     * Parse request content
+     *
+     * @param string $content
+     * @return void
+     */
+    public function parse($content);
+
+    /**
+     * validate actual InputStream
+     *
+     * @param string $buffer InputStream
+     * @return void
+     */
+    public function initFromRawHeader($buffer);
+
 }
