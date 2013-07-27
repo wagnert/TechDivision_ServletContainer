@@ -84,6 +84,7 @@ class ThreadRequest extends \Thread {
 
         try {
 
+            // initialize the response
             $response = new HttpResponse();
 
             /** @var HttpRequest $request */
@@ -102,6 +103,9 @@ class ThreadRequest extends \Thread {
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
 
+            // do access log entry
+            $this->getAccessLogger()->log($request, $response);
+
         } catch (\Exception $e) {
 
             ob_start();
@@ -113,9 +117,6 @@ class ThreadRequest extends \Thread {
 
         // prepare the headers
         $headers = $this->prepareHeader($response);
-
-        // do access log entry
-        $this->getAccessLogger()->log($request, $response);
 
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());
