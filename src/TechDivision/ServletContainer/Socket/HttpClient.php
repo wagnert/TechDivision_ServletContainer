@@ -46,8 +46,6 @@ class HttpClient extends Client
      */
     public function receive()
     {
-        $this->lineLength = 16;
-
         // initialize the buffer
         $buffer = '';
 
