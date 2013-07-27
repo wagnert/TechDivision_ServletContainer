@@ -15,6 +15,7 @@ namespace TechDivision\ServletContainer\Service\Locator;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
+use TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException;
 
 /**
  * The static resource locator implementation, e. g. to locate files like pictures.
@@ -55,9 +56,12 @@ class StaticResourceLocator extends AbstractResourceLocator {
     }
 
     /**
-     * @param Request $request
-     * @throws \TechDivision\ServletContainer\Exceptions\FileNotFoundException
-     * @throws \Exception Is thrown if the requested file has not been found or is not readable
+     * Tries to locate the file specified in the passed request instance.
+     *
+     * @param Request $request The request instance
+     * @throws \TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException Is thrown if the requested file is a directory
+     * @throws \TechDivision\ServletContainer\Exceptions\FileNotFoundException Is thrown if the requested file has not been found or is not readable
+     * @throws \TechDivision\ServletContainer\Exceptions\FileNotReadableException Is thrown if the requested file is not readable
      * @return \SplFileObject The located file
      */
     public function locate(Request $request) {
@@ -65,21 +69,17 @@ class StaticResourceLocator extends AbstractResourceLocator {
         // build the path from url part and base path
         $path = $request->getServerVar('DOCUMENT_ROOT') . urldecode($request->getUri());
 
-        if (is_dir($path)) {
-            throw new \Exception("Requested file $path is a directory");
+        // load file information and return the file object if possible
+        $fileInfo = new \SplFileInfo($path);
+        if ($fileInfo->isDir()) {
+            throw new FoundDirInsteadOfFileException(sprintf("Requested file %s is a directory", $path));
         }
-
-        // make sure the requested file exists
-        if (!file_exists($path)) {
-            throw new FileNotFoundException(sprintf('404 - file %s does not exist.', $path));
+        if ($fileInfo->isFile() === false) {
+            throw new FileNotFoundException(sprintf('File %s not not found', $path));
         }
-
-        $file = new \SplFileObject($path);
-
-        if (!($file->isReadable() && $file->isFile())) {
-            throw new \Exception(sprintf('File %s could not be opened.', $path));
+        if ($fileInfo->isReadable() === false) {
+            throw new FileNotReadableException(sprintf('File %s is not readable', $path));
         }
-
-        return $file;
+        return $fileInfo->openFile();
     }
 }

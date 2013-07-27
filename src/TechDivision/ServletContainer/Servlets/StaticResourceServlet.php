@@ -13,6 +13,7 @@
 namespace TechDivision\ServletContainer\Servlets;
 
 use Symfony\Component\Security\Acl\Exception\Exception;
+use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
 use TechDivision\ServletContainer\Utilities\MimeTypeDictionary;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Servlets\DefaultServlet;
@@ -69,55 +70,59 @@ class StaticResourceServlet extends HttpServlet {
             // let the locator retrieve the file
             $file = $locator->locate($req);
 
-        } catch(\Exception $e) {
+            // do not directly serve php files
+            if (strpos($file->getFilename(), '.php') !== false) {
+                throw new PermissionDeniedException(sprintf(
+                    '403 - You do not have permission to access %s', $file->getFilename()));
+            }
 
-            error_log($e->__toString());
+            // set mimetypes to header
+            $res->addHeader('Content-Type',
+                $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
+            );
+
+            // set last modified date from file
+            $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
+
+            // set expires date
+            $res->addHeader('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
+
+            // check if If-Modified-Since header info is set
+            if ($req->getHeader('If-Modified-Since')) {
+                // check if file is modified since header given header date
+                if (strtotime($req->getHeader('If-Modified-Since'))>=$file->getMTime()) {
+                    // send 304 Not Modified Header information without content
+                    $res->addHeader('status', 'HTTP/1.1 304 Not Modified');
+                    $res->getContent(PHP_EOL);
+                    return;
+                }
+            }
+
+            // store the file's contents in the response
+            $res->setContent(
+                file_get_contents($file->getRealPath())
+            );
+
+        } catch(\FoundDirInsteadOfFileException $fdiofe) {
 
             // load the information about the requested path
             $pathInfo = $req->getPathInfo();
 
-            // if ending slash is missing, redirect to same folder but with slash appended
+            // if we found a folder AND ending slash is missing, redirect to same folder but with slash appended
             if (substr($pathInfo, -1) !== '/') {
 
                 $res->addHeader("location", $pathInfo . '/');
                 $res->addHeader("status", 'HTTP/1.1 301 OK');
                 $res->setContent(PHP_EOL);
-
-                return;
             }
+
+        } catch(\Exception $e) {
+
+            // load the information about the requested path
+            $pathInfo = $req->getPathInfo();
+
+            $res->addHeader("status", 'HTTP/1.1 404 OK');
+            $res->setContent(sprintf('<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL %s was not found on this server.</p></body></html>', $pathInfo));
         }
-
-        // do not directly serve php files
-        if (strpos($file->getFilename(), '.php') !== false) {
-            throw new PermissionDeniedException(sprintf(
-                '403 - You do not have permission to access %s', $file->getFilename()));
-        }
-
-        // set mimetypes to header
-        $res->addHeader('Content-Type',
-            $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
-        );
-
-        // set last modified date from file
-        $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
-
-        // set expires date
-        $res->addHeader('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
-
-        // check if If-Modified-Since header info is set
-        if ($req->getHeader('If-Modified-Since')) {
-            // check if file is modified since header given header date
-            if (strtotime($req->getHeader('If-Modified-Since'))>=$file->getMTime()) {
-                // send 304 Not Modified Header information without content
-                $res->addHeader('status', 'HTTP/1.1 304 Not Modified');
-                $res->getContent(PHP_EOL);
-                return;
-            }
-        }
-
-        // store the file's contents in the response
-        $res->setContent(
-            file_get_contents($file->getRealPath())
-        );
     }
 }

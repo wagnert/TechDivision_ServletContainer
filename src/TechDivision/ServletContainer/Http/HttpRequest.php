@@ -16,6 +16,7 @@ use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Session\PersistentSessionManager;
 use TechDivision\ServletContainer\Session\ServletSession;
+use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 
 /**
  * A web request implementation.
@@ -27,7 +28,6 @@ use TechDivision\ServletContainer\Session\ServletSession;
  * @author      Johann Zelger <j.zelger@techdivision.com>
  *              Philipp Dittert <p.dittert@techdivision.com>
  */
-
 class HttpRequest implements Request
 {
 
@@ -234,8 +234,9 @@ class HttpRequest implements Request
 
     public function getRequestMethodInstance()
     {
+
         // select fitting validator
-        switch ($this->getMethod()) {
+        switch ($method = $this->getMethod()) {
             case "GET":
                 $request = new GetRequest();
                 break;
@@ -245,14 +246,28 @@ class HttpRequest implements Request
             case "HEAD":
                 $request = new HeadRequest();
                 break;
+            case "CONNECT":
+                $request = new ConnectRequest();
+                break;
+            case "DELETE":
+                $request = new DeleteRequest();
+                break;
+            case "OPTIONS":
+                $request = new OptionsRequest();
+                break;
+            case "PUT":
+                $request = new PutRequest();
+                break;
+            case "TRACE":
+                $request = new TraceRequest();
+                break;
             default:
-                // Throw InvalidHeaderException if method is unknown
-                throw new InvalidHeaderException("Invalid Request Method");
+                throw new InvalidHeaderException("Found invalid request method '$method'");
                 break;
         }
+
         // set parsed headers to request method type
         $request->setHeaders($this->getHeaders());
-
         return $request;
     }
 
@@ -727,7 +742,4 @@ class HttpRequest implements Request
     {
         return $this->clientPort;
     }
-
-
-
 }
