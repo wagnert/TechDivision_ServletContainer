@@ -82,10 +82,10 @@ class ThreadRequest extends \Thread {
         // set the client socket resource
         $client->setResource($this->resource);
 
-        try {
+        // initialize the response
+        $response = new HttpResponse();
 
-            // initialize the response
-            $response = new HttpResponse();
+        try {
 
             /** @var HttpRequest $request */
             // receive Request Object from client
@@ -109,6 +109,8 @@ class ThreadRequest extends \Thread {
         } catch (\Exception $e) {
 
             ob_start();
+
+            error_log($e->__toString());
 
             debug_print_backtrace();
 
