@@ -20,7 +20,7 @@ namespace TechDivision\ServletContainer\Interfaces;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
- *              Johann Zelger <j.zelger@techdivision.com>
+ *              Johann Zelger <jz@techdivision.com>
  */
 interface Response {
 

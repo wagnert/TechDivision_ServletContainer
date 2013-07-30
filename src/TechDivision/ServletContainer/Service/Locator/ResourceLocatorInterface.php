@@ -24,7 +24,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
- * @author      Johann Zelger <j.zelger@techdivision.com>
+ * @author      Johann Zelger <jz@techdivision.com>
  */
 interface ResourceLocatorInterface {
 

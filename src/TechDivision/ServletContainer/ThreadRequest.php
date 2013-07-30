@@ -29,7 +29,7 @@ use TechDivision\SocketException;
  * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
- * @author      Johann Zelger <j.zelger@techdivision.com>
+ * @author      Johann Zelger <jz@techdivision.com>
  */
 class ThreadRequest extends \Thread {
 
@@ -123,6 +123,7 @@ class ThreadRequest extends \Thread {
         // return the string representation of the response content to the client
         $client->send($headers . "\r\n" . $response->getContent());
 
+        // try to shutdown client socket
         try {
             $client->shutdown();
         } catch (\Exception $e) {

@@ -23,7 +23,7 @@ use TechDivision\ServletContainer\Http\Cookie;
  * @license    	http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
- * @author      Johann Zelger <j.zelger@techdivision.com>
+ * @author      Johann Zelger <jz@techdivision.com>
  */
 class HttpResponse implements Response {
 
