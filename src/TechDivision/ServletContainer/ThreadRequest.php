@@ -12,12 +12,12 @@
 
 namespace TechDivision\ServletContainer;
 
+use TechDivision\ApplicationServer\AbstractThread;
 use TechDivision\ServletContainer\Http\AccessLogger;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Socket\HttpClient;
-use TechDivision\SplClassLoader;
 use TechDivision\ServletContainer\Container;
 
 /**
@@ -29,7 +29,7 @@ use TechDivision\ServletContainer\Container;
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <jz@techdivision.com>
  */
-class ThreadRequest extends \Thread {
+class ThreadRequest extends AbstractThread {
 
     /**
      * Holds the container instance
@@ -59,19 +59,15 @@ class ThreadRequest extends \Thread {
      * @param resource $resource The client socket instance
      * @return void
      */
-    public function __construct($container, $resource) {
+    public function init($container, $resource) {
         $this->container = $container;
         $this->resource = $resource;
     }
 
     /**
-     * @see \Thread::run()
+     * @see AbstractThread::main()
      */
-    public function run() {
-
-        // register class loader again, because we are in a thread
-        $classLoader = new SplClassLoader();
-        $classLoader->register();
+    public function main() {
 
         // initialize a new client socket
         $client = new HttpClient();
