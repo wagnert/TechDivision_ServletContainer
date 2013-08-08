@@ -19,8 +19,6 @@ use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Socket\HttpClient;
 use TechDivision\SplClassLoader;
 use TechDivision\ServletContainer\Container;
-use TechDivision\ServletContainer\Exceptions\BadRequestException;
-use TechDivision\SocketException;
 
 /**
  * The thread implementation that handles the request.

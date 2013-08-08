@@ -83,7 +83,8 @@ class Application {
      * 
      * @param type $name The application name
      */
-    public function __construct($name) {
+    public function __construct($initialContext, $name) {
+        $this->initialContext = $initialContext;
         $this->name = $name;
     }
     
@@ -267,6 +268,6 @@ class Application {
      * @return object The created instance
      */
     public function newInstance($className, array $args = array()) {
-        return InitialContext::get()->newInstance($className, $args);
+        return $this->initialContext->newInstance($className, $args);
     }
 }

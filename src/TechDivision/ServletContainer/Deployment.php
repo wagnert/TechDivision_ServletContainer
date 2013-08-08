@@ -48,7 +48,7 @@ class Deployment extends AbstractDeployment {
                 $name = basename($folder);
 
                 // initialize the application instance
-                $application = $containerThread->newInstance('\TechDivision\ServletContainer\Application', array($name));
+                $application = $containerThread->newInstance('\TechDivision\ServletContainer\Application', array($this->initialContext, $name));
                 $application->setConfiguration($configuration);
 
                 // add the application to the available applications
