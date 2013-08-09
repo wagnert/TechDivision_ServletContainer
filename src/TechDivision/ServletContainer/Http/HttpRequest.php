@@ -294,7 +294,7 @@ class HttpRequest implements Request
     protected function initServerVars()
     {
         $this->server = array(
-            'HTTP_HOST' => $this->getServerName(),
+            'HTTP_HOST' => $this->getHeader('Host'),
             'HTTP_CONNECTION' => $this->getHeader('Connection'),
             'HTTP_ACCEPT' => $this->getHeader('Accept'),
             'HTTP_USER_AGENT' => $this->getHeader('User-Agent:'),

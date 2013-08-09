@@ -183,4 +183,5 @@ class ThreadRequest extends AbstractThread {
     public function findApplication($servletRequest) {
         return $this->getContainer()->findApplication($servletRequest);
     }
+
 }
