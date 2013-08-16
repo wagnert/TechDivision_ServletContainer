@@ -15,8 +15,6 @@ namespace TechDivision\ServletContainer\Socket;
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\Socket\Client;
-use TechDivision\ServletContainer\Http\GetRequest;
-use TechDivision\ServletContainer\Http\PostRequest;
 
 /**
  * The http client implementation that handles the request like a webserver
@@ -47,7 +45,7 @@ class HttpClient extends Client
     public function receive()
     {
         // initialize the buffer
-        $buffer = '';
+        $buffer = null;
 
         // get clients ip and port
         $this->getPeerName($clientIp, $clientPort);
@@ -61,7 +59,9 @@ class HttpClient extends Client
         }
 
         // separate header from body chunk
-        list ($rawHeader, $body) = explode($this->getNewLine(), $buffer);
+        list ($rawHeader) = explode($this->getNewLine(), $buffer);
+
+        $body = str_replace($rawHeader . $this->getNewLine(), '', $buffer);
 
         // get http request (factory)
         $requestFactory = new HttpRequest();
@@ -77,6 +77,7 @@ class HttpClient extends Client
             while ($line = $this->read($this->getLineLength())) {
                 // append body
                 $body .= $line;
+
                 // if length is reached break here
                 if (strlen($body) == (int)$contentLength) {
                     break;
