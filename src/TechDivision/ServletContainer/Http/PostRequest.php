@@ -37,6 +37,7 @@ class PostRequest extends HttpRequest
         $this->setParameters($content);
 
         $params = array();
+        $queryParser = new QueryParser();
 
         // grab multipart boundary from content type header
         preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
@@ -44,7 +45,7 @@ class PostRequest extends HttpRequest
         // content type is probably regular form-encoded
         if (!count($matches)) {
             // we expect regular query string containing data
-            parse_str(urldecode($content), $params);
+            $queryParser->parseStr(urldecode($content));
 
         } else {
             // get boundary
@@ -73,12 +74,13 @@ class PostRequest extends HttpRequest
                 {
                     // match "name" and optional value in between newline sequences
                     preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
-                    $params[$matches[1]] = $matches[2];
+                    $queryParser->parseKeyValue($matches[1], $matches[2]);
                 }
             }
         }
 
-        $this->setParameterMap($params);
+        error_log(var_export($queryParser->getResult(), true));
+        $this->setParameterMap($queryParser->getResult());
     }
 
 }
