@@ -78,8 +78,6 @@ class PostRequest extends HttpRequest
                 }
             }
         }
-
-        error_log(var_export($queryParser->getResult(), true));
         $this->setParameterMap($queryParser->getResult());
     }
 
