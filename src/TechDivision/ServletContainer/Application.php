@@ -61,7 +61,12 @@ class Application extends AbstractApplication
      * @return \TechDivision\ServletContainer\Application The connected application
      */
     public function connect() {
-
+        
+        // initialize the class loader with the additional folders
+        set_include_path(get_include_path() . PS . $this->getWebappPath());
+        set_include_path(get_include_path() . PS . $this->getWebappPath() . DS . 'WEB-INF' . DS . 'classes');
+        set_include_path(get_include_path() . PS . $this->getWebappPath() . DS . 'WEB-INF' . DS . 'lib');
+        
         // prepare the VHost configurations
         foreach ($this->getConfiguration()->getChilds(self::CONTAINER_VHOSTS) as $vhost) {
 
@@ -84,7 +89,7 @@ class Application extends AbstractApplication
         }
         
         // initialize the servlet manager instance
-        $servletManager = new ServletManager($this);
+        $servletManager = $this->newInstance('TechDivision\ServletContainer\ServletManager', array($this));
         $servletManager->initialize();
         
         // set the entity manager

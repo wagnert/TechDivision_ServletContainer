@@ -63,21 +63,33 @@ class ThreadRequest extends AbstractThread {
         $this->container = $container;
         $this->resource = $resource;
     }
-
+    
+    /**
+     * Creates a new instance of the passed class name and passes the
+     * args to the instance constructor.
+     * 
+     * @param string $className The class name to create the instance of
+     * @param array $args The parameters to pass to the constructor
+     * @return object The created instance
+     */
+    public function newInstance($className, array $args = array()) {
+        return $this->getContainer()->newInstance($className, $args);
+    }
+    
     /**
      * @see AbstractThread::main()
      */
     public function main() {
-
+        
         // initialize a new client socket
-        $client = new HttpClient();
+        $client = $this->newInstance('TechDivision\ServletContainer\Socket\HttpClient');
         $client->setNewLine("\r\n\r\n");
 
         // set the client socket resource
         $client->setResource($this->resource);
 
         // initialize the response
-        $response = new HttpResponse();
+        $response = $this->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
 
         try {
 
@@ -154,7 +166,7 @@ class ThreadRequest extends AbstractThread {
     public function getAccessLogger()
     {
         if (!$this->accessLogger) {
-            $this->accessLogger = new AccessLogger();
+            $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
         }
         return $this->accessLogger;
     }

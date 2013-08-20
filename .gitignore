@@ -1,2 +1,6 @@
 .idea
 /target
+/instance-src
+/.buildpath
+/.project
+/.settings/

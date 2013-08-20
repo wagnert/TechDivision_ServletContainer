@@ -103,9 +103,6 @@ class ServletManager {
                 throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $folder));
             }
 
-            // add the servlet-specific include path
-            set_include_path($folder . PATH_SEPARATOR . get_include_path());
-
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
 
@@ -126,14 +123,10 @@ class ServletManager {
 
                 // get the string classname
                 $className = (string) array_shift($className);
-
-                // set the additional servlet include paths
-                set_include_path($folder . DS . 'WEB-INF' . DS . 'classes' . PS . get_include_path());
-                set_include_path($folder . DS . 'WEB-INF' . DS . 'lib' . PS . get_include_path());
-
+                
                 // instantiate the servlet
-                $servlet = new $className();
-                $servlet->init(new ServletConfiguration($this));
+                $servlet = $this->getApplication()->newInstance($className);
+                $servlet->init($this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array($this)));
 
                 // load the url pattern
                 $urlPattern = (string) $mapping->{'url-pattern'};
@@ -154,8 +147,8 @@ class ServletManager {
      * @return false
      */
     protected function addDefaultServlet() {
-        $defaultServlet = new StaticResourceServlet();
-        $defaultServlet->init(new ServletConfiguration($this));
+        $defaultServlet = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\StaticResourceServlet');
+        $defaultServlet->init($this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array($this)));
         $this->addServlet('/', $defaultServlet);
     }
 
