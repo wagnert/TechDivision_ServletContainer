@@ -14,6 +14,7 @@ namespace TechDivision\ServletContainer\Http;
 
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Session\SessionManager;
 use TechDivision\ServletContainer\Session\PersistentSessionManager;
 use TechDivision\ServletContainer\Session\ServletSession;
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
@@ -164,15 +165,15 @@ class HttpRequest implements Request
      * @var array
      */
     protected $parameterMap = array();
-
+    
     /**
-     * Constructor
-     *
+     * Inject the session manager into the request instance.
+     * 
+     * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager The session manager instance
+     * @return void
      */
-    public function __construct()
-    {
-        // init session manager
-        $this->sessionManager = new PersistentSessionManager();
+    public function injectSessionManager(SessionManager $sessionManager) {
+        $this->sessionManager = $sessionManager;
     }
 
     /**

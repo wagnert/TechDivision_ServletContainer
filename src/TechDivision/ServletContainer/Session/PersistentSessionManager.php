@@ -20,6 +20,22 @@ class PersistentSessionManager implements SessionManager {
      * @var string
      */
     const SESSION_NAME = 'PHPSESSID';
+    
+    /**
+     * The initial context instance.
+     * @var \TechDivision\ApplicationServer\InitialContext
+     */
+    protected $initialContext;
+    
+    /**
+     * Initialize the session manager with the inital context instance.
+     * 
+     * @param \TechDivision\ApplicationServer\InitialContext $initialContext The initial context instance
+     * @return void
+     */
+    public function __construct($initialContext) {
+        $this->initialContext = $initialContext;
+    }
 
     /**
      * Tries to find a session for the given request. The session id
@@ -60,14 +76,6 @@ class PersistentSessionManager implements SessionManager {
             $sessionId = $params[self::SESSION_NAME];
         }
 
-        /*
-        // initialize a new session if none is present yet
-        if ($sessionId == null) {
-            // @todo make session id really unique over all requests
-            $sessionId = uniqid(self::SESSION_NAME);
-        }
-        */
-
         $settings['session']['name'] = self::SESSION_NAME;
         $settings['session']['cookie']['lifetime'] = time() + 86400;
         $settings['session']['cookie']['domain'] = null;
@@ -77,24 +85,27 @@ class PersistentSessionManager implements SessionManager {
         $settings['session']['garbageCollectionProbability'] = 1;
         $settings['session']['inactivityTimeout'] = 1440;
 
-        $persistentSession = new ServletSession($request, $sessionId, __CLASS__, time());
+        // initialize the session storage
+        $storage = $this->newInstance('TechDivision\ServletContainer\Session\Storage\InitialContextStorage');
+        $storage->injectBackend($this->initialContext);
+        
+        // initialize and return the session instance
+        $sessionParams = array($request, $sessionId, __CLASS__, time());
+        $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
         $persistentSession->injectSettings($settings);
-        $persistentSession->injectCache(new MemcachedStorage());
-
-        /*
-        // register the session id with php's standard logic
-        session_id($sessionId);
-
-        $connection = Factory::createContextConnection();
-
-        $session = $connection->createContextSession();
-        $context = $session->createInitialContext();
-
-
-        $persistentSession = $context->lookup('\TechDivision\ServletContainer\Session\ServletSession');
-        $persistentSession->setSessionId($sessionId);
-        */
-
+        $persistentSession->injectCache($storage);
         return $persistentSession;
+    }
+    
+    /**
+     * Returns a new instance of the passed class name.
+     * 
+     * @param string $className The fully qualified class name to return the instance for
+     * @param array $args Arguments to pass to the constructor of the instance
+     * @return object The instance itself
+     * @todo Has to be refactored to avoid registering autoloader on every call
+     */
+    public function newInstance($className, array $args = array()) {
+        return $this->initialContext->newInstance($className, $args);
     }
 }

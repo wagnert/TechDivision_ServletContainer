@@ -12,7 +12,7 @@
 
 namespace TechDivision\ServletContainer;
 
-use TechDivision\ApplicationServer\AbstractThread;
+use TechDivision\ApplicationServer\AbstractContextThread;
 use TechDivision\ServletContainer\Http\AccessLogger;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
@@ -29,7 +29,7 @@ use TechDivision\ServletContainer\Container;
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <jz@techdivision.com>
  */
-class ThreadRequest extends AbstractThread {
+class ThreadRequest extends AbstractContextThread {
 
     /**
      * Holds the container instance
@@ -65,18 +65,6 @@ class ThreadRequest extends AbstractThread {
     }
     
     /**
-     * Creates a new instance of the passed class name and passes the
-     * args to the instance constructor.
-     * 
-     * @param string $className The class name to create the instance of
-     * @param array $args The parameters to pass to the constructor
-     * @return object The created instance
-     */
-    public function newInstance($className, array $args = array()) {
-        return $this->getContainer()->newInstance($className, $args);
-    }
-    
-    /**
      * @see AbstractThread::main()
      */
     public function main() {
@@ -96,6 +84,10 @@ class ThreadRequest extends AbstractThread {
             /** @var HttpRequest $request */
             // receive Request Object from client
             $request = $client->receive();
+            
+            // inject the request with the session manager
+            $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array($this->initialContext));
+            $request->injectSessionManager($sessionManager);
 
             // initialize response container
             $request->setResponse($response);
