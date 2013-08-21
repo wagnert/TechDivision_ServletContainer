@@ -63,9 +63,9 @@ class Application extends AbstractApplication
     public function connect() {
         
         // initialize the class loader with the additional folders
-        set_include_path(get_include_path() . APPSERVER_PS . $this->getWebappPath());
-        set_include_path(get_include_path() . APPSERVER_PS . $this->getWebappPath() . APPSERVER_DS . 'WEB-INF' . APPSERVER_DS . 'classes');
-        set_include_path(get_include_path() . APPSERVER_PS . $this->getWebappPath() . APPSERVER_DS . 'WEB-INF' . APPSERVER_DS . 'lib');
+        set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath());
+        set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath() . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'classes');
+        set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath() . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'lib');
         
         // prepare the VHost configurations
         foreach ($this->getConfiguration()->getChilds(self::CONTAINER_VHOSTS) as $vhost) {

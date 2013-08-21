@@ -99,7 +99,7 @@ class ServletManager {
         if (is_dir($folder = $this->getWebappPath())) {
 
             // it's no valid application without at least the web.xml file
-            if (!file_exists($web = $folder . APPSERVER_DS . 'WEB-INF' . APPSERVER_DS . 'web.xml')) {
+            if (!file_exists($web = $folder . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'web.xml')) {
                 throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $folder));
             }
 
