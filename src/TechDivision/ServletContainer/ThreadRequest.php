@@ -109,9 +109,6 @@ class ThreadRequest extends AbstractThread {
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
 
-            // do access log entry
-            $this->getAccessLogger()->log($request, $response);
-
         } catch (\Exception $e) {
 
             ob_start();
@@ -131,7 +128,9 @@ class ThreadRequest extends AbstractThread {
 
         // try to shutdown client socket
         try {
+            
             $client->shutdown();
+            
         } catch (\Exception $e) {
             // do nothing due to peer closed connection already
         }
@@ -195,5 +194,4 @@ class ThreadRequest extends AbstractThread {
     public function findApplication($servletRequest) {
         return $this->getContainer()->findApplication($servletRequest);
     }
-
 }
