@@ -60,15 +60,4 @@ class GetRequest extends HttpRequest
         }
     }
 
-    /**
-     * Set QueryString
-     *
-     * @param string $qs QueryString
-     * return void
-     */
-    protected function setQueryString($qs)
-    {
-        $this->queryString = $qs;
-    }
-
 }

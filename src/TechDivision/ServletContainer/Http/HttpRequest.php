@@ -138,6 +138,7 @@ class HttpRequest implements Request
      */
     protected $params = array();
 
+
     /**
      * Server data
      *
@@ -486,6 +487,17 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets query string
+     *
+     * @param string $queryString
+     * @return void
+     */
+    public function setQueryString($queryString)
+    {
+        $this->queryString = $queryString;
+    }
+
+    /**
      * Returns server name
      *
      * @return string
@@ -743,4 +755,6 @@ class HttpRequest implements Request
     {
         return $this->clientPort;
     }
+
+
 }

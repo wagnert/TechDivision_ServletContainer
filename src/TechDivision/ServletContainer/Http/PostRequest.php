@@ -39,6 +39,15 @@ class PostRequest extends HttpRequest
         $params = array();
         $queryParser = new QueryParser();
 
+        // check if url has params within
+        $url = parse_url($this->getUri());
+
+        // parse path
+        if (array_key_exists('query', $url)) {
+            // set query
+            $this->setQueryString($url['query']);
+        }
+
         // grab multipart boundary from content type header
         preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
 
