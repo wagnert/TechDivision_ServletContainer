@@ -60,8 +60,18 @@ class ThreadRequest extends AbstractContextThread {
      * @return void
      */
     public function init($container, $resource) {
+
+        register_shutdown_function( array( &$this, "shutdown" ) );
+
         $this->container = $container;
         $this->resource = $resource;
+    }
+
+    public function shutdown()
+    {
+
+        error_log(__METHOD__);
+
     }
     
     /**
