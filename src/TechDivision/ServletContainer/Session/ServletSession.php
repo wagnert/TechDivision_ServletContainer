@@ -14,9 +14,9 @@ namespace TechDivision\ServletContainer\Session;
 
 use TechDivision\ServletContainer\Http\Cookie;
 use TechDivision\ApplicationServer\Utilities\Algorithms;
+use TechDivision\ApplicationServer\InitialContext\StorageInterface;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\ServletContainer\Session\Storage\StorageInterface;
 use TechDivision\ServletContainer\Session\Exceptions\SessionNotStartedException;
 use TechDivision\ServletContainer\Session\Exceptions\OperationNotSupportedException;
 use TechDivision\ServletContainer\Session\Exceptions\DataNotSerializableException;
@@ -41,9 +41,9 @@ class ServletSession {
 
     /**
      * Cache storage for this session
-     * @var \TechDivision\ServletContainer\Session\StorageInterface
+     * @var \TechDivision\ApplicationServer\InitialContext\StorageInterface
      */
-    protected $cache;
+    protected $storage;
 
     /**
      * @var string
@@ -184,13 +184,13 @@ class ServletSession {
     }
 
     /**
-     * Injects the cache manager to persist session data.
+     * Injects the storage to persist session data.
      *
-     * @param \TechDivision\ServletContainer\Session\Storage\StorageInterface $cache The session cache
+     * @param \TechDivision\ApplicationServer\InitialContext\StorageInterface $storage The session storage to use
      * @return void
      */
-    public function injectCache(StorageInterface $cache) {
-        $this->cache = $cache;
+    public function injectStorage(StorageInterface $storage) {
+        $this->storage = $storage;
     }
 
     /**
@@ -286,7 +286,7 @@ class ServletSession {
         if ($this->sessionCookie === NULL || $this->request === NULL || $this->started === TRUE) {
             return FALSE;
         }
-        $sessionInfo = $this->cache->get($this->sessionCookie->getValue());
+        $sessionInfo = $this->storage->get($this->sessionCookie->getValue());
         if ($sessionInfo === FALSE) {
             return FALSE;
         }
@@ -310,7 +310,7 @@ class ServletSession {
             $this->response->setCookie($this->sessionCookie);
             $this->started = TRUE;
 
-            $sessionObjects = $this->cache->get($this->storageIdentifier . md5(__CLASS__));
+            $sessionObjects = $this->storage->get($this->storageIdentifier . md5(__CLASS__));
 
             if (is_array($sessionObjects)) {
 
@@ -324,7 +324,7 @@ class ServletSession {
             } else {
                 // Fallback for some malformed session data, if it is no array but something else.
                 // In this case, we reset all session objects (graceful degradation).
-                $this->cache->set($this->storageIdentifier . md5(__CLASS__), array(), array($this->storageIdentifier), 0);
+                $this->storage->set($this->storageIdentifier . md5(__CLASS__), array(), array($this->storageIdentifier), 0);
             }
 
             $lastActivitySecondsAgo = ($this->now - $this->lastActivityTimestamp);
@@ -385,7 +385,7 @@ class ServletSession {
         if ($this->started !== TRUE) {
             throw new SessionNotStartedException('Tried to get session data, but the session has not been started yet.', 1351162255);
         }
-        return $this->cache->get($this->storageIdentifier . md5($key));
+        return $this->storage->get($this->storageIdentifier . md5($key));
     }
 
     /**
@@ -399,7 +399,7 @@ class ServletSession {
         if ($this->started !== TRUE) {
             throw new SessionNotStartedException('Tried to check a session data entry, but the session has not been started yet.', 1352488661);
         }
-        return $this->cache->has($this->storageIdentifier . md5($key));
+        return $this->storage->has($this->storageIdentifier . md5($key));
     }
 
     /**
@@ -419,7 +419,7 @@ class ServletSession {
         if (is_resource($data)) {
             throw new DataNotSerializableException('The given data cannot be stored in a session, because it is of type "' . gettype($data) . '".', 1351162262);
         }
-        $this->cache->set($this->storageIdentifier . md5($key), $data, array($this->storageIdentifier), 0);
+        $this->storage->set($this->storageIdentifier . md5($key), $data, array($this->storageIdentifier), 0);
     }
 
     /**
@@ -456,7 +456,7 @@ class ServletSession {
         if ($this->started !== TRUE) {
             throw new SessionNotStartedException('Tried to tag a session which has not been started yet.', 1355143533);
         }
-        if (!$this->cache->isValidTag($tag)) {
+        if (!$this->storage->isValidTag($tag)) {
             throw new \InvalidArgumentException(sprintf('The tag used for tagging session %s contained invalid characters. Make sure it matches this regular expression: "%s"', $this->sessionIdentifier, FrontendInterface::PATTERN_TAG));
         }
         if (!in_array($tag, $this->tags)) {
@@ -546,7 +546,7 @@ class ServletSession {
         }
 
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
-        $this->cache->flushByTag($this->storageIdentifier);
+        $this->storage->flushByTag($this->storageIdentifier);
         $this->started = FALSE;
         $this->sessionIdentifier = NULL;
         $this->storageIdentifier = NULL;
@@ -563,10 +563,10 @@ class ServletSession {
     public function collectGarbage() {
         $sessionRemovalCount = 0;
         if ($this->inactivityTimeout !== 0) {
-            foreach ($this->cache->getByTag('session') as $sessionInfo) {
+            foreach ($this->storage->getByTag('session') as $sessionInfo) {
                 $lastActivitySecondsAgo = $this->now - $sessionInfo['lastActivityTimestamp'];
                 if ($lastActivitySecondsAgo > $this->inactivityTimeout) {
-                    $this->cache->flushByTag($sessionInfo['storageIdentifier']);
+                    $this->storage->flushByTag($sessionInfo['storageIdentifier']);
                     $sessionRemovalCount ++;
                 }
             }
@@ -586,7 +586,7 @@ class ServletSession {
 
         if ($this->started === TRUE && $this->remote === FALSE) {
 
-            if ($this->cache->has($this->sessionIdentifier)) {
+            if ($this->storage->has($this->sessionIdentifier)) {
 
                 /*
                 // Security context can't be injected and must be retrieved manually
@@ -696,7 +696,7 @@ class ServletSession {
         $tagsForCacheEntry[] = 'session';
         $tagsForCacheEntry[] = $this->sessionIdentifier;
 
-        $this->cache->set($this->sessionIdentifier, $sessionInfo, $tagsForCacheEntry, 0);
+        $this->storage->set($this->sessionIdentifier, $sessionInfo, $tagsForCacheEntry, 0);
     }
 
     /**
@@ -709,6 +709,6 @@ class ServletSession {
      * @return void
      */
     protected function removeSessionInfoCacheEntry($sessionIdentifier) {
-        $this->cache->remove($sessionIdentifier);
+        $this->storage->remove($sessionIdentifier);
     }
 }

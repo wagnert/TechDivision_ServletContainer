@@ -11,7 +11,6 @@ namespace TechDivision\ServletContainer\Session;
 
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\ServletContainer\Session\Storage\MemcachedStorage;
 
 class PersistentSessionManager implements SessionManager {
 
@@ -84,16 +83,12 @@ class PersistentSessionManager implements SessionManager {
         $settings['session']['cookie']['httponly'] = false;
         $settings['session']['garbageCollectionProbability'] = 1;
         $settings['session']['inactivityTimeout'] = 1440;
-
-        // initialize the session storage
-        $storage = $this->newInstance('TechDivision\ServletContainer\Session\Storage\InitialContextStorage');
-        $storage->injectBackend($this->initialContext);
         
         // initialize and return the session instance
         $sessionParams = array($request, $sessionId, __CLASS__, time());
         $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
         $persistentSession->injectSettings($settings);
-        $persistentSession->injectCache($storage);
+        $persistentSession->injectStorage($this->initialContext->getStorage());
         return $persistentSession;
     }
     
