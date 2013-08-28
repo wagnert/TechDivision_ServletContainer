@@ -303,6 +303,7 @@ class HttpRequest implements Request
             'HTTP_ACCEPT_ENCODING' => $this->getHeader('Accept-Encoding'),
             'HTTP_ACCEPT_LANGUAGE' => $this->getHeader('Accept-Language'),
             'HTTP_REFERER' => $this->getHeader('Referer'),
+            'HTTP_COOKIE' => $this->getHeader('Cookie'),
             'PATH' => '/opt/appserver/bin',
             'SERVER_SIGNATURE' => '',
             'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
