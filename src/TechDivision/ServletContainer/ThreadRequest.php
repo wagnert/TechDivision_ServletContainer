@@ -60,18 +60,31 @@ class ThreadRequest extends AbstractContextThread {
      * @return void
      */
     public function init($container, $resource) {
-
-        register_shutdown_function( array( &$this, "shutdown" ) );
-
         $this->container = $container;
         $this->resource = $resource;
     }
 
-    public function shutdown()
+    /**
+     * @param $client
+     * @param $response
+     */
+    public function send($client, $response)
     {
+        // prepare the headers
+        $response->prepareHeaders();
 
-        error_log(__METHOD__);
+        // return the string representation of the response content to the client
+        $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
 
+        // try to shutdown client socket
+        try {
+            $client->shutdown();
+            $client->close();
+        } catch (\Exception $e) {
+            $client->close();
+        }
+
+        unset($client);
     }
     
     /**
@@ -108,58 +121,24 @@ class ThreadRequest extends AbstractContextThread {
             // try to locate a servlet which could service the current request
             $servlet = $application->locate($request);
 
+            $servlet->injectShutdownHandler(
+                $this->newInstance(
+                    'TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array($client, $response))
+            );
+
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
 
-        } catch (\Exception $e) {
 
-            ob_start();
+
+        } catch (\Exception $e) {
 
             error_log($e->__toString());
 
-            debug_print_backtrace();
-
-            $response->setContent(get_class($e) . "\n\n" . $e . "\n\n" . ob_get_clean());
+            $response->setContent($e->__toString());
         }
 
-        // prepare the headers
-        $headers = $this->prepareHeader($response);
-
-        // return the string representation of the response content to the client
-        $client->send($headers . "\r\n" . $response->getContent());
-
-        // try to shutdown client socket
-        try {
-
-            $client->shutdown();
-            $client->close();
-            
-        } catch (\Exception $e) {
-            
-            $client->close();
-            
-        }
-
-        unset($client);
-    }
-
-    /**
-     * Prepares the headers for the given response and returns them.
-     *
-     * @param Response $response The response to prepare the header for
-     * @return string The headers
-     * @todo This is a dummy implementation, headers has to be handled in request/response
-     */
-    public function prepareHeader(Response $response)
-    {
-        // prepare the content length
-        $contentLength = strlen($response->getContent());
-
-        // prepare the dynamic headers
-        $response->addHeader("Content-Length", $contentLength);
-
-        // return the headers
-        return $response->getHeadersAsString();
+        $this->send($client, $response);
     }
 
     /**

@@ -32,6 +32,62 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 class PhpServlet extends StaticResourceServlet {
 
     /**
+     * Holds the request object
+     *
+     * @var Request
+     */
+    protected $request;
+
+    /**
+     * Holds the response object
+     *
+     * @var Response
+     */
+    protected $response;
+
+
+    /**
+     * Set all headers for php script execution
+     *
+     * @return void
+     */
+    public function setHeaders()
+    {
+        // set default headers for php usage
+        $this->getResponse()->addHeader('X-Powered-By', 'PhpServlet');
+        $this->getResponse()->addHeader('Expires', '19 Nov 1981 08:52:00 GMT');
+        $this->getResponse()->addHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+        $this->getResponse()->addHeader('Pragma', 'no-cache');
+    }
+
+    /**
+     * Initialize globals
+     *
+     * @return void
+     */
+    public function initGlobals()
+    {
+        $_SERVER = $this->getRequest()->getServerVars();
+        $_SERVER['SERVER_PORT'] = NULL;
+
+        // check post type and set params to globals
+        if ($this->getRequest() instanceof PostRequest) {
+            $_POST = $this->getRequest()->getParameterMap();
+            // check if there are get params send via uri
+            parse_str($this->getRequest()->getQueryString(), $_GET);
+        } else {
+            $_GET = $this->getRequest()->getParameterMap();
+        }
+
+        $_REQUEST = $this->getRequest()->getParameterMap();
+
+        foreach (explode('; ', $this->getRequest()->getHeader('Cookie')) as $cookieLine) {
+            list($key, $value) = explode('=', $cookieLine);
+            $_COOKIE[$key] = $value;
+        }
+    }
+
+    /**
      * Tries to load the requested file and adds the content to the response.
      *
      * @param Request $req The servlet request
@@ -41,11 +97,18 @@ class PhpServlet extends StaticResourceServlet {
      */
     public function doGet(Request $req, Response $res) {
 
-        // instanciate the resource locator
+        // register request and response objects
+        $this->setRequest($req);
+        $this->setResponse($res);
+
+        // init globals
+        $this->initGlobals();
+
+        // init resource locator
         $locator = new StaticResourceLocator($this);
 
         // let the locator retrieve the file
-        $file = $locator->locate($req);
+        $file = $locator->locate($this->getRequest());
 
         // do not directly serve php files
         if (strpos($file->getFilename(), '.php') === false) {
@@ -53,14 +116,17 @@ class PhpServlet extends StaticResourceServlet {
                 '403 - You do not have permission to access %s', $file->getFilename()));
         }
 
+        $this->setHeaders();
+
         // start output buffering
         ob_start();
 
         // load the file
-        require_once $file->getFilename();
+        require_once $file->getPathname();
 
         // store the file's contents in the response
-        $res->setContent(ob_get_clean());
+        $this->getResponse()->setContent(ob_get_clean());
+
     }
 
     /**
@@ -68,5 +134,45 @@ class PhpServlet extends StaticResourceServlet {
      */
     public function doPost(Request $req, Response $res) {
         $this->doGet($req, $res);
+    }
+
+    /**
+     * Sets request object
+     *
+     * @param mixed $request
+     */
+    public function setRequest($request)
+    {
+        $this->request = $request;
+    }
+
+    /**
+     * Returns request object
+     *
+     * @return mixed
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * Sets response object
+     *
+     * @param mixed $response
+     */
+    public function setResponse($response)
+    {
+        $this->response = $response;
+    }
+
+    /**
+     * Returns response object
+     *
+     * @return mixed
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 }

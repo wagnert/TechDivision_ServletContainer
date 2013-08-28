@@ -15,6 +15,7 @@ namespace TechDivision\ServletContainer\Interfaces;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Socket\HttpClient;
 
 /**
  * Interface for all servlets.
@@ -56,6 +57,13 @@ interface Servlet {
      * @return mixed
      */
     public function getServletInfo();
+
+    /**
+     * @param HttpClient $client
+     * @param Response $response
+     * @return mixed
+     */
+    public function shutdown(HttpClient $client, Response $response);
 
     /**
      * @abstract

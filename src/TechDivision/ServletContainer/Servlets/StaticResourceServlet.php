@@ -64,6 +64,7 @@ class StaticResourceServlet extends HttpServlet {
 
         try {
 
+
             // instanciate the resource locator
             $locator = new StaticResourceLocator($this);
 
@@ -76,16 +77,19 @@ class StaticResourceServlet extends HttpServlet {
                     '403 - You do not have permission to access %s', $file->getFilename()));
             }
 
+
             // set mimetypes to header
             $res->addHeader('Content-Type',
                 $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
             );
+
 
             // set last modified date from file
             $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
 
             // set expires date
             $res->addHeader('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
+
 
             // check if If-Modified-Since header info is set
             if ($req->getHeader('If-Modified-Since')) {
@@ -98,10 +102,12 @@ class StaticResourceServlet extends HttpServlet {
                 }
             }
 
+
             // store the file's contents in the response
             $res->setContent(
                 file_get_contents($file->getRealPath())
             );
+
 
         } catch(\FoundDirInsteadOfFileException $fdiofe) {
 
@@ -125,4 +131,5 @@ class StaticResourceServlet extends HttpServlet {
             $res->setContent(sprintf('<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL %s was not found on this server.</p></body></html>', $pathInfo));
         }
     }
+
 }

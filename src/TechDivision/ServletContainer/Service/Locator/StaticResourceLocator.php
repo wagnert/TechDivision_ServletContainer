@@ -67,7 +67,7 @@ class StaticResourceLocator extends AbstractResourceLocator {
     public function locate(Request $request) {
 
         // build the path from url part and base path
-        $path = $request->getServerVar('DOCUMENT_ROOT') . urldecode($request->getUri());
+        $path = $this->getFilePath($request);
 
         // load file information and return the file object if possible
         $fileInfo = new \SplFileInfo($path);
@@ -81,5 +81,16 @@ class StaticResourceLocator extends AbstractResourceLocator {
             throw new FileNotReadableException(sprintf('File %s is not readable', $path));
         }
         return $fileInfo->openFile();
+    }
+
+    /**
+     * Returns the path to file without uri params
+     *
+     * @param Request $request
+     * @return string
+     */
+    public function getFilePath(Request $request)
+    {
+        return $request->getServerVar('DOCUMENT_ROOT') . parse_url($request->getUri(), PHP_URL_PATH);
     }
 }

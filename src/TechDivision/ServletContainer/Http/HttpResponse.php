@@ -221,4 +221,32 @@ class HttpResponse implements Response {
         return $this->acceptedEncodings;
     }
 
+    /**
+     * Prepares the headers for the given response and returns them.
+     *
+     * @param Response $response The response to prepare the header for
+     * @return string The headers
+     */
+    public function prepareHeaders()
+    {
+        // grap headers and set to response object
+        foreach (xdebug_get_headers() as $i => $h) {
+            $h = explode(':', $h, 2);
+            if (isset($h[1])) {
+                $key = trim($h[0]);
+                $value = trim($h[1]);
+                $this->addHeader($key, $value);
+                if ($key == 'Location') {
+                    $this->addHeader('status', 'HTTP/1.1 301');
+                }
+            }
+        }
+
+        // prepare the content length
+        $contentLength = strlen($this->getContent());
+
+        // prepare the dynamic headers
+        $this->addHeader("Content-Length", $contentLength);
+    }
+
 }
