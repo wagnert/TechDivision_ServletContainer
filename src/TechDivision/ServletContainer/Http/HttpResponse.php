@@ -230,7 +230,7 @@ class HttpResponse implements Response {
     public function prepareHeaders()
     {
         // grap headers and set to response object
-        foreach (xdebug_get_headers() as $i => $h) {
+        foreach (appserver_get_headers() as $i => $h) {
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
                 $key = trim($h[0]);
