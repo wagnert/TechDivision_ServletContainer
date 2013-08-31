@@ -11,8 +11,11 @@
         }
     ],
     "require": {
-        "php" : ">=5.4.0",
-        "techdivision/appserver": "dev-master"
+        "php" : ">=5.4.0"
+    },
+    "require-dev": {
+        "techdivision/appserver": "dev-master",
+        "techdivision/socket": "dev-master"
     },
     "autoload": {
         "psr-0": {"TechDivision": "src/"}

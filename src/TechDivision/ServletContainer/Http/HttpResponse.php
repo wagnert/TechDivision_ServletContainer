@@ -28,9 +28,14 @@ use TechDivision\ServletContainer\Http\Cookie;
 class HttpResponse implements Response {
 
     /**
-     * @var status
+     * Header names
+     *
+     * @var string
      */
     const HEADER_NAME_STATUS = 'status';
+    const HEADER_NAME_DATE = 'Date';
+    const HEADER_NAME_CONNECTION = 'Connection';
+    const HEADER_NAME_CONTENT_TYPE = 'Content-Type';
 
     /**
      * @var string
@@ -61,9 +66,9 @@ class HttpResponse implements Response {
         $this->setHeaders(
             array(
                 self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
-                "Date"                   => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                "Connection"             => "close",
-                "Content-Type"           => "text/html",
+                self::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
+                self::HEADER_NAME_CONNECTION => "keep-alive",
+                self::HEADER_NAME_CONTENT_TYPE => "text/html",
             )
         );
     }
