@@ -1,7 +1,7 @@
 <?php 
 
 /**
- * TechDivision\ApplicationServer\HttpResponseTest
+ * TechDivision\ApplicationServer\Http\HttpResponseTest
  *
  * NOTICE OF LICENSE
  *
@@ -10,9 +10,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  */
 
-namespace TechDivision\ServletContainer;
-
-use TechDivision\ServletContainer\Http\HttpResponse;
+namespace TechDivision\ServletContainer\Http;
 
 /**
  * @package     TechDivision\ApplicationServer

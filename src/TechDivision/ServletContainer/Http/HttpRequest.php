@@ -787,5 +787,19 @@ class HttpRequest implements Request
         return $this->webappName;
     }
 
-
+    /**
+     * Returns the parameter with the passed name if available or NULL
+     * if the parameter not exists.
+     * 
+     * @param string $name The name of the parameter to return
+     * @param integer $filter The filter to use
+     * @return string
+     */
+    public function getParameter($name, $filter = FILTER_SANITIZE_STRING)
+    {
+        $parameterMap = $this->getParameterMap();
+        if (array_key_exists($name, $parameterMap)) {
+            return filter_var($parameterMap[$name], $filter);
+        }
+    }
 }

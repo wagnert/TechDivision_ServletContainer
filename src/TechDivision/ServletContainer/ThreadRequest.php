@@ -94,6 +94,7 @@ class ThreadRequest extends AbstractContextThread {
         
         // initialize a new client socket
         $client = $this->newInstance('TechDivision\ServletContainer\Socket\HttpClient');
+        $client->injectHttpRequest($this->newInstance('TechDivision\ServletContainer\Http\HttpRequest'));
         $client->setNewLine("\r\n\r\n");
 
         // set the client socket resource

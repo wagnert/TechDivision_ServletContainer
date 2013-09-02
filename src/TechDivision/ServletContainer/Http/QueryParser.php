@@ -94,9 +94,6 @@ class QueryParser
      */
     public function getResult()
     {
-        echo 'indexCounter: ' . PHP_EOL;
-        echo var_export($this->indexCounter, true);
-        echo PHP_EOL . PHP_EOL;
         return $this->result;
     }
 
