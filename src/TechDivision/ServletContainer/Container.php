@@ -45,6 +45,8 @@ class Container extends AbstractContainer {
                 $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
                 $servletRequest->setServerVar('SERVER_SOFTWARE', $application->getServerSoftware());
                 $servletRequest->setServerVar('SERVER_ADMIN', $application->getServerAdmin());
+                $servletRequest->setWebappName($application->getName());
+
                 return $application;
             }
         }
@@ -60,6 +62,8 @@ class Container extends AbstractContainer {
             $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getAppBase());
             $servletRequest->setServerVar('SERVER_SOFTWARE', $applications[$applicationName]->getServerSoftware());
             $servletRequest->setServerVar('SERVER_ADMIN', $applications[$applicationName]->getServerAdmin());
+            $servletRequest->setWebappName($applications[$applicationName]->getName());
+
             return $applications[$applicationName];
         }
 

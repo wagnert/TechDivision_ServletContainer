@@ -132,6 +132,13 @@ class HttpRequest implements Request
     protected $queryString;
 
     /**
+     * Name of the webapp related by the request
+     *
+     * @var string
+     */
+    protected $webappName;
+
+    /**
      * Params data
      *
      * @var array
@@ -758,6 +765,26 @@ class HttpRequest implements Request
     public function getClientPort()
     {
         return $this->clientPort;
+    }
+
+    /**
+     * Sets the webapps name related with the request
+     *
+     * @param string $webappName
+     */
+    public function setWebappName($webappName)
+    {
+        $this->webappName = $webappName;
+    }
+
+    /**
+     * returns the webapps name related with the request
+     *
+     * @return string
+     */
+    public function getWebappName()
+    {
+        return $this->webappName;
     }
 
 

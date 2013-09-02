@@ -77,13 +77,15 @@ class PersistentSessionManager implements SessionManager {
 
         $settings['session']['name'] = self::SESSION_NAME;
         $settings['session']['cookie']['lifetime'] = time() + 86400;
-        $settings['session']['cookie']['domain'] = null;
-        $settings['session']['cookie']['path'] = null;
+        $settings['session']['cookie']['domain'] = $request->getServerName();
+        $settings['session']['cookie']['path'] = '/'. $request->getWebappName();
         $settings['session']['cookie']['secure'] = false;
         $settings['session']['cookie']['httponly'] = false;
         $settings['session']['garbageCollectionProbability'] = 1;
         $settings['session']['inactivityTimeout'] = 1440;
-        
+
+        error_log(var_export($settings, true));
+
         // initialize and return the session instance
         $sessionParams = array($request, $sessionId, __CLASS__, time());
         $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
