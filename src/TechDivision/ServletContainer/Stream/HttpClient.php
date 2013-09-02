@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Socket\SecureHttpClient
+ * TechDivision\ServletContainer\Stream\HttpClient
  *
  * NOTICE OF LICENSE
  *
@@ -10,10 +10,11 @@
  * http://opensource.org/licenses/osl-3.0.php
  */
 
-namespace TechDivision\ServletContainer\Socket;
+namespace TechDivision\ServletContainer\Stream;
 
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\ServletContainer\Http\HttpRequest;
+use TechDivision\Stream\Client;
 
 /**
  * The http client implementation that handles the request like a webserver
@@ -25,8 +26,41 @@ use TechDivision\ServletContainer\Http\HttpRequest;
  * @author      Johann Zelger <jz@techdivision.com>
  *              Philipp Dittert <p.dittert@techdivision.com>
  */
-class SecureHttpClient extends HttpClient
+class HttpClient extends Client
 {
+    
+    /**
+     * The HttpRequest instance to use as factory.
+     * @var \TechDivision\ServletContainer\Http\HttpRequest
+     */
+    protected $httpRequest;
+
+    /**
+     * The new line character.
+     * @param $newLine
+     */
+    public function setNewLine($newLine) {
+        $this->newLine = $newLine;
+    }
+    
+    /**
+     * Injects the HttpRequest instance to use as factory.
+     * 
+     * @param \TechDivision\ServletContainer\Http\HttpRequest $request The request instance to use
+     * @return void
+     */
+    public function injectHttpRequest($request) {
+        $this->httpRequest = $request;
+    }
+    
+    /**
+     * Returns the HttpRequest instance used as factory.
+     * 
+     * @return \TechDivision\ServletContainer\Http\HttpRequest The request instance
+     */
+    public function getHttpRequest() {
+        return $this->httpRequest;
+    }
 
     /**
      * Receive a Stream from Socket an check it is valid
@@ -52,11 +86,8 @@ class SecureHttpClient extends HttpClient
 
         $body = str_replace($rawHeader . $this->getNewLine(), '', $buffer);
 
-        // get http request (factory)
-        $requestFactory = new HttpRequest();
-
         // get method type instance inited by raw headers
-        $requestInstance = $requestFactory->initFromRawHeader($rawHeader);
+        $requestInstance = $this->getHttpRequest()->initFromRawHeader($rawHeader);
 
         // check if body-length not reached content-length already
         if (($contentLength = $requestInstance->getHeader('Content-Length'))
