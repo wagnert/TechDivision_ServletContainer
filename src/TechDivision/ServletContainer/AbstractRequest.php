@@ -29,7 +29,7 @@ use TechDivision\ServletContainer\Container;
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <jz@techdivision.com>
  */
-class ThreadRequest extends AbstractContextThread {
+abstract class AbstractRequest extends AbstractContextThread {
 
     /**
      * Holds the container instance
@@ -88,12 +88,19 @@ class ThreadRequest extends AbstractContextThread {
     }
     
     /**
+     * Returns the HttpClient class to be used for handling the request.
+     * 
+     * @return string
+     */
+    abstract protected function getHttpClientClass();
+    
+    /**
      * @see AbstractThread::main()
      */
     public function main() {
         
         // initialize a new client socket
-        $client = $this->newInstance('TechDivision\ServletContainer\Socket\HttpClient');
+        $client = $this->newInstance($this->getHttpClientClass());
         $client->injectHttpRequest($this->newInstance('TechDivision\ServletContainer\Http\HttpRequest'));
         $client->setNewLine("\r\n\r\n");
 
