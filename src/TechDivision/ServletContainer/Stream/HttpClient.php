@@ -70,9 +70,10 @@ class HttpClient extends Client
      */
     public function receive()
     {
+        
         // initialize the buffer
         $buffer = null;
-
+        
         // read a chunk from the socket
         while ($buffer .= $this->read($this->getLineLength())) {
             // check if header finished

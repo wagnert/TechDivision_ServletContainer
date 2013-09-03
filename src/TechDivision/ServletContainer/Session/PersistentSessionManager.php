@@ -84,8 +84,6 @@ class PersistentSessionManager implements SessionManager {
         $settings['session']['garbageCollectionProbability'] = 1;
         $settings['session']['inactivityTimeout'] = 1440;
 
-        error_log(var_export($settings, true));
-
         // initialize and return the session instance
         $sessionParams = array($request, $sessionId, __CLASS__, time());
         $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
