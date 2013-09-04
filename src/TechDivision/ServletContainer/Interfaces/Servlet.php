@@ -16,6 +16,7 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Socket\HttpClient;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 
 /**
  * Interface for all servlets.
@@ -29,23 +30,25 @@ use TechDivision\ServletContainer\Socket\HttpClient;
 interface Servlet {
 
     /**
-     * @abstract
-     * @param ServletConfig $config
-     * @throws ServletException;
-     * @return mixed
+     * Initializes the servlet with the passed configuration.
+     *
+     * @param \TechDivision\ServletContainer\Servlets\ServletConfig $config The configuration to initialize the servlet with
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
+     * @return void
      */
     public function init(ServletConfig $config);
 
     /**
-     * @abstract
-     * @return ServletConfig
+     * Return's the servlet's configuration.
+     *
+     * @return \TechDivision\ServletContainer\Servlets\ServletConfig The servlet's configuration
      */
     public function getServletConfig();
 
     /**
-     * @abstract
-     * @param Request $req
-     * @param Response $res
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response sent back to the client
      * @throws ServletException
      * @throws IOException
      * @return mixed
@@ -53,22 +56,23 @@ interface Servlet {
     public function service(Request $req, Response $res);
 
     /**
-     * @abstract
-     * @return mixed
+     * Returns an array with the server variables.
+     *
+     * @return array The server variables
      */
     public function getServletInfo();
 
     /**
-     * @param HttpClient $client
-     * @param Response $response
-     * @return mixed
+     * Will be invoked by the PHP when the servlets destruct method or exit() or die() has been invoked.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client The Http client that handles the request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response sent back to the client
+     * @return void
      */
-    public function shutdown(HttpClient $client, Response $response);
+    public function shutdown(HttpClientInterface $client, Response $response);
 
     /**
-     * @abstract
-     * @return mixed
+     * @todo Document this method
      */
     public function destroy();
-
 }

@@ -12,7 +12,7 @@
 
 namespace TechDivision\ServletContainer\Stream;
 
-use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\Stream\Client;
 
@@ -26,7 +26,7 @@ use TechDivision\Stream\Client;
  * @author      Johann Zelger <jz@techdivision.com>
  *              Philipp Dittert <p.dittert@techdivision.com>
  */
-class HttpClient extends Client
+class HttpClient extends Client implements HttpClientInterface
 {
     
     /**
@@ -46,27 +46,22 @@ class HttpClient extends Client
     /**
      * Injects the HttpRequest instance to use as factory.
      * 
-     * @param \TechDivision\ServletContainer\Http\HttpRequest $request The request instance to use
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance to use
      * @return void
      */
     public function injectHttpRequest($request) {
         $this->httpRequest = $request;
     }
-    
+
     /**
-     * Returns the HttpRequest instance used as factory.
-     * 
-     * @return \TechDivision\ServletContainer\Http\HttpRequest The request instance
+     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpRequest()
      */
     public function getHttpRequest() {
         return $this->httpRequest;
     }
 
     /**
-     * Receive a Stream from Socket an check it is valid
-     *
-     * @return mixed
-     * @throws InvalidHeaderException Is thrown if the header is complete but not valid
+     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::receive()
      */
     public function receive()
     {

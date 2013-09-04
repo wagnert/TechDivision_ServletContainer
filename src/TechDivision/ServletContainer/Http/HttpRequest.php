@@ -204,7 +204,7 @@ class HttpRequest implements Request
         $requestInstance->setHeaders($this->parseHeaders($buffer));
 
         // parsing for Servername and Port
-        list($serverName, $serverPort) = explode(":", $requestInstance->getHeader('Host'));
+        list ($serverName, $serverPort) = explode(":", $requestInstance->getHeader('Host'));
 
         // set Servername and Serverport attributes
         $requestInstance->setServerName($serverName);
@@ -238,7 +238,6 @@ class HttpRequest implements Request
      */
     public function parse($content)
     {
-
     }
 
     public function getRequestMethodInstance()

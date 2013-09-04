@@ -16,6 +16,7 @@ use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Interfaces\ShutdownHandler;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Socket\HttpClient;
 
 /**
@@ -31,49 +32,48 @@ use TechDivision\ServletContainer\Socket\HttpClient;
 abstract class GenericServlet implements Servlet {
 
     /**
-     * The host configuration.
-     * @var ServletConfig
+     * The servlet configuration.
+     * @var \TechDivision\ServletContainer\Interfaces\ServletConfig
      */
     protected $config;
 
     /**
-     * @param ServletConfig $config
-     * @throws ServletException;
-     * @return mixed
+     * @see \TechDivision\ServletContainer\Interfaces\Servlet::init(ServletConfig $config)
      */
     public function init(ServletConfig $config) {
         $this->config = $config;
     }
 
     /**
-     * @return ServletConfig
+     * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletConfig()
      */
     public function getServletConfig() {
         return $this->config;
     }
 
     /**
-     * @return mixed|void
+     * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletInfo()
      */
     public function getServletInfo() {
         return $this->getServletConfig()->getServerVars();
     }
 
     /**
-     * @param ShutdownHandler $shutdownHandler
+     * Injects the shutdown handler.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\ShutdownHandler $shutdownHandler The shutdown handler
      */
     public function injectShutdownHandler(ShutdownHandler $shutdownHandler) {
         $shutdownHandler->register($this);
     }
 
     /**
-     * @param HttpClient $client
-     * @param Response $response
-     * @return mixed|void
+     * @see \TechDivision\ServletContainer\Interfaces\Servlet::shutdown(HttpClientInterface $client, Response $response)
      */
-    public function shutdown(HttpClient $client, Response $response)
+    public function shutdown(HttpClientInterface $client, Response $response)
     {
 
+        // check if the client has a connected socket
         if (is_resource($client->getResource())) {
 
             $content = '';
@@ -106,8 +106,7 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
-     * @return mixed|void
-     * @todo Implement destroy() method
+     * @see \TechDivision\ServletContainer\Interfaces\Servlet::destroy()
      */
     public function destroy() {
     }
