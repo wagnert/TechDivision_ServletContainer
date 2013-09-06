@@ -26,6 +26,12 @@ use TechDivision\ServletContainer\Interfaces\Part;
  */
 class HttpPart implements Part
 {
+    /**
+     * Defines header name constances
+     * 
+     * @var unknown
+     */
+    const HEADER_NAME_CONTENT_TYPE = 'Content-Type';
 	
 	/**
 	 * Holds input stream file pointer
@@ -120,7 +126,7 @@ class HttpPart implements Part
 	*/
 	public function getContentType()
 	{
-		return $this->getHeader();
+		return $this->getHeader(self::HEADER_NAME_CONTENT_TYPE);
 	}
 	
 	/**
