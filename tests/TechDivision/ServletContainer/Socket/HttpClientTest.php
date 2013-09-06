@@ -13,6 +13,7 @@
 namespace TechDivision\ServletContainer\Socket;
 
 use TechDivision\ServletContainer\Http\HttpRequest;
+use TechDivision\ServletContainer\Http\HttpPart;
 
 /**
  * @package     TechDivision\ServletContainer
@@ -39,6 +40,7 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
 	{
         $this->client = new HttpClient();
         $this->client->injectHttpRequest(new HttpRequest());
+        $this->client->injectHttpPart(new HttpPart());
         $this->client->setNewLine("\r\n\r\n");
 	}
 	

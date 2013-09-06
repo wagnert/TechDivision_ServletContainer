@@ -354,8 +354,11 @@ class HttpRequest implements Request
     {
         // set content to req instance
     	$this->setContent($content);
-    	// set params within url if exist
-		$this->setQueryString(parse_url($this->getUri(), PHP_URL_QUERY));
+    	// set and parse params within url if exist
+    	if ($queryString = parse_url($this->getUri(), PHP_URL_QUERY)) {
+    		$this->setQueryString($queryString);
+    		$this->getQueryParser()->parseStr($queryString);
+    	}
     	// check if multipart form data is given
     	if ($this->hasMultipartFormData()) {
             $this->parseMultipartFormData($content);
