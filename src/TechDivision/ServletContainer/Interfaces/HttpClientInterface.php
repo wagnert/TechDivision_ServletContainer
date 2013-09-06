@@ -30,6 +30,13 @@ interface HttpClientInterface {
      * @return \TechDivision\ServletContainer\Interfaces\Request The request factory instance
      */
     public function getHttpRequest();
+    
+    /**
+     * Returns the HttpPart factory instance.
+     *
+     * @return \TechDivision\ServletContainer\Interfaces\Part The part as factory instance
+     */
+    public function getHttpPart();
 
     /**
      * Returns the Request instance initialized with request data

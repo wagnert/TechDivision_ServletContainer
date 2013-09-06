@@ -54,10 +54,27 @@ class HttpClient extends Client implements HttpClientInterface
     }
 
     /**
+     * Injects the Part instance.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Part $part The part instance to use
+     * @return void
+     */
+    public function injectHttpPart($part) {
+        $this->httpPart = $part;
+    }
+    
+    /**
      * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpRequest()
      */
     public function getHttpRequest() {
         return $this->httpRequest;
+    }
+
+    /**
+     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpPart()
+     */
+    public function getHttpPart() {
+        return $this->httpPart;
     }
 
     /**
@@ -100,6 +117,9 @@ class HttpClient extends Client implements HttpClientInterface
                 }
             }
         }
+        
+        // inject part instance
+        $requestInstance->injectHttpPart($this->getHttpPart());
 
         // parse body with request instance
         $requestInstance->parse($body);

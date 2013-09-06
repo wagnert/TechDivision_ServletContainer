@@ -26,38 +26,4 @@ namespace TechDivision\ServletContainer\Http;
 class GetRequest extends HttpRequest
 {
 
-    /**
-     * parse get header content
-     *
-     * @param string $content
-     * @return void
-     */
-    public function parse($content)
-    {
-        // queryString is only available on GET Method
-        $qs = $this->parseQueryString($this->getUri());
-        $this->setQueryString($qs);
-
-        $this->setServerVar('QUERY_STRING', $qs);
-
-        $this->setParameters($qs);
-        $paramMap = $this->parseParameterMap($qs);
-        $this->setParameterMap($paramMap);
-    }
-
-    /**
-     * Parsing QueryString out of URI
-     *
-     * @param string $uri
-     * @return mixed
-     */
-    protected function parseQueryString($uri)
-    {
-        $url = parse_url($uri);
-        // parse path
-        if (array_key_exists('query', $url)) {
-            return $url['query'];
-        }
-    }
-
 }

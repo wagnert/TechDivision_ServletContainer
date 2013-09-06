@@ -98,10 +98,15 @@ abstract class AbstractRequest extends AbstractContextThread {
      * @see AbstractThread::main()
      */
     public function main() {
-        
+
+        /** @var HttpClient $client */
         // initialize a new client socket
         $client = $this->newInstance($this->getHttpClientClass());
         $client->injectHttpRequest($this->newInstance('TechDivision\ServletContainer\Http\HttpRequest'));
+
+        // inject part factory
+        $client->injectHttpPart($this->newInstance('TechDivision\ServletContainer\Http\HttpPart'));
+        
         $client->setNewLine("\r\n\r\n");
 
         // set the client socket resource
@@ -136,8 +141,6 @@ abstract class AbstractRequest extends AbstractContextThread {
 
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
-
-
 
         } catch (\Exception $e) {
 

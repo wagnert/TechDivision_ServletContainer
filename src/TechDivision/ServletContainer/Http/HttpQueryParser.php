@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Http\QueryParser
+ * TechDivision\ServletContainer\Http\HttpQueryParser
  *
  * NOTICE OF LICENSE
  *
@@ -12,6 +12,8 @@
 
 namespace TechDivision\ServletContainer\Http;
 
+use TechDivision\ServletContainer\Interfaces\QueryParser;
+
 /**
  * A http query parser to parse post and get params to array from query string
  *
@@ -21,7 +23,7 @@ namespace TechDivision\ServletContainer\Http;
  *              Open Software License (OSL 3.0)
  * @author      Johann Zelger <jz@techdivision.com>
  */
-class QueryParser
+class HttpQueryParser implements QueryParser
 {
 
     /**

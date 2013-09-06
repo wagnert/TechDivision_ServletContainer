@@ -31,9 +31,17 @@ class HttpClient extends Client implements HttpClientInterface
     
     /**
      * The HttpRequest instance to use as factory.
+     * 
      * @var \TechDivision\ServletContainer\Http\HttpRequest
      */
     protected $httpRequest;
+    
+    /**
+     * Hold the http part instance to use as factory.
+     * 
+     * @var \TechDivision\ServletContainer\Http\HttpPart
+     */
+    protected $httpPart;
 
     /**
      * The new line character.
@@ -54,10 +62,27 @@ class HttpClient extends Client implements HttpClientInterface
     }
     
     /**
+     * Injects the Part instance to use as factory.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Part $part The part instance to use
+     * @return void
+     */
+    public function injectHttpPart($part) {
+        $this->httpPart = $part;
+    }
+    
+    /**
      * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpRequest()
      */
     public function getHttpRequest() {
         return $this->httpRequest;
+    }
+    
+    /**
+     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpPart()
+     */
+    public function getHttpPart() {
+        return $this->httpPart;
     }
 
     /**
@@ -67,7 +92,7 @@ class HttpClient extends Client implements HttpClientInterface
     {
         // initialize the buffer
         $buffer = null;
-
+        
         // read a chunk from the socket
         while ($buffer .= $this->read($this->getLineLength())) {
         
@@ -101,6 +126,9 @@ class HttpClient extends Client implements HttpClientInterface
                 }
             }
         }
+        
+        // inject part instance
+        $requestInstance->injectHttpPart($this->getHttpPart());
 
         // parse body with request instance
         $requestInstance->parse($body);
