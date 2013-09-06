@@ -15,7 +15,8 @@
     },
     "require-dev": {
         "techdivision/appserver": "dev-master",
-        "techdivision/socket": "dev-master"
+        "techdivision/socket": "dev-master",
+        "techdivision/stream": "dev-master"
     },
     "autoload": {
         "psr-0": {"TechDivision": "src/"}
