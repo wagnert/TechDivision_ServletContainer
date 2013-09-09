@@ -17,6 +17,7 @@ use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
+use TechDivision\ServletContainer\Interfaces\QueryParser;
 
 /**
  * Abstract Http servlet implementation.
@@ -44,8 +45,7 @@ class PhpServlet extends StaticResourceServlet {
      * @var Response
      */
     protected $response;
-
-
+    
     /**
      * Set all headers for php script execution
      *

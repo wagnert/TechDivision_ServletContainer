@@ -17,6 +17,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Interfaces\ShutdownHandler;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
+use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Socket\HttpClient;
 
 /**
@@ -28,33 +29,45 @@ use TechDivision\ServletContainer\Socket\HttpClient;
  *              Open Software License (OSL 3.0)
  * @author      Markus Stockbauer <ms@techdivision.com>
  * @author      Tim Wagner <tw@techdivision.com>
+ * @author      Johann Zelger <jz@techdivision.com>
  */
 abstract class GenericServlet implements Servlet {
 
     /**
      * The servlet configuration.
+     * 
      * @var \TechDivision\ServletContainer\Interfaces\ServletConfig
      */
     protected $config;
 
     /**
+     * Holds a queryparser object
+     *
+     * @var QueryParser
+     */
+    protected $queryParser;
+
+    /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::init(ServletConfig $config)
      */
-    public function init(ServletConfig $config) {
+    public function init(ServletConfig $config)
+    {
         $this->config = $config;
     }
 
     /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletConfig()
      */
-    public function getServletConfig() {
+    public function getServletConfig()
+    {
         return $this->config;
     }
 
     /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletInfo()
      */
-    public function getServletInfo() {
+    public function getServletInfo()
+    {
         return $this->getServletConfig()->getServerVars();
     }
 
@@ -63,8 +76,30 @@ abstract class GenericServlet implements Servlet {
      *
      * @param \TechDivision\ServletContainer\Interfaces\ShutdownHandler $shutdownHandler The shutdown handler
      */
-    public function injectShutdownHandler(ShutdownHandler $shutdownHandler) {
+    public function injectShutdownHandler(ShutdownHandler $shutdownHandler)
+    {
         $shutdownHandler->register($this);
+    }
+
+    /**
+     * Injects a queryparser
+     *
+     * @param QueryParser $queryParser
+     * @return void
+     */
+    public function injectQueryParser(QueryParser $queryParser)
+    {
+        $this->queryParser = $queryParser;
+    }
+    
+    /**
+     * Returns the injected query parser object
+     *
+     * @return QueryParser
+     */
+    public function getQueryParser()
+    {
+        return $this->queryParser;
     }
 
     /**
@@ -108,6 +143,7 @@ abstract class GenericServlet implements Servlet {
     /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::destroy()
      */
-    public function destroy() {
+    public function destroy()
+    {
     }
 }

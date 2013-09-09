@@ -134,9 +134,14 @@ abstract class AbstractRequest extends AbstractContextThread {
             // try to locate a servlet which could service the current request
             $servlet = $application->locate($request);
 
+            // inject shutdown handler
             $servlet->injectShutdownHandler(
                 $this->newInstance(
                     'TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array($client, $response))
+            );
+            // inject query parser
+            $servlet->injectQueryParser(
+            	$this->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser')
             );
 
             // let the servlet process the request and store the result in the response

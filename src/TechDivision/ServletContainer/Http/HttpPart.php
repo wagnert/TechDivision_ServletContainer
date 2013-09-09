@@ -66,7 +66,7 @@ class HttpPart implements Part
 	 * 
 	 * @var int
 	 */
-	protected $size;
+	protected $size = 0;
 
 	/**
 	 * Initiates a http form part object
