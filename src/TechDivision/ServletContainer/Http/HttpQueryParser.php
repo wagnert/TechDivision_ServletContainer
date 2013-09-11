@@ -188,5 +188,15 @@ class HttpQueryParser implements QueryParser
         // merge buildValue into existing result
         $this->merge($this->result, $buildValue);
     }
+    
+    /**
+     * Clears the result
+     * 
+     * @return void
+     */
+    public function clear()
+    {
+        $this->result = array();
+    }
 
 }

@@ -235,7 +235,7 @@ class HttpRequest implements Request
      * @return void
      */
     public function initFromRawHeader($buffer)
-    {    	
+    {   
         // parse method uri and http version
         list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
 
@@ -283,6 +283,7 @@ class HttpRequest implements Request
      */
     public function parseMultipartFormData($content)
     {
+        
         // grab multipart boundary from content type header
         preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);   
         // get boundary
@@ -319,10 +320,9 @@ class HttpRequest implements Request
                 // set given filename
                 $part->setFilename($matches[2]);
                 // put content to part
-                $part->putContent($partBody);
+                $part->putContent(preg_replace('/.'.PHP_EOL.'$/', '', $partBody));
                 // add the part instance to request
                 $this->addPart($part);
-                
             // parse all other fields as normal key value pairs
             } else {
                 // match "name" and optional value in between newline sequences
