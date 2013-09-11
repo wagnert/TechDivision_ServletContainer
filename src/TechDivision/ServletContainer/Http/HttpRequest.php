@@ -690,6 +690,16 @@ class HttpRequest implements Request
     }
 
     /**
+     * Return content
+     *
+     * @return string $content
+     */
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    /**
      * Returns request method
      *
      * @return string

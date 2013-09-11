@@ -31,7 +31,7 @@ class HttpQueryParser implements QueryParser
      *
      * @var array
      */
-    protected $result;
+    protected $result = array();
 
     /**
      * Holds auto generated indices when ?value[]= is used
@@ -106,14 +106,17 @@ class HttpQueryParser implements QueryParser
      */
     public function parseStr($queryStr)
     {
-        // fetch pairs from query
-        $pairs = explode('&', $this->prepareQueryStr($queryStr));
-        // iterate over all pairs1
-        foreach ($pairs as $pair) {
-            // split pair into param and value
-            list($param, $value) = explode('=', $pair);
-            // parse key value
-            $this->parseKeyValue($param, $value);
+        // check if query string is empty
+        if (empty($queryStr) === false) {
+            // fetch pairs from query
+            $pairs = explode('&', $this->prepareQueryStr($queryStr));
+            // iterate over all pairs1
+            foreach ($pairs as $pair) {
+                // split pair into param and value
+                list($param, $value) = explode('=', $pair);
+                // parse key value
+                $this->parseKeyValue($param, $value);
+            }
         }
         // return new merged result
         return $this->result;
