@@ -429,7 +429,7 @@ class HttpRequest implements Request
      *
      *@return void
      */
-    protected function initServerVars()
+    public function initServerVars()
     {
         $this->server = array(
             'HTTP_HOST' => $this->getHeader('Host'),
@@ -736,7 +736,7 @@ class HttpRequest implements Request
      * @param string $uri URI
      * @return void
      */
-    protected function setUri($uri)
+    public function setUri($uri)
     {
         $this->uri = $uri;
     }
