@@ -82,10 +82,13 @@ class HttpQueryParser implements QueryParser
      */
     public function prepareQueryStr($queryStr)
     {
+        // decode query string
+        $queryStr = urldecode($queryStr);
         // cut off '?' if its at the beginning of given query string
         if (strpos($queryStr, '?') !== false) {
             $queryStr = substr($queryStr, 1, strlen($queryStr));
         }
+        // return prepared query string
         return $queryStr;
     }
 

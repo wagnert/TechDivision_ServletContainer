@@ -86,4 +86,41 @@ class HttpQueryParserTest extends \PHPUnit_Framework_TestCase {
 	
 	    $this->assertSame(array(), $this->queryParser->getResult());
 	}
+
+	/**
+	 * Tests parse string functionality with filled queryString
+	 * and leading question mark url encoded
+	 */
+	public function testParseStrFunctionWithNonEmptyEncodedQueryStringAndLeadingQuestionMark()
+	{
+	    $queryString = urlencode('?@key-3=@value-1&key-2=value-2&key-1=value-3');
+	    
+	    $this->queryParser->parseStr($queryString);
+	
+	    $expectedResult = array(
+	        '@key-3' => '@value-1',
+	        'key-2' => 'value-2',
+	        'key-1' => 'value-3'
+	    );
+	    $this->assertSame($expectedResult, $this->queryParser->getResult());
+	}
+	
+	/**
+	 * Tests parse string functionality with filled queryString
+	 * and leading question mark url encoded twice
+	 */
+	public function testParseStrFunctionWithNonEmptyDoubleEncodedQueryStringAndLeadingQuestionMark()
+	{
+	    $queryString = urlencode(urlencode('?@key-3=@value-1&key-2=value-2&key-1=value-3'));
+	     
+	    $this->queryParser->parseStr($queryString);
+	
+	    $expectedResult = array(
+	        '@key-3' => '@value-1',
+	        'key-2' => 'value-2',
+	        'key-1' => 'value-3'
+	    );
+	    $this->assertSame($expectedResult, $this->queryParser->getResult());
+	}
+	
 }
