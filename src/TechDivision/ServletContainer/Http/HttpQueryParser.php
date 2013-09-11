@@ -106,6 +106,8 @@ class HttpQueryParser implements QueryParser
      */
     public function parseStr($queryStr)
     {
+        // prepare query string before parsing it
+        $queryStr = $this->prepareQueryStr($queryStr);
         // check if query string is empty
         if (empty($queryStr) === false) {
             // fetch pairs from query

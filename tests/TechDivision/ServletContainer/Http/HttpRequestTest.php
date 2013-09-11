@@ -58,4 +58,5 @@ class HttpRequestTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('127.0.0.1', $requestInstance->getServerName());
         $this->assertEquals('8590', $requestInstance->getServerPort());
     }
+    
 }
