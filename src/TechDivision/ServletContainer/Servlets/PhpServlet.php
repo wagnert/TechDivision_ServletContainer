@@ -139,7 +139,7 @@ class PhpServlet extends StaticResourceServlet {
     /**
      * Sets request object
      *
-     * @param mixed $request
+     * @param Request $request
      */
     public function setRequest($request)
     {
@@ -149,7 +149,7 @@ class PhpServlet extends StaticResourceServlet {
     /**
      * Returns request object
      *
-     * @return mixed
+     * @return Request
      */
     public function getRequest()
     {
@@ -159,7 +159,7 @@ class PhpServlet extends StaticResourceServlet {
     /**
      * Sets response object
      *
-     * @param mixed $response
+     * @param Response $response
      */
     public function setResponse($response)
     {
@@ -169,7 +169,7 @@ class PhpServlet extends StaticResourceServlet {
     /**
      * Returns response object
      *
-     * @return mixed
+     * @return Response
      */
     public function getResponse()
     {

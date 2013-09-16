@@ -51,10 +51,10 @@ class PersistentSessionManager implements SessionManager {
         // @todo merge refactoring for headers getter by bcmzero
         $headers = $request->getHeaders();
         $sessionId = null;
-
+        
         // try to retrieve the session id from the cookies in request header
         if (isset($headers['Cookie'])) {
-
+            
             foreach (explode(';', $headers['Cookie']) as $cookie) {
 
                 list($name, $value) = explode('=', $cookie);
