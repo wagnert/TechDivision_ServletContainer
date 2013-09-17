@@ -51,23 +51,18 @@ class HttpQueryParser implements QueryParser
     protected function merge(&$array, &$array_i) {
         // for each element of the array (key => value)
         foreach ($array_i as $k => $v) {
-            // if the value itself is an array, the process repeats recursively
+            // if the value itself is an array
             if (is_array($v)) {
                 if (!isset($array[$k])) {
                     $array[$k] = array();
                 }
+                // the process repeats recursively
                 $this->merge($array[$k], $v);
-
-                // else, the value is assigned to the current element of the resulting array
+            // else, the value is assigned to the current element of the resulting array
             } else {
                 if (isset($array[$k]) && is_array($array[$k])) {
                     $array[$k][0] = $v;
                 } else {
-                    if (isset($array) && !is_array($array)) {
-                        $temp = $array;
-                        $array = array();
-                        $array[0] = $temp;
-                    }
                     $array[$k] = $v;
                 }
             }
@@ -193,10 +188,10 @@ class HttpQueryParser implements QueryParser
         // merge buildValue into existing result
         $this->merge($this->result, $buildValue);
     }
-    
+
     /**
      * Clears the result
-     * 
+     *
      * @return void
      */
     public function clear()
