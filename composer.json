@@ -1,6 +1,5 @@
 {
     "name": "techdivision/servletcontainer",
-    "type": "package",
     "description": "Servlet container implementation that serves HTTP request for thread based PHP ApplicationServer.",
     "homepage": "https://github.com/techdivision/TechDivision_ApplicationServer",
     "license": ["OSL-3.0"],
@@ -11,14 +10,12 @@
         }
     ],
     "require": {
-        "php" : ">=5.4.0"
-    },
-    "require-dev": {
+        "php" : ">=5.4.0",
         "techdivision/appserver": "dev-master",
         "techdivision/socket": "dev-master",
         "techdivision/stream": "dev-master"
     },
     "autoload": {
-        "psr-0": {"TechDivision": "src/"}
+        "psr-0": {"TechDivision": ["src/", "tests/"]}
     }
 }
