@@ -9,7 +9,6 @@
  * that is available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  */
-    
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractApplication;
@@ -17,33 +16,24 @@ use TechDivision\ServletContainer\ServletManager;
 use TechDivision\ServletContainer\Service\Locator\ServletLocator;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ApplicationServer\Configuration;
+use TechDivision\ApplicationServer\Vhost;
 
 /**
  * The application instance holds all information about the deployed application
  * and provides a reference to the servlet manager and the initial context.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Tim Wagner <tw@techdivision.com>
+ * @package TechDivision\ServletContainer
+ * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
+ * @license http://opensource.org/licenses/osl-3.0.php
+ *          Open Software License (OSL 3.0)
+ * @author Tim Wagner <tw@techdivision.com>
  */
 class Application extends AbstractApplication
 {
-    /**
-     * Path to the container's VHost configuration.
-     * @var string
-     */
-    const XPATH_CONTAINER_VHOSTS = '/container/host/vhosts/vhost';
-
-    /**
-     * Path to the container's VHost alias configuration.
-     * @var string
-     */
-    const XPATH_CONTAINER_ALIAS = '/vhost/aliases/alias';
 
     /**
      * The servlet manager.
+     *
      * @var \TechDivision\ServletContainer\ServletManager
      */
     protected $servletManager;
@@ -57,44 +47,51 @@ class Application extends AbstractApplication
     /**
      * Has been automatically invoked by the container after the application
      * instance has been created.
-     * 
+     *
      * @return \TechDivision\ServletContainer\Application The connected application
      */
-    public function connect() {
-        
+    public function connect()
+    {
+
         // initialize the class loader with the additional folders
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath());
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath() . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'classes');
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath() . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'lib');
-        
+
         // prepare the VHost configurations
-        foreach ($this->getConfiguration()->getChilds(self::XPATH_CONTAINER_VHOSTS) as $vhost) {
+        foreach ($this->getConfiguration()->getChilds(Vhost::XPATH_CONTAINER_VHOSTS) as $vhost) {
 
             // check if vhost configuration belongs to application
             if ($this->getName() == ltrim($vhost->getAppBase(), '/')) {
 
                 // prepare the aliases if available
                 $aliases = array();
-                foreach ($vhost->getChilds(self::XPATH_CONTAINER_ALIAS) as $alias) {
+                foreach ($vhost->getChilds(Vhost::XPATH_CONTAINER_ALIAS) as $alias) {
                     $aliases[] = $alias->getValue();
                 }
 
                 // initialize VHost classname and parameters
-                $vhostClassname = '\TechDivision\ServletContainer\Vhost';
-                $vhostParameter = array($vhost->getName(), $vhost->getAppBase(), $aliases);
+                $vhostClassname = '\TechDivision\ApplicationServer\Vhost';
+                $vhostParameter = array(
+                    $vhost->getName(),
+                    $vhost->getAppBase(),
+                    $aliases
+                );
 
                 // register VHost in array with app base folder
                 $this->vhosts[] = $this->newInstance($vhostClassname, $vhostParameter);
             }
         }
-        
+
         // initialize the servlet manager instance
-        $servletManager = $this->newInstance('TechDivision\ServletContainer\ServletManager', array($this));
+        $servletManager = $this->newInstance('TechDivision\ServletContainer\ServletManager', array(
+            $this
+        ));
         $servletManager->initialize();
-        
+
         // set the entity manager
         $this->setServletManager($servletManager);
-        
+
         // return the instance itself
         return $this;
     }
@@ -104,8 +101,11 @@ class Application extends AbstractApplication
      *
      * @return string The server software
      */
-    public function getServerSoftware() {
-        return $this->getConfiguration()->getChild(self::XPATH_CONTAINER_HOST)->getServerSoftware();
+    public function getServerSoftware()
+    {
+        return $this->getConfiguration()
+            ->getChild(Vhost::XPATH_CONTAINER_HOST)
+            ->getServerSoftware();
     }
 
     /**
@@ -113,27 +113,33 @@ class Application extends AbstractApplication
      *
      * @return string The server admin email
      */
-    public function getServerAdmin() {
-        return $this->getConfiguration()->getChild(self::XPATH_CONTAINER_HOST)->getServerAdmin();
+    public function getServerAdmin()
+    {
+        return $this->getConfiguration()
+            ->getChild(Vhost::XPATH_CONTAINER_HOST)
+            ->getServerAdmin();
     }
-    
+
     /**
      * Sets the applications entity manager instance.
-     * 
-     * @param \TechDivision\ServletContainer\ServletManager $entityManager The entity manager instance
+     *
+     * @param \TechDivision\ServletContainer\ServletManager $entityManager
+     *            The entity manager instance
      * @return \TechDivision\ServletContainer\Application The application instance
      */
-    public function setServletManager(ServletManager $servletManager) {
+    public function setServletManager(ServletManager $servletManager)
+    {
         $this->servletManager = $servletManager;
         return $this;
     }
-    
+
     /**
      * Return the entity manager instance.
-     * 
+     *
      * @return \TechDivision\ServletContainer\ServletManager The entity manager instance
      */
-    public function getServletManager() {
+    public function getServletManager()
+    {
         return $this->servletManager;
     }
 
@@ -142,17 +148,20 @@ class Application extends AbstractApplication
      *
      * @return array The available VHost configurations
      */
-    public function getVhosts() {
+    public function getVhosts()
+    {
         return $this->vhosts;
     }
 
     /**
      * Checks if the application is the VHost for the passed server name.
      *
-     * @param string $serverName The server name to check the application being a VHost of
+     * @param string $serverName
+     *            The server name to check the application being a VHost of
      * @return boolean TRUE if the application is the VHost, else FALSE
      */
-    public function isVhostOf($serverName) {
+    public function isVhostOf($serverName)
+    {
 
         // check if the application is VHost for the passed server name
         foreach ($this->getVhosts() as $vhost) {
@@ -169,13 +178,14 @@ class Application extends AbstractApplication
         }
         return false;
     }
-    
+
     /**
-     * 
+     *
      * @param Request $request
      * @return type
      */
-    public function locate(Request $request) {
+    public function locate(Request $request)
+    {
         $servletLocator = new ServletLocator($this->getServletManager());
         return $servletLocator->locate($request);
     }
