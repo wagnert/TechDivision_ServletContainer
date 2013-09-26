@@ -33,7 +33,7 @@ use TechDivision\ServletContainer\Interfaces\QueryParser;
  */
 class HttpRequest implements Request
 {
-    
+
     /**
      * Separator between Header and Content (e.g. POST-Request)
      *
@@ -152,10 +152,10 @@ class HttpRequest implements Request
      * @var PersistentSessionManager
      */
     protected $sessionManager;
-    
+
     /**
      * Holds the query parser
-     * 
+     *
      * @var unknown QueryParser
      */
     protected $queryParser;
@@ -173,34 +173,34 @@ class HttpRequest implements Request
      * @var array
      */
     protected $parameterMap = array();
-    
+
     /**
      * Holds collection of parts from multipart form data
-     * 
+     *
      * @var array A Collection of HttpPart Objects
      */
     protected $parts = array();
-    
+
     /**
      * Holds the part factory instance
-     * 
+     *
      * @var HttpPart
      */
     protected $part;
-    
+
     /**
      * Inject the session manager into the request instance.
-     * 
+     *
      * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager The session manager instance
      * @return void
      */
     public function injectSessionManager(SessionManager $sessionManager) {
         $this->sessionManager = $sessionManager;
     }
-    
+
     /**
      * Inject the query parser
-     * 
+     *
      * @param QueryParser $queryParser
      * @return void
      */
@@ -210,17 +210,17 @@ class HttpRequest implements Request
 
     /**
      * Inject a part factory
-     * 
+     *
      * @param Part $part a Part implementation with factory function
      * @return void
      */
     public function injectHttpPart(Part $part) {
         $this->part = $part;
     }
-    
+
     /**
      * Returns an part instance
-     * 
+     *
      * @return Part
      */
     public function getHttpPartInstance()
@@ -235,7 +235,7 @@ class HttpRequest implements Request
      * @return void
      */
     public function initFromRawHeader($buffer)
-    {   
+    {
         // parse method uri and http version
         list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
 
@@ -268,24 +268,24 @@ class HttpRequest implements Request
         }
 
         $requestInstance->injectQueryParser(new HttpQueryParser());
-        
+
         // set accepted encoding data
         $this->acceptedEncodings = explode(',', $requestInstance->getHeader('Accept-Encoding'));
 
         return $requestInstance;
     }
-    
+
     /**
      * Parse multipart form data
-     * 
+     *
      * @param string $content
      * @return void
      */
     public function parseMultipartFormData($content)
     {
-        
+
         // grab multipart boundary from content type header
-        preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);   
+        preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
         // get boundary
         $boundary = $matches[1];
         // split content by boundary
@@ -299,13 +299,14 @@ class HttpRequest implements Request
             if (empty($block)) {
                 continue;
             }
-            
+
             // check if filename is given
             if (strpos($block, '; filename="') !== FALSE) {
                 // init new part instance
-                $part = $this->getHttpPartInstance();                	
+                $part = $this->getHttpPartInstance();
                 // seperate headers from body
-                list($partHeaders, $partBody) = explode("\n\r\n", $block);
+                $partHeaders = strstr($block, "\n\r\n", true);
+                $partBody = ltrim(strstr($block, "\n\r\n"));
                 // parse part headers
                 foreach (explode("\n", $partHeaders) as $i => $h) {
                     $h = explode(':', $h, 2);
@@ -331,10 +332,10 @@ class HttpRequest implements Request
             }
         }
     }
-    
+
     /**
      * Checks if request has multipart formdata or not
-     * 
+     *
      * @return boolean
      */
     public function hasMultipartFormData()
@@ -343,7 +344,7 @@ class HttpRequest implements Request
         preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
         return (count($matches) > 0);
     }
-   
+
     /**
      * Parse request content and sets parameter map and parts
      *
@@ -362,17 +363,17 @@ class HttpRequest implements Request
     	// check if multipart form data is given
     	if ($this->hasMultipartFormData()) {
             $this->parseMultipartFormData($content);
-    	} else {    		
+    	} else {
     	    // content type is probably regular form-encoded
     	    $this->getQueryParser()->parseStr(urldecode($content));
     	}
     	// finally set parameter map
     	$this->setParameterMap($this->getQueryParser()->getResult());
     }
-    
+
     /**
      * Request instance factory
-     * 
+     *
      * @throws InvalidHeaderException
      * @return Request
      */
@@ -453,7 +454,7 @@ class HttpRequest implements Request
             'REQUEST_URI' => $this->getUri(),
             'REQUEST_TIME' => time(),
         );
-        
+
         if ($cookie = $this->getHeader('Cookie')) {
             $this->server['HTTP_COOKIE'] = $cookie;
         }
@@ -677,10 +678,10 @@ class HttpRequest implements Request
     {
         $this->headers = $headers;
     }
-    
+
     /**
      * Sets the body content
-     * 
+     *
      * @param string $content
      * @return void
      */
@@ -776,10 +777,10 @@ class HttpRequest implements Request
 
         return $this->session;
     }
-    
+
     /**
      * Returns the injected query parser
-     * 
+     *
      * @return QueryParser
      */
     public function getQueryParser()
@@ -886,7 +887,7 @@ class HttpRequest implements Request
     /**
      * Returns the parameter with the passed name if available or NULL
      * if the parameter not exists.
-     * 
+     *
      * @param string $name The name of the parameter to return
      * @param integer $filter The filter to use
      * @return string
@@ -898,10 +899,10 @@ class HttpRequest implements Request
             return filter_var($parameterMap[$name], $filter);
         }
     }
-    
+
     /**
      * Returns a part object by given name
-     * 
+     *
      * @param string $name The name of the form part
      * @return HttpPart
      */
@@ -911,20 +912,20 @@ class HttpRequest implements Request
     		return $this->parts[$name];
     	}
     }
-    
+
     /**
      * Returns the parts collection as array
-     * 
+     *
      * @return array A collection of HttpPart objects
      */
     public function getParts()
     {
     	return $this->parts;
     }
-    
+
     /**
      * adds a part to the parts collection
-     * 
+     *
      * @param Part $part a form part object
      * @param string $name A manually defined name
      * @return void

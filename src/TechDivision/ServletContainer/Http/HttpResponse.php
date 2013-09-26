@@ -227,20 +227,28 @@ class HttpResponse implements Response {
     }
 
     /**
-     * Prepares the headers for the given response and returns them.
+     * Prepares the headers for final processing
      *
-     * @param Response $response The response to prepare the header for
-     * @return string The headers
+     * @return void
      */
     public function prepareHeaders()
     {
         // grap headers and set to response object
         foreach (appserver_get_headers() as $i => $h) {
+            
+            // skip default session delete header 
+            if (strpos($h,"Set-Cookie: PHPSESSID=deleted;")!==false) {
+                continue;   
+            }
+            
+            // set headers defined in sapi headers   
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
                 $key = trim($h[0]);
                 $value = trim($h[1]);
                 $this->addHeader($key, $value);
+                
+                // set status header to 301 if location is given
                 if ($key == 'Location') {
                     $this->addHeader('status', 'HTTP/1.1 301');
                 }
