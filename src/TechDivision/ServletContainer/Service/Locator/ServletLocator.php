@@ -103,7 +103,7 @@ class ServletLocator implements ResourceLocatorInterface {
     public function locate(Request $request) {
 
         // build the file-path of the request
-        $path = $request->getUri();
+        $path = $request->getPathInfo();
 
         // check if the application is loaded by a VHost
         if (!$this->getApplication()->isVhostOf($request->getServerName())) {
