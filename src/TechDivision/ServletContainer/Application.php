@@ -104,7 +104,7 @@ class Application extends AbstractApplication
     public function getServerSoftware()
     {
         return $this->getConfiguration()
-            ->getChild(Vhost::XPATH_CONTAINER_HOST)
+            ->getChild(self::XPATH_CONTAINER_HOST)
             ->getServerSoftware();
     }
 
@@ -116,7 +116,7 @@ class Application extends AbstractApplication
     public function getServerAdmin()
     {
         return $this->getConfiguration()
-            ->getChild(Vhost::XPATH_CONTAINER_HOST)
+            ->getChild(self::XPATH_CONTAINER_HOST)
             ->getServerAdmin();
     }
 
