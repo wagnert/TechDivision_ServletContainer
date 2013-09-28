@@ -53,35 +53,13 @@ class Application extends AbstractApplication
     public function connect()
     {
 
+        // also initialize the vhost configuration
+        parent::connect();
+
         // initialize the class loader with the additional folders
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath());
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath() . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'classes');
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->getWebappPath() . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'lib');
-
-        // prepare the VHost configurations
-        foreach ($this->getConfiguration()->getChilds(Vhost::XPATH_CONTAINER_VHOSTS) as $vhost) {
-
-            // check if vhost configuration belongs to application
-            if ($this->getName() == ltrim($vhost->getAppBase(), '/')) {
-
-                // prepare the aliases if available
-                $aliases = array();
-                foreach ($vhost->getChilds(Vhost::XPATH_CONTAINER_ALIAS) as $alias) {
-                    $aliases[] = $alias->getValue();
-                }
-
-                // initialize VHost classname and parameters
-                $vhostClassname = '\TechDivision\ApplicationServer\Vhost';
-                $vhostParameter = array(
-                    $vhost->getName(),
-                    $vhost->getAppBase(),
-                    $aliases
-                );
-
-                // register VHost in array with app base folder
-                $this->vhosts[] = $this->newInstance($vhostClassname, $vhostParameter);
-            }
-        }
 
         // initialize the servlet manager instance
         $servletManager = $this->newInstance('TechDivision\ServletContainer\ServletManager', array(
