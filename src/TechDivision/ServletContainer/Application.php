@@ -81,9 +81,7 @@ class Application extends AbstractApplication
      */
     public function getServerSoftware()
     {
-        return $this->getConfiguration()
-            ->getChild(self::XPATH_CONTAINER_HOST)
-            ->getServerSoftware();
+        return $this->getContainerNode()->getHost()->getServerSoftware();
     }
 
     /**
@@ -93,9 +91,7 @@ class Application extends AbstractApplication
      */
     public function getServerAdmin()
     {
-        return $this->getConfiguration()
-            ->getChild(self::XPATH_CONTAINER_HOST)
-            ->getServerAdmin();
+        return $this->getContainerNode()->getHost()->getServerAdmin();
     }
 
     /**
