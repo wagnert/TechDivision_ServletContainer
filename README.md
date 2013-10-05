@@ -31,6 +31,7 @@ In the second step you'll create a file named `web.xml` that declares your servl
     <display-name>A simple servlet example</display-name>
     <description>My first web application</description>
 
+    <!-- declares your first serlvet -->
     <servlet>
         <description><![CDATA[My first servlet.]]></description>
         <display-name>MyServlet</display-name>
@@ -38,15 +39,18 @@ In the second step you'll create a file named `web.xml` that declares your servl
         <servlet-class>\My\App\Servlets\MyServlet</servlet-class>
     </servlet>
     
+    <!-- matches URL http://127.0.0.1:8586/myapp -->
     <servlet-mapping>
         <servlet-name>MyServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
-
+    
+    <!-- matches URL http://127.0.0.1:8586/myapp/* -->
     <servlet-mapping>
         <servlet-name>MyServlet</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+    
 </web-app>
 ```
 
