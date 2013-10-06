@@ -65,10 +65,9 @@ class Application extends AbstractApplication
         $servletManager = $this->newInstance('TechDivision\ServletContainer\ServletManager', array(
             $this
         ));
-        $servletManager->initialize();
 
         // set the entity manager
-        $this->setServletManager($servletManager);
+        $this->setServletManager($servletManager->initialize());
 
         // return the instance itself
         return $this;

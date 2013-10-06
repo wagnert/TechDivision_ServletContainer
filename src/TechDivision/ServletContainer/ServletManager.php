@@ -59,49 +59,17 @@ class ServletManager
      * Has been automatically invoked by the container after the application
      * instance has been created.
      *
-     * @return \TechDivision\ServletContainer\Application The connected application
+     * @return \TechDivision\ServletContainer\ServletManager The servlet manager instance itself
      */
     public function initialize()
     {
-
-        // deploy the web application and register the servlets
-        $this->deployWebapps();
         $this->registerServlets();
-
-        // return the instance itself
         return $this;
-    }
-
-    /**
-     *
-     * @param
-     *            $archive
-     */
-    protected function deployArchive($archive)
-    {
-        error_log(__METHOD__ . ' is not implemented!');
-    }
-
-    /**
-     * Gathers all available archived webapps and deploys them for usage.
-     *
-     * @param
-     *            void
-     * @return void
-     */
-    protected function deployWebapps()
-    {
-        // gather all the available web application archives and deploy them
-        foreach (new \RegexIterator(new \FilesystemIterator($this->getWebappPath()), '/^.*\.phar$/') as $archive) {
-            $this->deployArchive($archive);
-        }
     }
 
     /**
      * Finds all servlets which are provided by the webapps and initializes them.
      *
-     * @param
-     *            void
      * @return void
      */
     protected function registerServlets()
