@@ -9,7 +9,6 @@
  * that is available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  */
-
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractContextThread;
@@ -23,13 +22,14 @@ use TechDivision\ServletContainer\Container;
 /**
  * The thread implementation that handles the request.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Johann Zelger <jz@techdivision.com>
+ * @package TechDivision\ServletContainer
+ * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license http://opensource.org/licenses/osl-3.0.php
+ *          Open Software License (OSL 3.0)
+ * @author Johann Zelger <jz@techdivision.com>
  */
-abstract class AbstractRequest extends AbstractContextThread {
+abstract class AbstractRequest extends AbstractContextThread
+{
 
     /**
      * Holds the container instance
@@ -55,18 +55,24 @@ abstract class AbstractRequest extends AbstractContextThread {
     /**
      * Initializes the request with the client socket.
      *
-     * @param Container $container The ServletContainer
-     * @param resource $resource The client socket instance
+     * @param Container $container
+     *            The ServletContainer
+     * @param resource $resource
+     *            The client socket instance
      * @return void
      */
-    public function init($container, $resource) {
+    public function init($container, $resource)
+    {
         $this->container = $container;
         $this->resource = $resource;
     }
 
     /**
-     * @param $client
-     * @param $response
+     *
+     * @param
+     *            $client
+     * @param
+     *            $response
      */
     public function send($client, $response)
     {
@@ -86,27 +92,31 @@ abstract class AbstractRequest extends AbstractContextThread {
 
         unset($client);
     }
-    
+
     /**
      * Returns the HttpClient class to be used for handling the request.
-     * 
+     *
      * @return string
      */
     abstract protected function getHttpClientClass();
-    
+
     /**
+     *
      * @see AbstractThread::main()
      */
-    public function main() {
+    public function main()
+    {
 
-        /** @var HttpClient $client */
+        /**
+         * @var HttpClient $client
+         */
         // initialize a new client socket
         $client = $this->newInstance($this->getHttpClientClass());
         $client->injectHttpRequest($this->newInstance('TechDivision\ServletContainer\Http\HttpRequest'));
 
         // inject part factory
         $client->injectHttpPart($this->newInstance('TechDivision\ServletContainer\Http\HttpPart'));
-        
+
         $client->setNewLine("\r\n\r\n");
 
         // set the client socket resource
@@ -117,12 +127,16 @@ abstract class AbstractRequest extends AbstractContextThread {
 
         try {
 
-            /** @var HttpRequest $request */
+            /**
+             * @var HttpRequest $request
+             */
             // receive Request Object from client
             $request = $client->receive();
-            
+
             // inject the request with the session manager
-            $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array($this->initialContext));
+            $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(
+                $this->initialContext
+            ));
             $request->injectSessionManager($sessionManager);
 
             // initialize response container
@@ -135,14 +149,13 @@ abstract class AbstractRequest extends AbstractContextThread {
             $servlet = $application->locate($request);
 
             // inject shutdown handler
-            $servlet->injectShutdownHandler(
-                $this->newInstance(
-                    'TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array($client, $response))
-            );
+            $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
+                $client,
+                $response
+            )));
+
             // inject query parser
-            $servlet->injectQueryParser(
-            	$this->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser')
-            );
+            $servlet->injectQueryParser($this->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser'));
 
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
@@ -164,7 +177,7 @@ abstract class AbstractRequest extends AbstractContextThread {
      */
     public function getAccessLogger()
     {
-        if (!$this->accessLogger) {
+        if (! $this->accessLogger) {
             $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
         }
         return $this->accessLogger;
@@ -175,7 +188,8 @@ abstract class AbstractRequest extends AbstractContextThread {
      *
      * @return \TechDivision\ServletContainer\Container The container instance
      */
-    public function getContainer() {
+    public function getContainer()
+    {
         return $this->container;
     }
 
@@ -184,14 +198,17 @@ abstract class AbstractRequest extends AbstractContextThread {
      *
      * @return array The available applications
      */
-    public function getApplications() {
+    public function getApplications()
+    {
         return $this->getContainer()->getApplications();
     }
 
     /**
+     *
      * @see \TechDivision\ServletContainer\Application::findApplication($servletRequest)
      */
-    public function findApplication($servletRequest) {
+    public function findApplication($servletRequest)
+    {
         return $this->getContainer()->findApplication($servletRequest);
     }
 }
