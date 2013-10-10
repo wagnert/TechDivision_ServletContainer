@@ -11,9 +11,9 @@
     ],
     "require": {
         "php" : ">=5.4.0",
-        "techdivision/appserver": "dev-master",
-        "techdivision/socket": "dev-master",
-        "techdivision/stream": "dev-master"
+        "techdivision/appserver": "~0.5.7@beta",
+        "techdivision/socket": "~0.5.7@beta",
+        "techdivision/stream": "~0.5.7@beta"
     },
     "autoload": {
         "psr-0": {"TechDivision": ["src/", "tests/"]}
