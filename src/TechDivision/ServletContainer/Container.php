@@ -45,7 +45,7 @@ class Container extends AbstractContainer
         // iterate over the applications and check if one of the VHosts match the request
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
-                $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getDocumentRoot());
+                $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
                 $servletRequest->setServerVar('SERVER_SOFTWARE', $application->getServerSoftware());
                 $servletRequest->setServerVar('SERVER_ADMIN', $application->getServerAdmin());
                 $servletRequest->setWebappName($application->getName());
