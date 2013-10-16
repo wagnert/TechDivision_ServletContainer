@@ -250,7 +250,8 @@ class HttpRequest implements Request
         // parsing for servername and port
         list ($serverName, $serverPort) = explode(":", $requestInstance->getHeader('Host'));
 
-        // set server name and server port
+        // set server address, name and server port
+        $requestInstance->setServerAddress(gethostbyname($servletName));
         $requestInstance->setServerName($serverName);
         $requestInstance->setServerPort($serverPort);
 
@@ -432,6 +433,51 @@ class HttpRequest implements Request
      */
     public function initServerVars()
     {
+    	/*
+		 * 'HTTP_HOST'
+		 * 'HTTP_CONNECTION'
+		 * 'HTTP_ACCEPT'
+		 * 'HTTP_USER_AGENT'
+		 * 'HTTP_ACCEPT_ENCODING'
+		 * 'HTTP_ACCEPT_LANGUAGE'
+		 * 'HTTP_REFERER'
+		 * 'PATH'
+		 * 'SERVER_SIGNATURE'
+		 * 'SERVER_SOFTWARE'
+		 * 'SERVER_NAME'
+		 * 'SERVER_ADDR'
+		 * 'SERVER_PORT'
+		 * 'REMOTE_ADDR'
+		 * 'DOCUMENT_ROOT'
+		 * 'SERVER_ADMIN'
+		 * 'SERVER_PROTOCOL'
+		 * 'REQUEST_METHOD'
+		 * 'REQUEST_URI'
+		 * 'REQUEST_TIME'
+		 * 'REQUEST_TIME_FLOAT'
+		 * 
+    	 * 'PHP_SELF'
+		 * 'argv'
+		 * 'argc'
+		 * 'GATEWAY_INTERFACE'
+		 * 'QUERY_STRING'
+		 * 'HTTP_ACCEPT_CHARSET'
+		 * 'HTTPS'
+		 * 'REMOTE_HOST'
+		 * 'REMOTE_PORT'
+		 * 'REMOTE_USER'
+		 * 'REDIRECT_REMOTE_USER'
+		 * 'SCRIPT_FILENAME'
+		 * 'PATH_TRANSLATED'
+		 * 'SCRIPT_NAME'
+		 * 'PHP_AUTH_DIGEST'
+		 * 'PHP_AUTH_USER'
+		 * 'PHP_AUTH_PW'
+		 * 'AUTH_TYPE'
+		 * 'PATH_INFO'
+		 * 'ORIG_PATH_INFO'
+    	 */
+    	
         $this->server = array(
             'HTTP_HOST' => $this->getHeader('Host'),
             'HTTP_CONNECTION' => $this->getHeader('Connection'),
@@ -441,10 +487,11 @@ class HttpRequest implements Request
             'HTTP_ACCEPT_LANGUAGE' => $this->getHeader('Accept-Language'),
             'HTTP_REFERER' => $this->getHeader('Referer'),
             'PATH' => '/opt/appserver/bin',
+		    'GATEWAY_INTERFACE' => 'CGI/1.1',
             'SERVER_SIGNATURE' => '',
             'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
             'SERVER_NAME' => $this->getServerName(),
-            'SERVER_ADDR' => '127.0.0.1',
+            'SERVER_ADDR' => gethostbyname($this->getServerName()),
             'SERVER_PORT' => $this->getServerPort(),
             'REMOTE_ADDR' => '127.0.0.1',
             'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
@@ -453,6 +500,7 @@ class HttpRequest implements Request
             'REQUEST_METHOD' => $this->getMethod(),
             'REQUEST_URI' => $this->getUri(),
             'REQUEST_TIME' => time(),
+            'REQUEST_TIME_FLOAT' => microtime(true)
         );
 
         if ($cookie = $this->getHeader('Cookie')) {
@@ -614,6 +662,27 @@ class HttpRequest implements Request
     protected function setServerName($serverName)
     {
         return $this->serverName = $serverName;
+    }
+
+    /**
+     * Returns the server's IP v4 address
+     *
+     * @return string
+     */
+    public function getServerAddress()
+    {
+        return $this->serverAddress;
+    }
+
+    /**
+     * Sets server's IP v4 address
+     *
+     * @param string $serverAddress The server's IP address
+     * @return void
+     */
+    protected function setServerAddress($serverAddress)
+    {
+        return $this->serverAddress = $serverAddress;
     }
 
     /**

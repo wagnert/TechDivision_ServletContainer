@@ -38,6 +38,8 @@ class Container extends AbstractContainer
 
         // load the server name
         $serverName = $servletRequest->getServerName();
+        
+        $this->prepareServerVars($servletRequest);
 
         // load the array with the applications
         $applications = $this->getApplications();
@@ -46,10 +48,7 @@ class Container extends AbstractContainer
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
                 $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
-                $servletRequest->setServerVar('SERVER_SOFTWARE', $application->getServerSoftware());
-                $servletRequest->setServerVar('SERVER_ADMIN', $application->getServerAdmin());
                 $servletRequest->setWebappName($application->getName());
-
                 return $application;
             }
         }
@@ -63,14 +62,32 @@ class Container extends AbstractContainer
         // if not, check if the request matches a folder
         if (array_key_exists($applicationName, $applications)) {
             $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getDocumentRoot());
-            $servletRequest->setServerVar('SERVER_SOFTWARE', $applications[$applicationName]->getServerSoftware());
-            $servletRequest->setServerVar('SERVER_ADMIN', $applications[$applicationName]->getServerAdmin());
             $servletRequest->setWebappName($applications[$applicationName]->getName());
-
             return $applications[$applicationName];
         }
 
         // if not throw an exception
         throw new BadRequestException("Can\'t find application for '$applicationName'");
+    }
+    
+    /**
+     * 
+     * @param unknown $servletRequest
+     */
+    public function prepareServerVars($servletRequest)
+    {
+        $servletRequest->setServerVar('PATH', $this->getBaseDirectory(DIRECTORY_SEPARATOR . 'bin') . PATH_SEPARATOR . getenv('PATH'));
+        $servletRequest->setServerVar('SERVER_SOFTWARE', $this->getContainerNode()->getHost()->getServerSoftware());
+        $servletRequest->setServerVar('SERVER_ADMIN', $this->getContainerNode()->getHost()->getServerAdmin());
+    }
+
+    /**
+     * (non-PHPdoc)
+     *
+     * @see \TechDivision\ApplicationServer\Api\ContainerService::getBaseDirectory()
+     */
+    public function getBaseDirectory($directoryToAppend = null)
+    {
+        return $this->newService('TechDivision\ApplicationServer\Api\ContainerService')->getBaseDirectory($directoryToAppend);
     }
 }
