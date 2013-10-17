@@ -18,6 +18,7 @@ use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
+use TechDivision\ServletContainer\Http\PostRequest;
 
 /**
  * This servlet emulates an Apache webserver request by initializing the 
@@ -56,17 +57,6 @@ class PhpServlet extends StaticResourceServlet
     }
 
     /**
-     * (non-PHPdoc)
-     *
-     * @see \TechDivision\ServletContainer\Interfaces\ServletConfig::init()
-     */
-    public function init(ServletConfig $config)
-    {
-        parent::init($config);
-        $this->locator = new StaticResourceLocator($this);
-    }
-
-    /**
      * Prepares the passed request instance for generating the globals.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
@@ -95,7 +85,7 @@ class PhpServlet extends StaticResourceServlet
             // check if filename is given, write and register it
             if ($part->getFilename()) {
                 // generate temp filename
-                $tempName = tempnam(ini_get('upload_tmp_dir'), 'neos_upload_');
+                $tempName = tempnam(ini_get('upload_tmp_dir'), $this->getServletConfig()->getApplication()->getName() . '_');
                 // write part
                 $part->write($tempName);
                 // register uploaded file
@@ -164,7 +154,7 @@ class PhpServlet extends StaticResourceServlet
      */
     protected function initPostGlobals(Request $req)
     {
-        if ($req instanceof PostRequest) {
+        if ($req->getMethod() == 'POST') {
             return $req->getParameterMap();
         } else {
             return array();
@@ -178,8 +168,14 @@ class PhpServlet extends StaticResourceServlet
      * @return array The $_GET vars
      */
     protected function initGetGlobals(Request $req)
-    {
-        return $this->initRequestGlobals($req);
+    {   
+        // check post type and set params to globals
+        if ($req->getMethod() == 'POST') {
+            parse_str($req->getQueryString(), $parameterMap);
+        } else {
+            $parameterMap = $req->getParameterMap();
+        }
+        return $parameterMap;
     }
 
     /**
@@ -201,7 +197,7 @@ class PhpServlet extends StaticResourceServlet
      * @return void
      */
     protected function initGlobals(Request $req)
-    {
+    {   
         // prepare the request before initializing the globals
         $this->prepareGlobals($req);
         // initialize the globals
