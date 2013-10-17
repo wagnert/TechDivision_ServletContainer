@@ -34,6 +34,8 @@ use TechDivision\ServletContainer\Http\PostRequest;
  */
 class PhpServlet extends StaticResourceServlet
 {
+    
+    protected $directoryIndex = 'index.php';
 
     /**
      * The resource locator necessary to load static resources.
@@ -55,6 +57,16 @@ class PhpServlet extends StaticResourceServlet
         $res->addHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
         $res->addHeader('Pragma', 'no-cache');
     }
+    
+    /**
+     * 
+     * @param string $directoryToPrepend
+     * @return string
+     */
+    protected function getDirectoryIndex($directoryToPrepend = DIRECTORY_SEPARATOR)
+    {
+        return $directoryToPrepend . $this->directoryIndex;
+    }
 
     /**
      * Prepares the passed request instance for generating the globals.
@@ -64,9 +76,22 @@ class PhpServlet extends StaticResourceServlet
      */
     protected function prepareGlobals(Request $req)
     {
+        
         if (($xRequestedWith = $req->getHeader('X-Requested-With')) != null) {
             $req->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
         }
+        
+        // if the application has not been called over a vhost configuration append application folder name
+        if ($this->getServletConfig()->getApplication()->isVhostOf($req->getServerName()) === true) {
+            $directoryIndex = $this->getDirectoryIndex();
+        } else {
+            $directoryToPrepend = DIRECTORY_SEPARATOR . $this->getServletConfig()->getApplication()->getName() . DIRECTORY_SEPARATOR;
+            $directoryIndex = $this->getDirectoryIndex($directoryToPrepend);
+        }
+        
+        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $directoryIndex);
+        $req->setServerVar('SCRIPT_NAME', $directoryIndex);
+        $req->setServerVar('PHP_SELF', $directoryIndex);
     }
 
     /**

@@ -51,38 +51,13 @@ class MageServlet extends PhpServlet
     protected function prepareGlobals(Request $req)
     {
         
-        // prepare the global GLOBALS
+        
         parent::prepareGlobals($req);
         
         /*
          * ATTENTION: This is necessary because of a Magento bug!!!!
          */
         $req->setServerVar('SERVER_PORT', NULL);
-        
-        // if the application has not been called over a vhost configuration append application folder name
-        if (!$this->getServletConfig()->getApplication()->isVhostOf($req->getServerName())) {
-            
-            $applicationName = $this->getServletConfig()->getApplication()->getName();
-            
-            $req->setServerVar(
-                'SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . DIRECTORY_SEPARATOR . $applicationName . DIRECTORY_SEPARATOR . 'index.php'
-            );
-            $req->setServerVar(
-                'SCRIPT_NAME', DIRECTORY_SEPARATOR . $applicationName . DIRECTORY_SEPARATOR . 'index.php'
-            );
-            $req->setServerVar(
-                'PHP_SELF', DIRECTORY_SEPARATOR . $applicationName . DIRECTORY_SEPARATOR . 'index.php'
-            );
-            
-        } else {
-            
-            $req->setServerVar(
-                'SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') .  DIRECTORY_SEPARATOR . 'index.php'
-            );
-            $req->setServerVar('SCRIPT_NAME', '/index.php');
-            $req->setServerVar('PHP_SELF', '/index.php');
-            
-        }
     }
 
     /**
@@ -103,6 +78,14 @@ class MageServlet extends PhpServlet
         $this->load();
         // init globals
         $this->initGlobals($req);
+        
+        error_log(var_export($_SERVER, true));
+        error_log(var_export($_REQUEST, true));
+        error_log(var_export($_POST, true));
+        error_log(var_export($_GET, true));
+        error_log(var_export($_FILES, true));
+        error_log(var_export($_COOKIE, true));
+        
         // run \Mage and set content
         $res->setContent($this->run($req));
         // set headers
@@ -174,7 +157,7 @@ class MageServlet extends PhpServlet
             error_log($content = $e->toString());
         }
 
-        // r
+        // return the content
         return $content;
     }
 }

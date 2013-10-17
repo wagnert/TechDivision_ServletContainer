@@ -74,7 +74,7 @@ class StaticResourceLocator extends AbstractResourceLocator
 
         // build the path from url part and base path
         $path = $this->getFilePath($request);
-
+        
         // load file information and return the file object if possible
         $fileInfo = new \SplFileInfo($path);
         if ($fileInfo->isDir()) {
