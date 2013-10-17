@@ -104,8 +104,16 @@ class ServletManager
                 // get the string classname
                 $className = (string) array_shift($className);
                 
-                // instantiate the servlet and the servlet configuration
+                // instantiate the servlet
                 $servlet = $this->getApplication()->newInstance($className);
+                
+                // load the url pattern
+                $urlPattern = (string) $mapping->{'url-pattern'};
+                
+                // make sure that the URL pattern always starts with a leading slash
+                $urlPattern = ltrim($urlPattern, '/');
+                
+                //  initialize the servlet configuration
                 $servletConfig = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
                     $this
                 ));
@@ -116,14 +124,11 @@ class ServletManager
                     $servletConfig->addInitParameter((string) $initParam->{'param-name'}, (string) $initParam->{'param-value'});
                 }
                 
+                // set the servlet's unique URL pattern
+                $servletConfig->setUrlPattern('/' . $urlPattern);
+                
                 // initialize the servlet
                 $servlet->init($servletConfig);
-                
-                // load the url pattern
-                $urlPattern = (string) $mapping->{'url-pattern'};
-                
-                // make sure that the URL pattern always starts with a leading slash
-                $urlPattern = ltrim($urlPattern, '/');
                 
                 // the servlet is added to the dictionary using the complete request path as the key
                 $this->addServlet('/' . $urlPattern, $servlet);
@@ -164,6 +169,17 @@ class ServletManager
     public function getServlets()
     {
         return $this->servlets;
+    }
+
+    /**
+     *
+     * @return \TechDivision_Collections_Dictionary
+     */
+    public function getServlet($key)
+    {
+        if (array_key_exists($key, $this->servlets)) {
+            return $this->servlets[$key];
+        }
     }
 
     /**

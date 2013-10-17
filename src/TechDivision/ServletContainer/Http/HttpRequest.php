@@ -251,7 +251,7 @@ class HttpRequest implements Request
         list ($serverName, $serverPort) = explode(":", $requestInstance->getHeader('Host'));
 
         // set server address, name and server port
-        $requestInstance->setServerAddress(gethostbyname($servletName));
+        // $requestInstance->setServerAddress(gethostbyname($serverName));
         $requestInstance->setServerName($serverName);
         $requestInstance->setServerPort($serverPort);
 
@@ -455,11 +455,11 @@ class HttpRequest implements Request
 		 * 'REQUEST_URI'
 		 * 'REQUEST_TIME'
 		 * 'REQUEST_TIME_FLOAT'
+		 * 'GATEWAY_INTERFACE'
 		 * 
     	 * 'PHP_SELF'
 		 * 'argv'
 		 * 'argc'
-		 * 'GATEWAY_INTERFACE'
 		 * 'QUERY_STRING'
 		 * 'HTTP_ACCEPT_CHARSET'
 		 * 'HTTPS'

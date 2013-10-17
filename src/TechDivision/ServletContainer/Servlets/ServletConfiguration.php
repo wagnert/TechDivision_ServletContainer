@@ -34,11 +34,18 @@ class ServletConfiguration implements ServletConfig
     protected $servletManager;
     
     /**
-     * Array with the servlet's init parameters found in the web.xml.
+     * Array with the servlet's init parameters found in the web.xml configuration file.
      * 
      * @var array
      */
     protected $initParameter = array();
+    
+    /**
+     * The servlet's URL pattern from the web.xml configuration file.
+     * 
+     * @var string
+     */
+    protected $urlPattern = '/';
 
     /**
      * Initializes the servlet configuration with the servlet manager instance.
@@ -100,6 +107,27 @@ class ServletConfiguration implements ServletConfig
     public function getAppBase()
     {
         return $this->getApplication()->getAppBase();
+    }
+    
+    /**
+     * Set's the servlet's URL pattern from the web.xml configuration file.
+     * 
+     * @param string $urlPattern The URL pattern
+     * @return void
+     */
+    public function setUrlPattern($urlPattern)
+    {
+        $this->urlPattern = $urlPattern;
+    }
+    
+    /**
+     * Return's the servlet's URL patter from the web.xml configuration file.
+     * 
+     * @return string The URL pattern
+     */
+    public function getUrlPattern()
+    {
+        return $this->urlPattern;
     }
     
     /**
