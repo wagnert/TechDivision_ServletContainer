@@ -11,7 +11,6 @@
  */
 namespace TechDivision\ServletContainer\Servlets\Legacy;
 
-use TechDivision\ServletContainer\Http\PostRequest;
 use TechDivision\ServletContainer\Http\HttpPart;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;

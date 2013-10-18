@@ -18,7 +18,6 @@ use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
-use TechDivision\ServletContainer\Http\PostRequest;
 
 /**
  * This servlet emulates an Apache webserver request by initializing the 
@@ -35,6 +34,11 @@ use TechDivision\ServletContainer\Http\PostRequest;
 class PhpServlet extends StaticResourceServlet
 {
     
+    /**
+     * Default directory index file.
+     * 
+     * @var string
+     */
     protected $directoryIndex = 'index.php';
 
     /**

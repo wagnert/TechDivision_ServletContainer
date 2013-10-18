@@ -11,7 +11,6 @@
  */
 namespace TechDivision\ServletContainer\Servlets\Legacy;
 
-use TechDivision\ServletContainer\Http\PostRequest;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Servlets\PhpServlet;
@@ -74,7 +73,7 @@ class NeosServlet extends PhpServlet
         $this->initGlobals($req);
         
         // this is a bad HACK because it's NOT possible to write to php://stdin
-        if ($req instanceof PostRequest) {
+        if ($req->getMethod() == 'POST') {
             define('HTTP_RAW_POST_DATA', $req->getContent());
         }
         

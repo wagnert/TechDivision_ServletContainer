@@ -13,7 +13,6 @@ namespace TechDivision\ServletContainer\Servlets\Legacy;
 
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\ServletContainer\Http\PostRequest;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 
 /**
