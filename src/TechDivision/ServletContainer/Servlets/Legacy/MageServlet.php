@@ -50,13 +50,8 @@ class MageServlet extends PhpServlet
      */
     protected function prepareGlobals(Request $req)
     {
-        
-        
         parent::prepareGlobals($req);
-        
-        /*
-         * ATTENTION: This is necessary because of a Magento bug!!!!
-         */
+        // ATTENTION: This is necessary because of a Magento bug!!!!
         $req->setServerVar('SERVER_PORT', NULL);
     }
 
@@ -78,14 +73,6 @@ class MageServlet extends PhpServlet
         $this->load();
         // init globals
         $this->initGlobals($req);
-        
-        error_log(var_export($_SERVER, true));
-        error_log(var_export($_REQUEST, true));
-        error_log(var_export($_POST, true));
-        error_log(var_export($_GET, true));
-        error_log(var_export($_FILES, true));
-        error_log(var_export($_COOKIE, true));
-        
         // run \Mage and set content
         $res->setContent($this->run($req));
         // set headers

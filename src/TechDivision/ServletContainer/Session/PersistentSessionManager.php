@@ -16,14 +16,14 @@ class PersistentSessionManager implements SessionManager
 
     /**
      * Prefix for the session name.
-     * 
+     *
      * @var string
      */
     const SESSION_NAME = 'PHPSESSID';
 
     /**
      * The initial context instance.
-     * 
+     *
      * @var \TechDivision\ApplicationServer\InitialContext
      */
     protected $initialContext;
@@ -82,9 +82,9 @@ class PersistentSessionManager implements SessionManager
         
         // prepare the cookie path
         if (! strstr($request->getServerVar('DOCUMENT_ROOT'), $webappName = $request->getWebappName())) {
-            $cookiePath = '/';
-        } else {
             $cookiePath = $webappName;
+        } else {
+            $cookiePath = '/';
         }
         
         $settings['session']['name'] = self::SESSION_NAME;
@@ -100,7 +100,7 @@ class PersistentSessionManager implements SessionManager
         $sessionParams = array(
             $request,
             $sessionId,
-            __CLASS__,
+            $sessionId,
             time()
         );
         $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
