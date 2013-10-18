@@ -348,6 +348,17 @@ class HttpRequest implements Request
         preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
         return (count($matches) > 0);
     }
+    
+    /**
+     * Returns TRUE if the request is a multipart from data request with 
+     * content type <code>application/x-www-form-urlencoded</code>.
+     * 
+     * @return boolean TRUE if the request is a multipart form data request, else FALSE
+     */
+    public function isMultipartForm()
+    {
+        return $this->getHeader('Content-Type') == 'application/x-www-form-urlencoded';
+    }
 
     /**
      * Parse request content and sets parameter map and parts
@@ -359,18 +370,21 @@ class HttpRequest implements Request
     {
         // set content to req instance
         $this->setContent($content);
+        
         // set and parse params within url if exist
         if ($queryString = parse_url($this->getUri(), PHP_URL_QUERY)) {
             $this->setQueryString($queryString);
             $this->getQueryParser()->parseStr($queryString);
         }
-        // check if multipart form data is given
-        if ($this->hasMultipartFormData()) {
-            $this->parseMultipartFormData($content);
-        } else {
-            // content type is probably regular form-encoded
+        
+        // if multipart form data is given AND form has been submitted with JavaScript
+        if ($this->isMultipartForm() && $this->hasMultipartFormData() === false) {
             $this->getQueryParser()->parseStr(urldecode($content));
+        // if multipart form data is given AND submit was regular, e. g. with a submit button
+        } elseif ($this->isMultipartForm() && $this->hasMultipartFormData()) {
+            $this->parseMultipartFormData($content);
         }
+        
         // finally set parameter map
         $this->setParameterMap($this->getQueryParser()
             ->getResult());
