@@ -132,6 +132,8 @@ abstract class AbstractRequest extends AbstractContextThread
              */
             // receive Request Object from client
             $request = $client->receive();
+            
+            // error_log("Found client IP: {$request->getClientIp()}:{$request->getClientPort()}");
 
             // inject the request with the session manager
             $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(

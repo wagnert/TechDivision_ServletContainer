@@ -140,6 +140,11 @@ class HttpClient extends Client implements HttpClientInterface
         // parse body with request instance
         $requestInstance->parse($body);
         
+        // initialize client IP + port
+        $this->getPeerName($clientIp, $clientPort);
+        $requestInstance->setClientIp($clientIp);
+        $requestInstance->setClientPort($clientPort);
+        
         // return fully qualified request instance
         return $requestInstance;
     }
