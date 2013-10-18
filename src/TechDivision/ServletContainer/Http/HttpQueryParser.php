@@ -39,6 +39,36 @@ class HttpQueryParser implements QueryParser
      * @var array
      */
     protected $indexCounter = array();
+    
+    /**
+     * The array with content types where the content has to be parsed.
+     * 
+     * @var array
+     */
+    protected $parsingRelevantContentTypes = array(
+        'application/x-www-form-urlencoded',
+        'multipart/form-data'
+    );
+
+    /**
+     * Returns TRUE if the request is a multipart from data request with
+     * content type <code>application/x-www-form-urlencoded</code> or 
+     * <code>multipart/form-data</code>.
+     * 
+     * It is not necessary to use in_array() because the content type can be 
+     * extended by encoding, e. g. application/x-www-form-urlencoded; UTF-8.
+     *
+     * @return boolean TRUE if the content has to be parsed, else FALSE
+     */
+    public function isParsingRelevant($contentType)
+    {
+        foreach ($this->parsingRelevantContentTypes as $relevantContentType) {
+            if (strstr($contentType, $relevantContentType) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Internal recursive array merge functionality, due to the array_merge_recursive core php function
@@ -198,5 +228,4 @@ class HttpQueryParser implements QueryParser
     {
         $this->result = array();
     }
-
 }

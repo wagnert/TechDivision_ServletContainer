@@ -348,17 +348,6 @@ class HttpRequest implements Request
         preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
         return (count($matches) > 0);
     }
-    
-    /**
-     * Returns TRUE if the request is a multipart from data request with 
-     * content type <code>application/x-www-form-urlencoded</code>.
-     * 
-     * @return boolean TRUE if the request is a multipart form data request, else FALSE
-     */
-    public function isMultipartForm()
-    {
-        return $this->getHeader('Content-Type') == 'application/x-www-form-urlencoded';
-    }
 
     /**
      * Parse request content and sets parameter map and parts
@@ -377,12 +366,13 @@ class HttpRequest implements Request
             $this->getQueryParser()->parseStr($queryString);
         }
         
-        // if multipart form data is given AND form has been submitted with JavaScript
-        if ($this->isMultipartForm() && $this->hasMultipartFormData() === false) {
-            $this->getQueryParser()->parseStr(urldecode($content));
-        // if multipart form data is given AND submit was regular, e. g. with a submit button
-        } elseif ($this->isMultipartForm() && $this->hasMultipartFormData()) {
-            $this->parseMultipartFormData($content);
+        // check if request has to be parsed depending on Content-Type header
+        if ($this->getQueryParser()->isParsingRelevant($this->getHeader('Content-Type'))) {
+            if ($this->hasMultipartFormData()) {
+                $this->parseMultipartFormData($content);
+            } else {
+                $this->getQueryParser()->parseStr(urldecode($content));
+            }
         }
         
         // finally set parameter map
@@ -536,8 +526,10 @@ class HttpRequest implements Request
      */
     public function getHeader($key)
     {
-        if (array_key_exists($key, $this->headers)) {
-            return $this->headers[$key];
+        foreach ($this->headers as $headerName => $value) {
+            if (strcasecmp($key, $headerName) === 0) {
+                return $this->headers[$headerName];
+            }
         }
     }
 
