@@ -27,6 +27,40 @@ class Container extends AbstractContainer
 {
 
     /**
+     * Holds access logger instance
+     *
+     * @var AccessLogger
+     */
+    protected $accessLogger;
+
+    /**
+     * Initializes the container with the initial context, the unique container ID
+     * and the deployed applications.
+     *
+     * @param \TechDivision\ApplicationServer\InitialContext $initialContext
+     *            The initial context instance
+     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode $containerNode
+     *            The container's UUID
+     * @todo Application deployment only works this way because of Thread compatibilty
+     * @return void
+     */
+    public function __construct($initialContext, $containerNode, $applications)
+    {
+        parent::__construct($initialContext, $containerNode, $applications);
+        $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
+    }
+    
+    /**
+     * The access logger implementation that writes the Apache compatible log files.
+     * 
+     * @return \TechDivision\ServletContainer\AccessLogger The access logger implementation
+     */
+    public function getAccessLogger()
+    {
+        return $this->accessLogger;   
+    }
+
+    /**
      * Tries to find and return the application for the passed request.
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request $request

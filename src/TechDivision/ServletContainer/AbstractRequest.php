@@ -46,13 +46,6 @@ abstract class AbstractRequest extends AbstractContextThread
     public $resource;
 
     /**
-     * Holds access logger instance
-     *
-     * @var AccessLogger
-     */
-    protected $accessLogger;
-
-    /**
      * Initializes the request with the client socket.
      *
      * @param Container $container
@@ -161,6 +154,9 @@ abstract class AbstractRequest extends AbstractContextThread
 
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
+            
+            // log the request
+            $this->getAccessLogger()->log($request, $response);
 
         } catch (\Exception $e) {
 
@@ -179,10 +175,7 @@ abstract class AbstractRequest extends AbstractContextThread
      */
     public function getAccessLogger()
     {
-        if (! $this->accessLogger) {
-            $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
-        }
-        return $this->accessLogger;
+        return $this->getContainer()->getAccessLogger();
     }
 
     /**
