@@ -49,7 +49,22 @@ class MageServlet extends PhpServlet
      */
     protected function prepareGlobals(Request $req)
     {
+        // prepare the globals
         parent::prepareGlobals($req);
+        
+        // if the application has not been called over a vhost configuration append application folder name
+        if ($this->getServletConfig()->getApplication()->isVhostOf($req->getServerName()) === true) {
+            $directoryIndex = $this->getDirectoryIndex();
+        } else {
+            $directoryToPrepend = DIRECTORY_SEPARATOR . $this->getServletConfig()->getApplication()->getName() . DIRECTORY_SEPARATOR;
+            $directoryIndex = $this->getDirectoryIndex($directoryToPrepend);
+        }
+        
+        // initialize the server variables
+        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $directoryIndex);
+        $req->setServerVar('SCRIPT_NAME', $directoryIndex);
+        $req->setServerVar('PHP_SELF', $directoryIndex);
+        
         // ATTENTION: This is necessary because of a Magento bug!!!!
         $req->setServerVar('SERVER_PORT', NULL);
     }

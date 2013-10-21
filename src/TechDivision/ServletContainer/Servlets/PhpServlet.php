@@ -54,7 +54,7 @@ class PhpServlet extends StaticResourceServlet
      * @param \TechDivision\ServletContainer\Interfaces\Response $res The HTTP response to append the headers to
      * @return void
      */
-    public function addHeaders(Repsonse $res)
+    public function addHeaders(Response $res)
     {
         $res->addHeader('X-Powered-By', get_class($this));
         $res->addHeader('Expires', '19 Nov 1981 08:52:00 GMT');
@@ -63,9 +63,10 @@ class PhpServlet extends StaticResourceServlet
     }
     
     /**
+     * Returns the directory index file that defaults to index.php.
      * 
-     * @param string $directoryToPrepend
-     * @return string
+     * @param string $directoryToPrepend Directory to prepend to the default directory index file
+     * @return string The directory index file prepended with the passed directory
      */
     protected function getDirectoryIndex($directoryToPrepend = DIRECTORY_SEPARATOR)
     {
@@ -81,21 +82,22 @@ class PhpServlet extends StaticResourceServlet
     protected function prepareGlobals(Request $req)
     {
         
+        // check if a XHttpRequest has to be handled
         if (($xRequestedWith = $req->getHeader('X-Requested-With')) != null) {
             $req->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
         }
         
-        // if the application has not been called over a vhost configuration append application folder name
-        if ($this->getServletConfig()->getApplication()->isVhostOf($req->getServerName()) === true) {
-            $directoryIndex = $this->getDirectoryIndex();
+        // check if php script is called to set script and php info
+        if (pathinfo($req->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
+            $scriptName = $req->getPathInfo();
         } else {
-            $directoryToPrepend = DIRECTORY_SEPARATOR . $this->getServletConfig()->getApplication()->getName() . DIRECTORY_SEPARATOR;
-            $directoryIndex = $this->getDirectoryIndex($directoryToPrepend);
+            $scriptName = $this->getDirectoryIndex();
         }
         
-        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $directoryIndex);
-        $req->setServerVar('SCRIPT_NAME', $directoryIndex);
-        $req->setServerVar('PHP_SELF', $directoryIndex);
+        // set the script file information
+        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $scriptName);
+        $req->setServerVar('SCRIPT_NAME', $scriptName);
+        $req->setServerVar('PHP_SELF', $scriptName);
     }
 
     /**
@@ -183,7 +185,7 @@ class PhpServlet extends StaticResourceServlet
      */
     protected function initPostGlobals(Request $req)
     {
-        if ($req->getMethod() == 'POST') {
+        if ($req->getMethod() == Request::POST) {
             return $req->getParameterMap();
         } else {
             return array();

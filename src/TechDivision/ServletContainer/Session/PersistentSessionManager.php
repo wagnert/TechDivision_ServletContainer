@@ -41,12 +41,11 @@ class PersistentSessionManager implements SessionManager
     }
 
     /**
-     * Tries to find a session for the given request.
-     * The session id
-     * is searched in the cookie header of the request, and in the
-     * request query string. If both values are present, the value
-     * in the query string takes precedence. If no session id
-     * is found, a new one is created and assigned to the request.
+     * Tries to find a session for the given request. The session id will be 
+     * searched in the cookie header of the request, and in the request query 
+     * string. If both values are present, the value in the query string takes 
+     * precedence. If no session id is found, a new one is created and assigned 
+     * to the request.
      *
      * @param Request $request            
      * @return ServletSession
@@ -59,11 +58,8 @@ class PersistentSessionManager implements SessionManager
         
         // try to retrieve the session id from the cookies in request header
         if (isset($headers['Cookie'])) {
-            
             foreach (explode(';', $headers['Cookie']) as $cookie) {
-                
                 list ($name, $value) = explode('=', $cookie);
-                
                 if ($name === self::SESSION_NAME) {
                     $sessionId = $value;
                 }
@@ -81,10 +77,9 @@ class PersistentSessionManager implements SessionManager
         }
         
         // prepare the cookie path
-        if (! strstr($request->getServerVar('DOCUMENT_ROOT'), $webappName = $request->getWebappName())) {
+        $cookiePath = $webappName;
+        if (strstr($request->getServerVar('DOCUMENT_ROOT'), $webappName = $request->getWebappName())) {
             $cookiePath = $webappName;
-        } else {
-            $cookiePath = '/';
         }
         
         $settings['session']['name'] = self::SESSION_NAME;
@@ -103,6 +98,7 @@ class PersistentSessionManager implements SessionManager
             $sessionId,
             time()
         );
+        
         $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
         $persistentSession->injectSettings($settings);
         $persistentSession->injectStorage($this->initialContext->getStorage());

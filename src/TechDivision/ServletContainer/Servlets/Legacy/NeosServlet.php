@@ -46,11 +46,11 @@ class NeosServlet extends PhpServlet
      */
     protected function prepareGlobals(Request $req)
     {
+        // overwrite DOCUMENT_ROOT + REQUEST_URI
+        $req->setServerVar('DOCUMENT_ROOT', $req->getServerVar('DOCUMENT_ROOT') . DIRECTORY_SEPARATOR . 'Web');
+        $req->setServerVar('REQUEST_URI', str_replace($this->getDirectoryIndex(), '', $req->getServerVar('REQUEST_URI')));
+        // prepare the globals
         parent::prepareGlobals($req);
-        $req->setServerVar('DOCUMENT_ROOT', $req->getServerVar('DOCUMENT_ROOT') . DIRECTORY_SEPARATOR . 'Web' . DIRECTORY_SEPARATOR);
-        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . 'index.php');
-        $req->setServerVar('SCRIPT_NAME', DIRECTORY_SEPARATOR . 'index.php');
-        $req->setServerVar('PHP_SELF', DIRECTORY_SEPARATOR . 'index.php');
     }
 
     /**
@@ -73,14 +73,14 @@ class NeosServlet extends PhpServlet
         $this->initGlobals($req);
         
         // this is a bad HACK because it's NOT possible to write to php://stdin
-        if ($req->getMethod() == 'POST') {
-            define('HTTP_RAW_POST_DATA', $req->getContent());
+        if ($req->getMethod() == Request::POST) {
+            $GLOBALS['HTTP_RAW_POST_DATA'] = $req->getContent();
         }
         
         // initialize the TYPO3.Flow specific $_SERVER variables
         $_SERVER['FLOW_CONTEXT'] = $this->getServletConfig()->getInitParameter('flowContext');
         $_SERVER['FLOW_SAPITYPE'] = $this->getServletConfig()->getInitParameter('flowSapiType');
-        $_SERVER['FLOW_REWRITEURLS'] = (integer) $this->getServletConfig()->getInitParameter('flowRewriteUrls');
+        $_SERVER['FLOW_REWRITEURLS'] = $this->getServletConfig()->getInitParameter('flowRewriteUrls');
         $_SERVER['FLOW_ROOTPATH'] = $this->getWebappPath();
         $_SERVER['REDIRECT_FLOW_CONTEXT'] = $_SERVER['FLOW_CONTEXT'];
         $_SERVER['REDIRECT_FLOW_SAPITYPE'] = $_SERVER['FLOW_SAPITYPE'];

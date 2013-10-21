@@ -160,28 +160,28 @@ abstract class HttpServlet extends GenericServlet
         
         // check the request method to invoke the appropriate method
         switch ($req->getMethod()) {
-            case 'CONNECT':
+            case Request::CONNECT:
                 $this->doConnect($req, $res);
                 break;
-            case 'DELETE':
+            case Request::DELETE:
                 $this->doDelete($req, $res);
                 break;
-            case 'GET':
+            case Request::GET:
                 $this->doGet($req, $res);
                 break;
-            case 'HEAD':
+            case Request::HEAD:
                 $this->doHead($req, $res);
                 break;
-            case 'OPTIONS':
+            case Request::OPTIONS:
                 $this->doOptions($req, $res);
                 break;
-            case 'POST':
+            case Request::POST:
                 $this->doPost($req, $res);
                 break;
-            case 'PUT':
+            case Request::PUT:
                 $this->doPut($req, $res);
                 break;
-            case 'TRACE':
+            case Request::TRACE:
                 $this->doTrace($req, $res);
                 break;
             default:

@@ -83,6 +83,7 @@ class Container extends AbstractContainer
         // iterate over the applications and check if one of the VHosts match the request
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
+                // set the DOCUMENT_ROOT to /opt/appserver/webapps/<WEBAPP-NAME>
                 $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
                 $servletRequest->setWebappName($application->getName());
                 return $application;
@@ -97,7 +98,8 @@ class Container extends AbstractContainer
         
         // if not, check if the request matches a folder
         if (array_key_exists($applicationName, $applications)) {
-            $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getDocumentRoot());
+            // set the DOCUMENT_ROOT to /opt/appserver/webapps
+            $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getWebappPath());
             $servletRequest->setWebappName($applications[$applicationName]->getName());
             return $applications[$applicationName];
         }

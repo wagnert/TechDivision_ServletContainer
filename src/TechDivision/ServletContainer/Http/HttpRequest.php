@@ -265,13 +265,6 @@ class HttpRequest implements Request
         // set intial server vars
         $this->initServerVars();
         
-        // check if php script is called to set script and php info
-        if (pathinfo($this->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
-            $this->setServerVar('SCRIPT_FILENAME', $this->getServerVar('DOCUMENT_ROOT') . $this->getPathInfo());
-            $this->setServerVar('SCRIPT_NAME', $this->getPathInfo());
-            $this->setServerVar('PHP_SELF', $this->getPathInfo());
-        }
-        
         // inject the query parser
         $this->injectQueryParser(new HttpQueryParser());
         

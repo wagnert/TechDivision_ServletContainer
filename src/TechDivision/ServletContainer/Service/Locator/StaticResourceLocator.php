@@ -58,6 +58,16 @@ class StaticResourceLocator extends AbstractResourceLocator
     {
         return $this->servlet;
     }
+    
+    /**
+     * Return's the application itself.
+     * 
+     * @return \TechDivision\ServletContainer\Applicatio The application itself
+     */
+    public function getApplication()
+    {
+        return $this->getServlet()->getServletConfig()->getApplication();
+    }
 
     /**
      * Tries to locate the file specified in the passed request instance.
@@ -97,6 +107,17 @@ class StaticResourceLocator extends AbstractResourceLocator
      */
     public function getFilePath(Request $request)
     {
-        return $request->getServerVar('DOCUMENT_ROOT') . parse_url($request->getUri(), PHP_URL_PATH);
+        // load the document root
+        $documentRoot = $request->getServerVar('DOCUMENT_ROOT');
+        
+         // if the application has not been called over a vhost configuration append application folder name
+        if ($this->getApplication()->isVhostOf($request->getServerName()) === false) {
+            $count = 1;
+            $documentRoot = str_replace("/{$this->getApplication()->getName()}", "", $documentRoot, $count);
+        }
+        
+        // prepare the static file name to load
+        $staticFileName = $documentRoot . DIRECTORY_SEPARATOR . parse_url($request->getUri(), PHP_URL_PATH);
+        return $staticFileName;
     }
 }
