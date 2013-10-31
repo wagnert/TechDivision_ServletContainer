@@ -46,6 +46,13 @@ interface Servlet {
     public function getServletConfig();
 
     /**
+     * Returns the servlet manager instance (context)
+     * 
+     * @return \TechDivision\ServletContainer\ServletManager The servlet manager instance
+     */
+    public function getServletManager();
+
+    /**
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request $request The request
      * @param \TechDivision\ServletContainer\Interfaces\Response $response The response sent back to the client

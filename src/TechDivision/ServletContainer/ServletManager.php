@@ -42,6 +42,13 @@ class ServletManager
      * @var array
      */
     protected $servlets = array();
+    
+    /**
+     * Array with the servlet's init parameters found in the web.xml configuration file.
+     * 
+     * @var array
+     */
+    protected $initParameter = array();
 
     /**
      * Set's the application instance.
@@ -83,16 +90,18 @@ class ServletManager
                 throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $folder));
             }
             
-            // load the application config
-            $config = new \SimpleXMLElement(file_get_contents($web));
-            
             // add the default servlet (StaticResourceServlet)
             $this->addDefaultServlet();
             
-            /**
-             *
-             * @var $mapping \SimpleXMLElement
-             */
+            // load the application config
+            $config = new \SimpleXMLElement(file_get_contents($web));
+            
+            // initialize the context by parsing the context-param nodes
+            foreach ($config->xpath('/web-app/context-param') as $contextParam) {
+                $this->addInitParameter((string) $contextParam->{'param-name'}, (string) $contextParam->{'param-value'});
+            }
+            
+            // initialize the servlets by parsing the servlet-mapping nodes
             foreach ($config->xpath('/web-app/servlet-mapping') as $mapping) {
                 
                 // try to resolve the mapped servlet class
@@ -222,5 +231,28 @@ class ServletManager
     public function getConfiguration()
     {
         return $this->getApplication()->getConfiguration();
+    }
+    
+    /**
+     * Register's the init parameter under the passed name.
+     * 
+     * @param string $name Name to register the init parameter with
+     * @param string $value The value of the init parameter
+     */
+    public function addInitParameter($name, $value)
+    {
+        $this->initParameter[$name] = $value;
+    }
+    
+    /**
+     * Return's the init parameter with the passed name.
+     * 
+     * @param string $name Name of the init parameter to return
+     */
+    public function getInitParameter($name)
+    {
+        if (array_key_exists($name, $this->initParameter)) {
+            return $this->initParameter[$name];
+        }
     }
 }

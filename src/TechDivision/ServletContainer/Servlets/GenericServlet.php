@@ -64,6 +64,14 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
+     * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletManager()
+     */
+    public function getServletManager()
+    {
+        return $this->getServletConfig()->getServletManager();
+    }
+
+    /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletInfo()
      */
     public function getServletInfo()
