@@ -126,6 +126,9 @@ abstract class AbstractRequest extends AbstractContextThread
             // receive Request Object from client
             $request = $client->receive();
 
+            // log the request
+            $this->getAccessLogger()->log($request, $response);
+
             // inject the request with the session manager
             $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(
                 $this->initialContext
@@ -152,9 +155,6 @@ abstract class AbstractRequest extends AbstractContextThread
 
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
-            
-            // log the request
-            $this->getAccessLogger()->log($request, $response);
 
         } catch (\Exception $e) {
 
