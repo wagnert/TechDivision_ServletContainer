@@ -51,7 +51,7 @@ class HttpRequestTest extends \PHPUnit_Framework_TestCase {
         $requestInstance = $this->request->initFromRawHeader($rawHeader);
         
         // check the request instance and the headers
-        $this->assertInstanceOf('TechDivision\ServletContainer\Http\GetRequest', $requestInstance);
+        $this->assertInstanceOf('TechDivision\ServletContainer\Interfaces\Request', $requestInstance);
         $this->assertEquals('GET', $requestInstance->getMethod());
         $this->assertEquals('/index.html', $requestInstance->getUri());
         $this->assertEquals('HTTP/1.1', $requestInstance->getVersion());

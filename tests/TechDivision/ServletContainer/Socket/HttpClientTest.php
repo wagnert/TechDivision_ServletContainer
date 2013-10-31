@@ -86,6 +86,7 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
 	    $requestString = "";
 	    $requestString .= "POST /index.php HTTP/1.1\r\n";
 	    $requestString .= "Content-Length: $contentLength\r\n";
+	    $requestString .= "Content-Type: application/x-www-form-urlencoded\r\n";
 	    $requestString .= "Host: 127.0.0.1:8590\r\n\r\n";
 	    $requestString .= $oversizedContent;
         
@@ -96,7 +97,7 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
         $request = $this->client->receive();
         
         // check the request instance and the headers
-        $this->assertInstanceOf('TechDivision\ServletContainer\Http\PostRequest', $request);
+        $this->assertInstanceOf('TechDivision\ServletContainer\Interfaces\Request', $request);
         $this->assertEquals('POST', $request->getMethod());
         $this->assertEquals('/index.php', $request->getUri());
         $this->assertEquals('HTTP/1.1', $request->getVersion());
@@ -132,7 +133,7 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
         $request = $this->client->receive();
         
         // check the request instance and the headers
-        $this->assertInstanceOf('TechDivision\ServletContainer\Http\GetRequest', $request);
+        $this->assertInstanceOf('TechDivision\ServletContainer\Interfaces\Request', $request);
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/index.html', $request->getUri());
         $this->assertEquals('HTTP/1.1', $request->getVersion());
@@ -164,7 +165,7 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
         $request = $this->client->receive();
         
         // check the request instance and the headers
-        $this->assertInstanceOf('TechDivision\ServletContainer\Http\GetRequest', $request);
+        $this->assertInstanceOf('TechDivision\ServletContainer\Interfaces\Request', $request);
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/index.html?var_01=value_01&var_02=value_02', $request->getUri());
         $this->assertEquals('HTTP/1.1', $request->getVersion());
@@ -188,11 +189,16 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
 	    list ($client, $server) = $this->getSocketPair();
 	    $this->client->setResource($server);
 	    
+	    $content = "var_01=value_01&var_02=value_02";
+	    $contentLength = strlen($content);
+	    
 	    // initialize the POST request
 	    $requestString = "";
 	    $requestString .= "POST /index.php HTTP/1.1\r\n";
-	    $requestString .= "Host: 127.0.0.1:8590\r\n\r\n";
-	    $requestString .= "var_01=value_01&var_02=value_02";
+	    $requestString .= "Host: 127.0.0.1:8590\r\n";
+	    $requestString .= "Content-Length: $contentLength\r\n";
+	    $requestString .= "Content-Type: application/x-www-form-urlencoded\r\n\r\n";
+	    $requestString .= $content;
         
         // write to the client socket
         socket_write($client, $requestString);
@@ -201,7 +207,7 @@ class HttpClientTest extends \PHPUnit_Framework_TestCase
         $request = $this->client->receive();
         
         // check the request instance and the headers
-        $this->assertInstanceOf('TechDivision\ServletContainer\Http\PostRequest', $request);
+        $this->assertInstanceOf('TechDivision\ServletContainer\Interfaces\Request', $request);
         $this->assertEquals('POST', $request->getMethod());
         $this->assertEquals('/index.php', $request->getUri());
         $this->assertEquals('HTTP/1.1', $request->getVersion());
