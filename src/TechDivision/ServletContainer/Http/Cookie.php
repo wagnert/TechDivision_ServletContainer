@@ -2,22 +2,23 @@
 
 namespace TechDivision\ServletContainer\Http;
 
-/*                                                                        *
- * This script belongs to the TYPO3 Flow framework.                       *
- *                                                                        *
- * It is free software; you can redistribute it and/or modify it under    *
- * the terms of the GNU Lesser General Public License, either version 3   *
- * of the License, or (at your option) any later version.                 *
- *                                                                        *
- * The TYPO3 project - inspiring people to share!                         *
- *                                                                        */
+/*
+ * This script belongs to the TYPO3 Flow framework. 
+ * 
+ * It is free software; you can redistribute it and/or modify it under 
+ * the terms of the GNU Lesser General Public License, either version 3 
+ * of the License, or (at your option) any later version. 
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
 
 /**
  * Represents a HTTP Cookie as of RFC 6265
  *
  * @see http://tools.ietf.org/html/rfc6265
  */
-class Cookie {
+class Cookie
+{
 
     /**
      * A token as per RFC 2616, Section 2.2
@@ -41,44 +42,52 @@ class Cookie {
 
     /**
      * Cookie Name, a token (RFC 6265, 4.1.1)
+     * 
      * @var string
      */
     protected $name;
 
     /**
+     *
      * @var string
      */
     protected $value;
 
     /**
      * Unix timestamp of the expiration date / time or 0 for "session" expiration (RFC 6265, 4.1.2.1)
+     * 
      * @var integer
      */
     protected $expiresTimestamp;
 
     /**
      * Number of seconds until the cookie expires (RFC 6265, 4.1.2.2)
+     * 
      * @var integer
      */
     protected $maximumAge;
 
     /**
      * Hosts to which this cookie will be sent (RFC 6265, 4.1.2.3)
+     * 
      * @var string
      */
     protected $domain;
 
     /**
+     *
      * @var string
      */
     protected $path;
 
     /**
+     *
      * @var boolean
      */
     protected $secure;
 
     /**
+     *
      * @var boolean
      */
     protected $httpOnly;
@@ -86,28 +95,36 @@ class Cookie {
     /**
      * Constructs a new Cookie object
      *
-     * @param string $name The cookie name as a valid token (RFC 2616)
-     * @param mixed $value The value to store in the cookie. Must be possible to cast into a string.
-     * @param integer|DateTime $expires Date and time after which this cookie expires.
-     * @param integer $maximumAge Number of seconds until the cookie expires.
-     * @param string $domain The host to which the user agent will send this cookie
-     * @param string $path The path describing the scope of this cookie
-     * @param boolean $secure If this cookie should only be sent through a "secure" channel by the user agent
-     * @param boolean $httpOnly If this cookie should only be used through the HTTP protocol
+     * @param string $name
+     *            The cookie name as a valid token (RFC 2616)
+     * @param mixed $value
+     *            The value to store in the cookie. Must be possible to cast into a string.
+     * @param integer|DateTime $expires
+     *            Date and time after which this cookie expires.
+     * @param integer $maximumAge
+     *            Number of seconds until the cookie expires.
+     * @param string $domain
+     *            The host to which the user agent will send this cookie
+     * @param string $path
+     *            The path describing the scope of this cookie
+     * @param boolean $secure
+     *            If this cookie should only be sent through a "secure" channel by the user agent
+     * @param boolean $httpOnly
+     *            If this cookie should only be used through the HTTP protocol
      * @api
      */
-    public function __construct($name, $value = NULL, $expires = 0, $maximumAge = NULL,  $domain = NULL, $path = '/', $secure = FALSE, $httpOnly = TRUE) {
-
+    public function __construct($name, $value = NULL, $expires = 0, $maximumAge = NULL, $domain = NULL, $path = '/', $secure = FALSE, $httpOnly = TRUE)
+    {
         if (preg_match(self::PATTERN_TOKEN, $name) !== 1) {
             throw new \InvalidArgumentException('The parameter "name" passed to the Cookie constructor must be a valid token as per RFC 2616, Section 2.2.', 1345101977);
         }
         if ($expires instanceof \Datetime) {
             $expires = $expires->getTimestamp();
         }
-        if (!is_integer($expires)) {
+        if (! is_integer($expires)) {
             throw new \InvalidArgumentException('The parameter "expires" passed to the Cookie constructor must be a unix timestamp or a DateTime object.', 1345108785);
         }
-        if ($maximumAge !== NULL && !is_integer($maximumAge)) {
+        if ($maximumAge !== NULL && ! is_integer($maximumAge)) {
             throw new \InvalidArgumentException('The parameter "maximumAge" passed to the Cookie constructor must be an integer value.', 1345108786);
         }
         if ($domain !== NULL && preg_match(self::PATTERN_DOMAIN, $domain) !== 1) {
@@ -116,7 +133,7 @@ class Cookie {
         if ($path !== NULL && preg_match(self::PATTERN_PATH, $path) !== 1) {
             throw new \InvalidArgumentException('The parameter "path" passed to the Cookie constructor must be a valid path as per RFC 6265, Section 4.1.1.', 1345123078);
         }
-
+        
         $this->name = $name;
         $this->value = $value;
         $this->expiresTimestamp = $expires;
@@ -135,15 +152,17 @@ class Cookie {
      * in case a required condition is not met. In these cases this function will return NULL
      * rather than the created cookie.
      *
-     * @param string $header The Set-Cookie string without the actual "Set-Cookie:" part
+     * @param string $header
+     *            The Set-Cookie string without the actual "Set-Cookie:" part
      * @return \TYPO3\Flow\Http\Cookie
      * @see http://tools.ietf.org/html/rfc6265
      */
-    public static function createFromRawSetCookieHeader($header) {
+    public static function createFromRawSetCookieHeader($header)
+    {
         $nameValueAndUnparsedAttributes = explode(';', $header, 2);
         $expectedNameValuePair = $nameValueAndUnparsedAttributes[0];
         $unparsedAttributes = isset($nameValueAndUnparsedAttributes[1]) ? $nameValueAndUnparsedAttributes[1] : '';
-
+        
         if (strpos($expectedNameValuePair, '=') === FALSE) {
             return NULL;
         }
@@ -153,14 +172,14 @@ class Cookie {
         if ($cookieName === '') {
             return NULL;
         }
-
+        
         $expiresAttribute = 0;
         $maxAgeAttribute = NULL;
         $domainAttribute = NULL;
         $pathAttribute = NULL;
         $secureAttribute = FALSE;
         $httpOnlyAttribute = TRUE;
-
+        
         if ($unparsedAttributes !== '') {
             foreach (explode(';', $unparsedAttributes) as $cookieAttributeValueString) {
                 $attributeNameAndValue = explode('=', $cookieAttributeValueString, 2);
@@ -203,18 +222,9 @@ class Cookie {
                 }
             }
         }
-
-        $cookie = new Cookie(
-            $cookieName,
-            $cookieValue,
-            $expiresAttribute,
-            $maxAgeAttribute,
-            $domainAttribute,
-            $pathAttribute,
-            $secureAttribute,
-            $httpOnlyAttribute
-        );
-
+        
+        $cookie = new Cookie($cookieName, $cookieValue, $expiresAttribute, $maxAgeAttribute, $domainAttribute, $pathAttribute, $secureAttribute, $httpOnlyAttribute);
+        
         return $cookie;
     }
 
@@ -224,28 +234,32 @@ class Cookie {
      * @return string The cookie name
      * @api
      */
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
     /**
      * Returns the value of this cookie
      *
-     * @return mixed
+     * @return mixed 
      * @api
      */
-    public function getValue() {
+    public function getValue()
+    {
         return $this->value;
     }
 
     /**
      * Sets the value of this cookie
      *
-     * @param mixed $value The new value
-     * @return void
+     * @param mixed $value
+     *            The new value
+     * @return void 
      * @api
      */
-    public function setValue($value) {
+    public function setValue($value)
+    {
         $this->value = $value;
     }
 
@@ -260,7 +274,8 @@ class Cookie {
      * @return integer A unix timestamp or 0
      * @api
      */
-    public function getExpires() {
+    public function getExpires()
+    {
         return $this->expiresTimestamp;
     }
 
@@ -273,7 +288,8 @@ class Cookie {
      * @return integer The maximum age in seconds, or NULL if none has been defined.
      * @api
      */
-    public function getMaximumAge() {
+    public function getMaximumAge()
+    {
         return $this->maximumAge;
     }
 
@@ -283,7 +299,8 @@ class Cookie {
      * @return string The domain name
      * @api
      */
-    public function getDomain() {
+    public function getDomain()
+    {
         return $this->domain;
     }
 
@@ -293,7 +310,8 @@ class Cookie {
      * @return string The path
      * @api
      */
-    public function getPath() {
+    public function getPath()
+    {
         return $this->path;
     }
 
@@ -306,7 +324,8 @@ class Cookie {
      * @return boolean State of the "Secure" attribute
      * @api
      */
-    public function isSecure() {
+    public function isSecure()
+    {
         return $this->secure;
     }
 
@@ -316,7 +335,8 @@ class Cookie {
      * @return boolean State of the "HttpOnly" attribute
      * @api
      */
-    public function isHttpOnly() {
+    public function isHttpOnly()
+    {
         return $this->httpOnly;
     }
 
@@ -328,7 +348,8 @@ class Cookie {
      *
      * @return void
      */
-    public function expire() {
+    public function expire()
+    {
         $this->expiresTimestamp = 202046400;
     }
 
@@ -338,7 +359,8 @@ class Cookie {
      *
      * @return boolean True if this cookie will is expired
      */
-    public function isExpired() {
+    public function isExpired()
+    {
         return ($this->expiresTimestamp !== 0 && $this->expiresTimestamp < time());
     }
 
@@ -347,35 +369,35 @@ class Cookie {
      *
      * @return string
      */
-    public function __toString() {
+    public function __toString()
+    {
         if ($this->value === FALSE) {
             $value = 0;
         } else {
             $value = $this->value;
         }
-
+        
         $cookiePair = sprintf('%s=%s', $this->name, urlencode($value));
         $attributes = '';
-
+        
         if ($this->expiresTimestamp !== 0) {
             $attributes .= '; Expires=' . gmdate('D, d-M-Y H:i:s T', $this->expiresTimestamp);
         }
-
+        
         if ($this->domain !== NULL) {
             $attributes .= '; Domain=' . $this->domain;
         }
-
+        
         $attributes .= '; Path=' . $this->path;
-
+        
         if ($this->secure) {
             $attributes .= '; Secure';
         }
-
+        
         if ($this->httpOnly) {
             $attributes .= '; HttpOnly';
         }
-
+        
         return $cookiePair . $attributes;
     }
-
 }
