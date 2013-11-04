@@ -571,7 +571,7 @@ class ServletSession
         }
         if ($this->remote !== TRUE) {
             if (! $this->response->hasCookie($this->sessionCookieName)) {
-                $this->response->setCookie($this->sessionCookie);
+                $this->response->addCookie($this->sessionCookie);
             }
             $this->sessionCookie->expire();
         }
