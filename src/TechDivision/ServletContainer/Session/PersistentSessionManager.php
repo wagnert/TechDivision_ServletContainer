@@ -1,25 +1,30 @@
 <?php
+
 /**
- * Created by JetBrains PhpStorm.
- * User: schboog
- * Date: 07.04.13
- * Time: 00:09
- * To change this template use File | Settings | File Templates.
+ * TechDivision\ServletContainer\Session\PersistentSessionManager
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  */
 namespace TechDivision\ServletContainer\Session;
 
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 
+/**
+ * A session manager implementation.
+ *
+ * @package TechDivision\ServletContainer
+ * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license http://opensource.org/licenses/osl-3.0.php
+ *          Open Software License (OSL 3.0)
+ * @author Tim Wagner <tw@techdivision.com>
+ */
 class PersistentSessionManager implements SessionManager
 {
-
-    /**
-     * Prefix for the session name.
-     *
-     * @var string
-     */
-    const SESSION_NAME = 'PHPSESSID';
 
     /**
      * The initial context instance.
@@ -27,6 +32,8 @@ class PersistentSessionManager implements SessionManager
      * @var \TechDivision\ApplicationServer\InitialContext
      */
     protected $initialContext;
+    
+    protected $sessions = array();
 
     /**
      * Initialize the session manager with the inital context instance.
@@ -39,6 +46,41 @@ class PersistentSessionManager implements SessionManager
     {
         $this->initialContext = $initialContext;
     }
+    
+    public function createSession(Request $request, $sessionId, $sessionName = ServletSession::SESSION_NAME)
+    {
+        
+        // prepare the cookie path
+        $cookiePath = '/';
+        
+        /*
+        if (strstr($request->getServerVar('DOCUMENT_ROOT'), $webappName = $request->getWebappName())) {
+            $cookiePath = $webappName;
+        }
+        */
+        
+        // initialize and return the session instance
+        $sessionParams = array($request, $sessionId, $sessionId, time());
+
+        // initialize the session settings
+        $settings['session']['name'] = $sessionName;
+        $settings['session']['cookie']['lifetime'] = time() + 86400;
+        $settings['session']['cookie']['domain'] = $request->getServerName();
+        $settings['session']['cookie']['path'] = $cookiePath;
+        $settings['session']['cookie']['secure'] = false;
+        $settings['session']['cookie']['httponly'] = false;
+        $settings['session']['garbageCollectionProbability'] = 1;
+        $settings['session']['inactivityTimeout'] = 1440;
+        
+        // initialize and return the session instance
+        $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
+        $persistentSession->injectSettings($settings);
+        $persistentSession->injectStorage($this->initialContext->getStorage());
+        
+        $this->sessions[$sessionName] = $persistentSession;
+        
+        return $persistentSession;
+    }
 
     /**
      * Tries to find a session for the given request. The session id will be 
@@ -50,8 +92,14 @@ class PersistentSessionManager implements SessionManager
      * @param Request $request            
      * @return ServletSession
      */
-    public function getSessionForRequest(Request $request)
+    public function getSessionForRequest(Request $request, $sessionName = ServletSession::SESSION_NAME)
     {
+        
+        // try to load the session with the passed name
+        if (array_key_exists($sessionName, $this->sessions)) {
+            return $this->sessions[$sessionName];
+        }
+            
         // @todo merge refactoring for headers getter by bcmzero
         $headers = $request->getHeaders();
         $sessionId = null;
@@ -60,7 +108,7 @@ class PersistentSessionManager implements SessionManager
         if (isset($headers['Cookie'])) {
             foreach (explode(';', $headers['Cookie']) as $cookie) {
                 list ($name, $value) = explode('=', $cookie);
-                if ($name === self::SESSION_NAME) {
+                if ($name === $sessionName) {
                     $sessionId = $value;
                 }
             }
@@ -69,40 +117,12 @@ class PersistentSessionManager implements SessionManager
         // try to retrieve the session id from the request query string
         // @todo merge refactoring for query string parameters getter by bcmzero
         $params = array();
-        
         parse_str($request->getQueryString(), $params);
-        
-        if (isset($params[self::SESSION_NAME])) {
-            $sessionId = $params[self::SESSION_NAME];
+        if (isset($params[$sessionName])) {
+            $sessionId = $params[$sessionName];
         }
         
-        // prepare the cookie path
-        $cookiePath = $webappName;
-        if (strstr($request->getServerVar('DOCUMENT_ROOT'), $webappName = $request->getWebappName())) {
-            $cookiePath = $webappName;
-        }
-        
-        $settings['session']['name'] = self::SESSION_NAME;
-        $settings['session']['cookie']['lifetime'] = time() + 86400;
-        $settings['session']['cookie']['domain'] = $request->getServerName();
-        $settings['session']['cookie']['path'] = $cookiePath;
-        $settings['session']['cookie']['secure'] = false;
-        $settings['session']['cookie']['httponly'] = false;
-        $settings['session']['garbageCollectionProbability'] = 1;
-        $settings['session']['inactivityTimeout'] = 1440;
-        
-        // initialize and return the session instance
-        $sessionParams = array(
-            $request,
-            $sessionId,
-            $sessionId,
-            time()
-        );
-        
-        $persistentSession = $this->newInstance('TechDivision\ServletContainer\Session\ServletSession', $sessionParams);
-        $persistentSession->injectSettings($settings);
-        $persistentSession->injectStorage($this->initialContext->getStorage());
-        return $persistentSession;
+        return $this->createSession($request, $sessionId, $sessionName);
     }
 
     /**

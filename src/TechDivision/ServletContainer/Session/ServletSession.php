@@ -33,6 +33,13 @@ class ServletSession
     const TAG_PREFIX = 'customtag-';
 
     /**
+     * Prefix for the session name.
+     *
+     * @var string
+     */
+    const SESSION_NAME = 'PHPSESSID';
+
+    /**
      * Cache storage for this session
      * 
      * @var \TechDivision\ApplicationServer\InitialContext\StorageInterface
@@ -241,7 +248,8 @@ class ServletSession
     /**
      * Tells if the session has been started already.
      *
-     * @return boolean @api
+     * @return boolean 
+     * @api
      */
     public function isStarted()
     {
@@ -253,7 +261,7 @@ class ServletSession
      * request) or remote (retrieved through the Session Manager).
      *
      * @return boolean TRUE if the session is remote, FALSE if this is the current session
-     *         @api
+     * @api
      */
     public function isRemote()
     {
@@ -263,10 +271,12 @@ class ServletSession
     /**
      * Starts the session, if it has not been already started
      *
-     * @return void @api
+     * @return void 
+     * @api
      */
     public function start()
     {
+        
         if ($this->request === NULL) {
             $this->initializeHttpAndCookie();
         }
@@ -296,7 +306,8 @@ class ServletSession
      * session info data needs to be loaded, this method stores this data already
      * so it doesn't have to be loaded again once the session is being used.
      *
-     * @return boolean @api
+     * @return boolean 
+     * @api
      */
     public function canBeResumed()
     {

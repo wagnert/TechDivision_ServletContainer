@@ -161,13 +161,6 @@ class HttpRequest implements Request
     protected $queryParser;
 
     /**
-     * The Session
-     *
-     * @var ServletSession
-     */
-    protected $session;
-
-    /**
      * An array that contains all request parameters.
      *
      * @var array
@@ -187,7 +180,7 @@ class HttpRequest implements Request
      * @var HttpPart
      */
     protected $part;
-
+    
     /**
      * Inject the session manager into the request instance.
      *
@@ -198,6 +191,16 @@ class HttpRequest implements Request
     public function injectSessionManager(SessionManager $sessionManager)
     {
         $this->sessionManager = $sessionManager;
+    }
+    
+    /**
+     * Return's the session manager from the request instance.
+     * 
+     * @return \TechDivision\ServletContainer\Session\SessionManager The session manager instance
+     */
+    public function getSessionManager()
+    {
+        return $this->sessionManager;   
     }
 
     /**
@@ -757,15 +760,12 @@ class HttpRequest implements Request
     /**
      * Returns the session for this request.
      *
-     * @return ServletSession
+     * @param string $sessionName The name of the session to return/create
+     * @return \TechDivision\ServletSession\Session\ServletSession The session instance
      */
-    public function getSession()
+    public function getSession($sessionName = ServletSession::SESSION_NAME)
     {
-        if ($this->session == null) {
-            $this->session = $this->sessionManager->getSessionForRequest($this);
-        }
-        
-        return $this->session;
+        return $this->sessionManager->getSessionForRequest($this, $sessionName);
     }
 
     /**
