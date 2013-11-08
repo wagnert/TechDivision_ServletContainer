@@ -34,6 +34,13 @@ use TechDivision\ServletContainer\Socket\HttpClient;
 abstract class GenericServlet implements Servlet {
 
     /**
+     * The unique servlet name.
+     * 
+     * @var string
+     */
+    protected $name;
+    
+    /**
      * The servlet configuration.
      * 
      * @var \TechDivision\ServletContainer\Interfaces\ServletConfig
@@ -53,6 +60,7 @@ abstract class GenericServlet implements Servlet {
     public function init(ServletConfig $config)
     {
         $this->config = $config;
+        error_log("call init() method for " . get_class($this));
     }
 
     /**

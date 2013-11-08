@@ -15,6 +15,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 use TechDivision\ServletContainer\Exceptions\InvalidApplicationArchiveException;
 use TechDivision\ServletContainer\Servlets\ServletConfiguration;
+use TechDivision\ServletContainer\Exceptions\InvalidServletMappingException;
 
 /**
  * The servlet manager handles the servlets registered for the application.
@@ -42,6 +43,13 @@ class ServletManager
      * @var array
      */
     protected $servlets = array();
+    
+    /**
+     * Array that contains the servlet mappings
+     * 
+     * @var array
+     */
+    protected $servletMappings = array();
     
     /**
      * Array with the servlet's init parameters found in the web.xml configuration file.
@@ -102,45 +110,60 @@ class ServletManager
             }
             
             // initialize the servlets by parsing the servlet-mapping nodes
-            foreach ($config->xpath('/web-app/servlet-mapping') as $mapping) {
+            foreach ($config->xpath('/web-app/servlet') as $servlet) {
                 
-                // try to resolve the mapped servlet class
-                $className = $config->xpath('/web-app/servlet[servlet-name="' . $mapping->{'servlet-name'} . '"]/servlet-class');
-                if (! count($className)) {
-                    throw new InvalidApplicationArchiveException(sprintf('No servlet class defined for servlet %s', $mapping->{'servlet-name'}));
+                // load the servlet name and check if it already has been initialized
+                $servletName = (string) $servlet->{'servlet-name'};
+                if (array_key_exists($servletName, $this->servlets)) {
+                    continue;
                 }
                 
-                // get the string classname
-                $className = (string) array_shift($className);
+                // try to resolve the mapped servlet class
+                $className = (string) $servlet->{'servlet-class'};
+                if (! count($className)) {
+                    throw new InvalidApplicationArchiveException(sprintf('No servlet class defined for servlet %s', $servlet->{'servlet-class'}));
+                }
                 
                 // instantiate the servlet
-                $servlet = $this->getApplication()->newInstance($className);
-                
-                // load the url pattern
-                $urlPattern = (string) $mapping->{'url-pattern'};
-                
-                // make sure that the URL pattern always starts with a leading slash
-                $urlPattern = ltrim($urlPattern, '/');
+                $instance = $this->getApplication()->newInstance($className);
                 
                 //  initialize the servlet configuration
                 $servletConfig = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
                     $this
                 ));
                 
+                // set the unique servlet name
+                $servletConfig->setServletName($servletName);
+                
                 // append the init params to the servlet configuration
-                $initParams = $config->xpath('/web-app/servlet[servlet-name="' . $mapping->{'servlet-name'} . '"]/init-param');
-                foreach ($initParams as $initParam) {
+                foreach ($servlet->{'init-param'} as $initParam) {
                     $servletConfig->addInitParameter((string) $initParam->{'param-name'}, (string) $initParam->{'param-value'});
                 }
                 
-                // set the servlet's unique URL pattern
-                $servletConfig->setUrlPattern('/' . $urlPattern);
-                
                 // initialize the servlet
-                $servlet->init($servletConfig);
+                $instance->init($servletConfig);
                 
                 // the servlet is added to the dictionary using the complete request path as the key
-                $this->addServlet('/' . $urlPattern, $servlet);
+                $this->addServlet((string) $servlet->{'servlet-name'}, $instance);
+            }
+            
+            // initialize the servlets by parsing the servlet-mapping nodes
+            foreach ($config->xpath('/web-app/servlet-mapping') as $mapping) {
+                
+                // load the url pattern and the servlet name
+                $urlPattern = (string) $mapping->{'url-pattern'};
+                $servletName = (string) $mapping->{'servlet-name'};
+                
+                // make sure that the URL pattern always starts with a leading slash
+                $urlPattern = ltrim($urlPattern, '/');
+                
+                // the servlet is added to the dictionary using the complete request path as the key
+                if (!array_key_exists($servletName, $this->servlets)) {
+                    throw new InvalidServletMappingException(sprintf("Can't find servlet %s for url-pattern %s", $servletName, $urlPattern));
+                }
+                
+                // append the url-pattern - servlet mapping to the array
+                $this->servletMappings['/' . $urlPattern] = (string) $mapping->{'servlet-name'};
             }
         }
     }
@@ -159,7 +182,9 @@ class ServletManager
             ->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
             $this
         )));
-        $this->addServlet('/', $defaultServlet);
+        $defaultServletName = 'StaticResourceServlet';
+        $this->addServlet($defaultServletName, $defaultServlet);
+        $this->servletMappings['/'] = $defaultServletName;
     }
 
     /**
@@ -179,15 +204,41 @@ class ServletManager
     {
         return $this->servlets;
     }
+    
+    /**
+     * Returns the servlet mappings found in the
+     * configuration file.
+     * 
+     * @return array The servlet mappings
+     */
+    public function getServletMappings()
+    {
+        return $this->servletMappings;
+    }
 
     /**
-     *
-     * @return \TechDivision_Collections_Dictionary
+     * Returns the servlet with the passed name.
+     * 
+     * @param string $key The name of the servlet to return
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance
      */
     public function getServlet($key)
     {
         if (array_key_exists($key, $this->servlets)) {
             return $this->servlets[$key];
+        }
+    }
+    
+    /**
+     * Returns the servlet for the passed URL mapping.
+     * 
+     * @param string $urlMapping The URL mapping to return the servlet for
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance
+     */
+    public function getServletByMapping($urlMapping)
+    {
+        if (array_key_exists($urlMapping, $this->servletMappings)) {
+            return $this->getServlet($this->servletMappings[$urlMapping]);
         }
     }
 

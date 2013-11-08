@@ -25,6 +25,13 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
  */
 class ServletConfiguration implements ServletConfig
 {
+    
+    /**
+     * The servlet's name from the web.xml configuration file.
+     * 
+     * @var string
+     */
+    protected $servletName;
 
     /**
      * The application instance.
@@ -39,13 +46,6 @@ class ServletConfiguration implements ServletConfig
      * @var array
      */
     protected $initParameter = array();
-    
-    /**
-     * The servlet's URL pattern from the web.xml configuration file.
-     * 
-     * @var string
-     */
-    protected $urlPattern = '/';
 
     /**
      * Initializes the servlet configuration with the servlet manager instance.
@@ -110,24 +110,24 @@ class ServletConfiguration implements ServletConfig
     }
     
     /**
-     * Set's the servlet's URL pattern from the web.xml configuration file.
+     * Set's the servlet's Uname from the web.xml configuration file.
      * 
-     * @param string $urlPattern The URL pattern
+     * @param string $servletName The servlet name
      * @return void
      */
-    public function setUrlPattern($urlPattern)
+    public function setServletName($servletName)
     {
-        $this->urlPattern = $urlPattern;
+        $this->servletName = $servletName;
     }
     
     /**
-     * Return's the servlet's URL patter from the web.xml configuration file.
+     * Return's the servlet's name from the web.xml configuration file.
      * 
-     * @return string The URL pattern
+     * @return string The servlet name
      */
-    public function getUrlPattern()
+    public function getServletName()
     {
-        return $this->urlPattern;
+        return $this->servletName;
     }
     
     /**
