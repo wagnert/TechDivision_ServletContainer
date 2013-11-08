@@ -177,12 +177,14 @@ class ServletManager
      */
     protected function addDefaultServlet()
     {
+        $defaultServletName = 'StaticResourceServlet';
         $defaultServlet = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\StaticResourceServlet');
-        $defaultServlet->init($this->getApplication()
+        $config = $this->getApplication()
             ->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
             $this
-        )));
-        $defaultServletName = 'StaticResourceServlet';
+        ));
+        $config->setServletName($defaultServletName);
+        $defaultServlet->init($config);
         $this->addServlet($defaultServletName, $defaultServlet);
         $this->servletMappings['/'] = $defaultServletName;
     }

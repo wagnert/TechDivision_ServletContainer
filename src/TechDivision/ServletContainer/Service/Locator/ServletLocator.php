@@ -126,6 +126,7 @@ class ServletLocator implements ResourceLocatorInterface
         
         // load the servlet cache and check if a servlet has already been loaded
         $servletCache = $this->getApplication()->getInitialContext()->getAttribute("$applicationName.servletCache");
+        
         if (is_array($servletCache) && array_key_exists($path, $servletCache)) {
             return $this->servletManager->getServlet($servletCache[$path]);
         } elseif (!is_array($servletCache)) {
