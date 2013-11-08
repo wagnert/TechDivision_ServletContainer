@@ -155,7 +155,7 @@ class MageServlet extends PhpServlet
             }
             
         } catch (\Exception $e) {
-            error_log($content = $e->toString());
+            error_log($content = $e->__toString());
         }
 
         // return the content

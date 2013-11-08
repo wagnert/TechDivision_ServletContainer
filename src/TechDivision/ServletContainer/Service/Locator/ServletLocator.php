@@ -82,6 +82,7 @@ class ServletLocator implements ResourceLocatorInterface
     {
         
         // retrieve the registered servlets
+        $servletMappings = $this->servletManager->getServletMappings();
         $servlets = $this->servletManager->getServlets();
         
         // prepare the collection with the available routes and initialize the route counter
@@ -89,7 +90,8 @@ class ServletLocator implements ResourceLocatorInterface
         $counter = 0;
         
         // iterate over the available servlets and prepare the routes
-        foreach ($servlets as $urlPattern => $servlet) {
+        foreach ($servletMappings as $urlPattern => $servletName) {
+            $servlet = $servlets[$servletName];
             $pattern = str_replace('/*', "/{placeholder_$counter}", $urlPattern);
             $route = new Route($pattern, array(
                 $servlet
@@ -124,6 +126,7 @@ class ServletLocator implements ResourceLocatorInterface
         
         // load the servlet cache and check if a servlet has already been loaded
         $servletCache = $this->getApplication()->getInitialContext()->getAttribute("$applicationName.servletCache");
+        
         if (is_array($servletCache) && array_key_exists($path, $servletCache)) {
             return $this->servletManager->getServlet($servletCache[$path]);
         } elseif (!is_array($servletCache)) {
@@ -151,7 +154,7 @@ class ServletLocator implements ResourceLocatorInterface
         $mappingServlet = current($servlet);
         
         // append it to the servlet cache and return the servlet
-        $servletCache[$path] = $mappingServlet->getServletConfig()->getUrlPattern();
+        $servletCache[$path] = $mappingServlet->getServletConfig()->getServletName();
         $this->getApplication()->getInitialContext()->setAttribute("$applicationName.servletCache", $servletCache);
         return $mappingServlet;
     }
