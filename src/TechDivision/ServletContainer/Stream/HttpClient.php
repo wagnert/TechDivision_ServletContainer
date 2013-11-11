@@ -36,6 +36,13 @@ class HttpClient extends Client implements HttpClientInterface
     protected $httpRequest;
 
     /**
+     * Hold the http part instance to use as factory.
+     *
+     * @var \TechDivision\ServletContainer\Http\HttpPart
+     */
+    protected $httpPart;
+
+    /**
      * The new line character.
      * 
      * @param
@@ -132,6 +139,11 @@ class HttpClient extends Client implements HttpClientInterface
         
         // parse body with request instance
         $requestInstance->parse($body);
+        
+        // initialize client IP + port
+        $this->getPeerName($clientIp, $clientPort);
+        $requestInstance->setClientIp($clientIp);
+        $requestInstance->setClientPort($clientPort);
         
         // return fully qualified request instance
         return $requestInstance;
