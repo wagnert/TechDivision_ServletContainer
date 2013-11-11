@@ -238,6 +238,7 @@ class ServletSession
     public function setSessionIdentifier($sessionIdentifier)
     {
         $this->sessionIdentifier = $sessionIdentifier;
+        $this->storageIdentifier = $sessionIdentifier;
     }
 
     public function getSessionIdentifier()
@@ -284,7 +285,8 @@ class ServletSession
         if ($this->started === FALSE) {
             
             $this->sessionIdentifier = Algorithms::generateRandomString(32);
-            $this->storageIdentifier = Algorithms::generateUUID();
+            // $this->storageIdentifier = Algorithms::generateUUID();
+            $this->storageIdentifier = $this->sessionIdentifier;
             $this->sessionCookie = new Cookie($this->sessionCookieName, $this->sessionIdentifier, $this->sessionCookieLifetime, NULL, $this->sessionCookieDomain, $this->sessionCookiePath, $this->sessionCookieSecure, $this->sessionCookieHttpOnly);
             
             $this->response->addCookie($this->sessionCookie);
@@ -331,7 +333,7 @@ class ServletSession
      * Resumes an existing session, if any.
      *
      * @return integer If a session was resumed, the inactivity of since the last request is returned
-     *         @api
+     * @api
      */
     public function resume()
     {
@@ -369,7 +371,8 @@ class ServletSession
      * Returns the current session identifier
      *
      * @return string The current session identifier
-     * @throws SessionNotStartedException @api
+     * @throws SessionNotStartedException
+     * @api
      */
     public function getId()
     {
@@ -385,7 +388,8 @@ class ServletSession
      *
      * @return string The new session ID
      * @throws SessionNotStartedException
-     * @throws \TechDivision\ServletContainer\Exceptions\OperationNotSupportedException @api
+     * @throws \TechDivision\ServletContainer\Exceptions\OperationNotSupportedException
+     * @api
      */
     public function renewId()
     {
@@ -446,7 +450,8 @@ class ServletSession
      *            The data to be stored
      * @return void
      * @throws \TechDivision\ServletContainer\Exceptions\DataNotSerializableException
-     * @throws SessionNotStartedException @api
+     * @throws SessionNotStartedException 
+     * @api
      */
     public function putData($key, $data)
     {
@@ -631,10 +636,9 @@ class ServletSession
             
             if ($this->storage->has($this->sessionIdentifier)) {
                 
-                /*
-                 * // Security context can't be injected and must be retrieved manually // because it relies on this very session object: $securityContext = $this->objectManager->get('TYPO3\Flow\Security\Context'); if ($securityContext->isInitialized()) { $this->storeAuthenticatedAccountsInfo($securityContext->getAuthenticationTokens()); } $this->putData('TYPO3_Flow_Object_ObjectManager', $this->objectManager->getSessionInstances());
-                 */
-                
+                 // Security context can't be injected and must be retrieved manually because it relies on this very session object: 
+                 // $securityContext = $this->objectManager->get('TYPO3\Flow\Security\Context'); if ($securityContext->isInitialized()) { $this->storeAuthenticatedAccountsInfo($securityContext->getAuthenticationTokens()); } $this->putData('TYPO3_Flow_Object_ObjectManager', $this->objectManager->getSessionInstances());
+
                 $this->writeSessionInfoCacheEntry();
             }
             
