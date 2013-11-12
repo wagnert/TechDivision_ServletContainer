@@ -29,7 +29,15 @@ class SecureHttpClient extends HttpClient
 {
 
     /**
-     * 
+     * Overwrites the readFrom() method of the Stream classes because the 
+     * {@link http://de3.php.net/stream_socket_recvfrom stream_socket_recvfrom()} doesn't
+     * support SSL handling.
+     *
+     * @param integer $length
+     *            The maximum number of bytes read is specified by the length parameter
+     * @param integer $flags
+     *            The value of flags can be any combination of the following flags, joined with the binary OR (|) operator
+     * @return string The string read from the socket
      */
     public function readFrom($length, $flags = 0)
     {
