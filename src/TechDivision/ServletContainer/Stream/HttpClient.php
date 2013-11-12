@@ -106,7 +106,7 @@ class HttpClient extends Client implements HttpClientInterface
         $buffer = null;
         
         // read a chunk from the socket
-        while ($buffer .= $this->read($this->getLineLength())) {
+        while ($buffer .= $this->readFrom($this->getLineLength())) {
             if (false !== strpos($buffer, $this->getNewLine())) {
                 break;
             }
@@ -141,9 +141,8 @@ class HttpClient extends Client implements HttpClientInterface
         $requestInstance->parse($body);
         
         // initialize client IP + port
-        $this->getPeerName($clientIp, $clientPort);
-        $requestInstance->setClientIp($clientIp);
-        $requestInstance->setClientPort($clientPort);
+        $requestInstance->setClientIp($this->getAddress());
+        $requestInstance->setClientPort($this->getPort());
         
         // return fully qualified request instance
         return $requestInstance;
