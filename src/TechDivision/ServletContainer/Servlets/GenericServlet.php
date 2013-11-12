@@ -60,7 +60,6 @@ abstract class GenericServlet implements Servlet {
     public function init(ServletConfig $config)
     {
         $this->config = $config;
-        error_log("call init() method for " . get_class($this));
     }
 
     /**
