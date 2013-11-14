@@ -182,6 +182,14 @@ class HttpRequest implements Request
     protected $part;
     
     /**
+     * Array that contain's the cookies passed with
+     * the request.
+     * 
+     * @var array
+     */
+    protected $cookies = array();
+    
+    /**
      * Inject the session manager into the request instance.
      *
      * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager
@@ -265,8 +273,9 @@ class HttpRequest implements Request
         // parse path info
         $this->parsePathInfo($this->getUri());
         
-        // set intial server vars
+        // set intial server vars and cookies
         $this->initServerVars();
+        $this->initCookies();
         
         // inject the query parser
         $this->injectQueryParser(new HttpQueryParser());
@@ -421,6 +430,22 @@ class HttpRequest implements Request
         
         if ($cookie = $this->getHeader('Cookie')) {
             $this->server['HTTP_COOKIE'] = $cookie;
+        }
+    }
+    
+    /**
+     * Initializes the cookies found in the header.
+     * 
+     * @return void
+     */
+    public function initCookies()
+    {
+        $cookies = explode(';', $this->getHeader('Cookie'));
+        foreach ($cookies as $cookie) {
+            if (!empty($cookie)) {
+                list ($cookieName, $cookieValue) = explode('=', trim($cookie));
+                $this->cookies[$cookieName] = new Cookie($cookieName, $cookieValue);
+            }
         }
     }
 
@@ -932,5 +957,30 @@ class HttpRequest implements Request
             $name = $part->getName();
         }
         $this->parts[$name] = $part;
+    }
+
+    /**
+     * Returns TRUE if the request has a cookie header with the passed
+     * name, else FALSE.
+     *
+     * @param string $cookieName
+     *            Name of the cookie header to be checked
+     * @return boolean TRUE if the request has the cookie, else FALSE
+     */
+    public function hasCookie($cookieName)
+    {
+        return array_key_exists($cookieName, $this->cookies);
+    }
+    
+    /**
+     * Returns the value of the cookie with the passed name.
+     * 
+     * @param string $cookieName The name of the cookie to return
+     * @return string The cookie value
+     */
+    public function getCookie($cookieName) {
+        if ($this->hasCookie($cookieName)) {
+            return $this->cookies[$cookieName]; 
+        }      
     }
 }

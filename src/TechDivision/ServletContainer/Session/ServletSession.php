@@ -197,7 +197,7 @@ class ServletSession
             $this->storageIdentifier = $storageIdentifier;
             $this->lastActivityTimestamp = $lastActivityTimestamp;
             $this->started = TRUE;
-            $this->remote = TRUE;
+            $this->remote = FALSE;
             $this->tags = $tags;
         }
         
@@ -278,15 +278,12 @@ class ServletSession
     public function start()
     {
         
-        if ($this->request === NULL) {
-            $this->initializeHttpAndCookie();
-        }
-        
         if ($this->started === FALSE) {
             
             $this->sessionIdentifier = Algorithms::generateRandomString(32);
             // $this->storageIdentifier = Algorithms::generateUUID();
             $this->storageIdentifier = $this->sessionIdentifier;
+            
             $this->sessionCookie = new Cookie($this->sessionCookieName, $this->sessionIdentifier, $this->sessionCookieLifetime, NULL, $this->sessionCookieDomain, $this->sessionCookiePath, $this->sessionCookieSecure, $this->sessionCookieHttpOnly);
             
             $this->response->addCookie($this->sessionCookie);
@@ -295,6 +292,9 @@ class ServletSession
             $this->started = TRUE;
             
             $this->writeSessionInfoCacheEntry();
+            
+        } else {
+            $this->initializeHttpAndCookie();
         }
     }
 
@@ -313,9 +313,9 @@ class ServletSession
      */
     public function canBeResumed()
     {
-        if ($this->request === NULL) {
-            $this->initializeHttpAndCookie();
-        }
+        
+        $this->initializeHttpAndCookie();
+            
         if ($this->sessionCookie === NULL || $this->request === NULL || $this->started === TRUE) {
             return FALSE;
         }
