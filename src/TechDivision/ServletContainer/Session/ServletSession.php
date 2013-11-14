@@ -126,25 +126,11 @@ class ServletSession
     protected $sessionIdentifier;
 
     /**
-     * Internal identifier used for storing session data in the cache
-     *
-     * @var string
-     */
-    protected $storageIdentifier;
-
-    /**
      * If this session has been started
      *
      * @var boolean
      */
     protected $started = FALSE;
-
-    /**
-     * If this session is remote or the "current" session
-     *
-     * @var boolean
-     */
-    protected $remote = FALSE;
 
     /**
      *
@@ -174,30 +160,21 @@ class ServletSession
      *            \TechDivision\ServletContainer\Interfaces\Response The response instance
      * @param string $sessionIdentifier
      *            The public session identifier which is also used in the session cookie
-     * @param string $storageIdentifier
-     *            The private storage identifier which is used for cache entries
      * @param integer $lastActivityTimestamp
      *            Unix timestamp of the last known activity for this session
      * @param array $tags
      *            A list of tags set for this session
      * @throws \InvalidArgumentException
      */
-    public function __construct(Request $request, $sessionIdentifier = NULL, $storageIdentifier = NULL, $lastActivityTimestamp = NULL, array $tags = array())
+    public function __construct(Request $request, $sessionIdentifier = NULL, $lastActivityTimestamp = NULL, array $tags = array())
     {
         $this->request = $request;
         $this->response = $request->getResponse();
         
         if ($sessionIdentifier !== NULL) {
-            
-            if ($storageIdentifier === NULL || $lastActivityTimestamp === NULL) {
-                throw new \InvalidArgumentException('Session requires a storage identifier and last activity timestamp for remote sessions.', 1354045988);
-            }
-            
             $this->sessionIdentifier = $sessionIdentifier;
-            $this->storageIdentifier = $storageIdentifier;
             $this->lastActivityTimestamp = $lastActivityTimestamp;
             $this->started = TRUE;
-            $this->remote = FALSE;
             $this->tags = $tags;
         }
         
@@ -235,12 +212,22 @@ class ServletSession
         $this->inactivityTimeout = (integer) $settings['session']['inactivityTimeout'];
     }
 
+    /**
+     * Set's the unique session identifier.
+     * 
+     * @param string $sessionIdentifier The unique session identifier
+     * @return void
+     */
     public function setSessionIdentifier($sessionIdentifier)
     {
         $this->sessionIdentifier = $sessionIdentifier;
-        $this->storageIdentifier = $sessionIdentifier;
     }
 
+    /**
+     * Return's the unique session identifier.
+     * 
+     * @return string The unique session identifier
+     */
     public function getSessionIdentifier()
     {
         return $this->sessionIdentifier;
@@ -258,18 +245,6 @@ class ServletSession
     }
 
     /**
-     * Tells if the session is local (the current session bound to the current HTTP
-     * request) or remote (retrieved through the Session Manager).
-     *
-     * @return boolean TRUE if the session is remote, FALSE if this is the current session
-     * @api
-     */
-    public function isRemote()
-    {
-        return $this->remote;
-    }
-
-    /**
      * Starts the session, if it has not been already started
      *
      * @return void 
@@ -281,11 +256,7 @@ class ServletSession
         if ($this->started === FALSE) {
             
             $this->sessionIdentifier = Algorithms::generateRandomString(32);
-            // $this->storageIdentifier = Algorithms::generateUUID();
-            $this->storageIdentifier = $this->sessionIdentifier;
-            
             $this->sessionCookie = new Cookie($this->sessionCookieName, $this->sessionIdentifier, $this->sessionCookieLifetime, NULL, $this->sessionCookieDomain, $this->sessionCookiePath, $this->sessionCookieSecure, $this->sessionCookieHttpOnly);
-            
             $this->response->addCookie($this->sessionCookie);
             
             $this->lastActivityTimestamp = $this->now;
@@ -319,12 +290,13 @@ class ServletSession
         if ($this->sessionCookie === NULL || $this->request === NULL || $this->started === TRUE) {
             return FALSE;
         }
+        
         $sessionInfo = $this->storage->get($this->sessionCookie->getValue());
         if ($sessionInfo === FALSE) {
             return FALSE;
         }
+        
         $this->lastActivityTimestamp = $sessionInfo['lastActivityTimestamp'];
-        $this->storageIdentifier = $sessionInfo['storageIdentifier'];
         $this->tags = $sessionInfo['tags'];
         return ! $this->autoExpire();
     }
@@ -343,22 +315,17 @@ class ServletSession
             $this->response->setCookie($this->sessionCookie);
             $this->started = TRUE;
             
-            $sessionObjects = $this->storage->get($this->storageIdentifier . md5(__CLASS__));
+            $sessionObjects = $this->storage->get($this->sessionIdentifier . md5(__CLASS__));
             
             if (is_array($sessionObjects)) {
-                
                 foreach ($sessionObjects as $object) {
-                    
                     if (method_exists($object, '__wakeup')) {
                         $object->__wakeup();
                     }
                 }
+                
             } else {
-                // Fallback for some malformed session data, if it is no array but something else.
-                // In this case, we reset all session objects (graceful degradation).
-                $this->storage->set($this->storageIdentifier . md5(__CLASS__), array(), array(
-                    $this->storageIdentifier
-                ), 0);
+                $this->storage->set($this->sessionIdentifier . md5(__CLASS__), array(), array($this->sessionIdentifier), 0);
             }
             
             $lastActivitySecondsAgo = ($this->now - $this->lastActivityTimestamp);
@@ -397,10 +364,6 @@ class ServletSession
             throw new SessionNotStartedException('Tried to renew the session identifier, but the session has not been started yet.', 1351182429);
         }
         
-        if ($this->remote === TRUE) {
-            throw new OperationNotSupportedException(sprintf('Tried to renew the session identifier on a remote session (%s).', $this->sessionIdentifier), 1354034230);
-        }
-        
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
         $this->sessionIdentifier = Algorithms::generateRandomString(32);
         $this->writeSessionInfoCacheEntry();
@@ -422,7 +385,7 @@ class ServletSession
         if ($this->started !== TRUE) {
             throw new SessionNotStartedException('Tried to get session data, but the session has not been started yet.', 1351162255);
         }
-        return $this->storage->get($this->storageIdentifier . md5($key));
+        return $this->storage->get($this->sessionIdentifier . md5($key));
     }
 
     /**
@@ -438,7 +401,7 @@ class ServletSession
         if ($this->started !== TRUE) {
             throw new SessionNotStartedException('Tried to check a session data entry, but the session has not been started yet.', 1352488661);
         }
-        return $this->storage->has($this->storageIdentifier . md5($key));
+        return $this->storage->has($this->sessionIdentifier . md5($key));
     }
 
     /**
@@ -461,8 +424,8 @@ class ServletSession
         if (is_resource($data)) {
             throw new DataNotSerializableException('The given data cannot be stored in a session, because it is of type "' . gettype($data) . '".', 1351162262);
         }
-        $this->storage->set($this->storageIdentifier . md5($key), $data, array(
-            $this->storageIdentifier
+        $this->storage->set($this->sessionIdentifier . md5($key), $data, array(
+            $this->sessionIdentifier
         ), 0);
     }
 
@@ -543,26 +506,6 @@ class ServletSession
     }
 
     /**
-     * Updates the last activity time to "now".
-     *
-     * @return void
-     * @throws SessionNotStartedException
-     */
-    public function touch()
-    {
-        if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to touch a session, but the session has not been started yet.', 1354284318);
-        }
-        
-        // Only makes sense for remote sessions because the currently active session
-        // will be updated on shutdown anyway:
-        if ($this->remote === TRUE) {
-            $this->lastActivityTimestamp = $this->now;
-            $this->writeSessionInfoCacheEntry();
-        }
-    }
-
-    /**
      * Explicitly writes and closes the session
      *
      * @return void @api
@@ -585,18 +528,16 @@ class ServletSession
         if ($this->started !== TRUE) {
             throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.', 1351162668);
         }
-        if ($this->remote !== TRUE) {
-            if (! $this->response->hasCookie($this->sessionCookieName)) {
-                $this->response->addCookie($this->sessionCookie);
-            }
-            $this->sessionCookie->expire();
+        
+        if ($this->response->hasCookie($this->sessionCookieName) === FALSE) {
+            $this->response->addCookie($this->sessionCookie);
         }
+        $this->sessionCookie->expire();
         
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
-        $this->storage->flushByTag($this->storageIdentifier);
+        $this->storage->flushByTag($this->sessionIdentifier);
         $this->started = FALSE;
         $this->sessionIdentifier = NULL;
-        $this->storageIdentifier = NULL;
         $this->tags = array();
     }
 
@@ -614,7 +555,7 @@ class ServletSession
             foreach ($this->storage->getByTag('session') as $sessionInfo) {
                 $lastActivitySecondsAgo = $this->now - $sessionInfo['lastActivityTimestamp'];
                 if ($lastActivitySecondsAgo > $this->inactivityTimeout) {
-                    $this->storage->flushByTag($sessionInfo['storageIdentifier']);
+                    $this->storage->flushByTag($this->sessionIdentifier);
                     $sessionRemovalCount ++;
                 }
             }
@@ -632,18 +573,11 @@ class ServletSession
      */
     public function shutdownObject()
     {
-        if ($this->started === TRUE && $this->remote === FALSE) {
-            
+        if ($this->started === TRUE) {
             if ($this->storage->has($this->sessionIdentifier)) {
-                
-                 // Security context can't be injected and must be retrieved manually because it relies on this very session object: 
-                 // $securityContext = $this->objectManager->get('TYPO3\Flow\Security\Context'); if ($securityContext->isInitialized()) { $this->storeAuthenticatedAccountsInfo($securityContext->getAuthenticationTokens()); } $this->putData('TYPO3_Flow_Object_ObjectManager', $this->objectManager->getSessionInstances());
-
                 $this->writeSessionInfoCacheEntry();
             }
-            
             $this->started = FALSE;
-            
             $decimals = strlen(strrchr($this->garbageCollectionProbability, '.')) - 1;
             $factor = ($decimals > - 1) ? $decimals * 10 : 1;
             if (rand(0, 100 * $factor) <= ($this->garbageCollectionProbability * $factor)) {
@@ -684,38 +618,6 @@ class ServletSession
     }
 
     /**
-     * Stores some information about the authenticated accounts in the session data.
-     *
-     * This method will check if a session has already been started, which is
-     * the case after tokens relying on a session have been authenticated: the
-     * UsernamePasswordToken does, for example, start a session in its authenticate()
-     * method.
-     *
-     * Because more than one account can be authenticated at a time, this method
-     * accepts an array of tokens instead of a single account.
-     *
-     * Note that if a session is started after tokens have been authenticated, the
-     * session will NOT be tagged with authenticated accounts.
-     *
-     * @param
-     *            array<\TYPO3\Flow\Security\Authentication\TokenInterface>
-     * @return void
-     */
-    protected function storeAuthenticatedAccountsInfo(array $tokens)
-    {
-        $accountProviderAndIdentifierPairs = array();
-        foreach ($tokens as $token) {
-            $account = $token->getAccount();
-            if ($token->isAuthenticated() && $account !== NULL) {
-                $accountProviderAndIdentifierPairs[$account->getAuthenticationProviderName() . ':' . $account->getAccountIdentifier()] = TRUE;
-            }
-        }
-        if ($accountProviderAndIdentifierPairs !== array()) {
-            $this->putData('TYPO3_Flow_Security_Accounts', array_keys($accountProviderAndIdentifierPairs));
-        }
-    }
-
-    /**
      * Writes the cache entry containing information about the session, such as the
      * last activity time and the storage identifier.
      *
@@ -731,7 +633,6 @@ class ServletSession
     {
         $sessionInfo = array(
             'lastActivityTimestamp' => $this->lastActivityTimestamp,
-            'storageIdentifier' => $this->storageIdentifier,
             'tags' => $this->tags
         );
         
@@ -740,7 +641,6 @@ class ServletSession
             return ServletSession::TAG_PREFIX . $tag;
         }, $this->tags);
         $tagsForCacheEntry[] = 'session';
-        $tagsForCacheEntry[] = $this->sessionIdentifier;
         
         $this->storage->set($this->sessionIdentifier, $sessionInfo, $tagsForCacheEntry, 0);
     }

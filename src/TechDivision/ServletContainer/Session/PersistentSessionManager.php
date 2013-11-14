@@ -60,7 +60,7 @@ class PersistentSessionManager implements SessionManager
         */
         
         // initialize and return the session instance
-        $sessionParams = array($request, $sessionId, $sessionId, time());
+        $sessionParams = array($request, $sessionId, time());
 
         // initialize the session settings
         $settings['session']['name'] = $sessionName;
