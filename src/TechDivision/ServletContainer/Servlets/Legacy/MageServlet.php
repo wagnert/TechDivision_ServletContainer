@@ -112,6 +112,9 @@ class MageServlet extends PhpServlet
     {
         
         try {
+            
+            // register the Magento autoloader as FIRST autoloader
+            spl_autoload_register(array(new \Varien_Autoload(), 'autoload'), true, true);
 
             #Varien_Profiler::enable();
             if (isset($_SERVER['MAGE_IS_DEVELOPER_MODE'])) {
