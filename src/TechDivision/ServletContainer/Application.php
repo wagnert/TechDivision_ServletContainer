@@ -39,6 +39,13 @@ class Application extends AbstractApplication
     protected $servletManager;
 
     /**
+     * The servlet locator.
+     *
+     * @var \TechDivision\ServletContainer\Service\Locator\ServletLocator
+     */
+    protected $servletLocator;
+
+    /**
      * Array with available VHost configurations.
      * @array
      */
@@ -66,8 +73,16 @@ class Application extends AbstractApplication
             $this
         ));
 
-        // set the entity manager
+        // set the servlet manager
         $this->setServletManager($servletManager->initialize());
+        
+        // initialize the servlet locator instance
+        $servletLocator = $this->newInstance('TechDivision\ServletContainer\Service\Locator\ServletLocator', array(
+        	$this->servletManager
+        ));
+        
+        // set the servlet locator
+        $this->setServletLocator($servletLocator);
 
         // return the instance itself
         return $this;
@@ -94,10 +109,10 @@ class Application extends AbstractApplication
     }
 
     /**
-     * Sets the applications entity manager instance.
+     * Sets the applications servlet manager instance.
      *
-     * @param \TechDivision\ServletContainer\ServletManager $entityManager
-     *            The entity manager instance
+     * @param \TechDivision\ServletContainer\ServletManager $servletManager
+     *            The servlet manager instance
      * @return \TechDivision\ServletContainer\Application The application instance
      */
     public function setServletManager(ServletManager $servletManager)
@@ -107,13 +122,36 @@ class Application extends AbstractApplication
     }
 
     /**
-     * Return the entity manager instance.
+     * Return the servlet manager instance.
      *
-     * @return \TechDivision\ServletContainer\ServletManager The entity manager instance
+     * @return \TechDivision\ServletContainer\ServletManager The servlet manager instance
      */
     public function getServletManager()
     {
         return $this->servletManager;
+    }
+
+    /**
+     * Sets the applications servlet locator instance.
+     *
+     * @param \TechDivision\ServletContainer\Service\Locator\ServletLocator $servletLocator
+     *            The servlet locator instance
+     * @return \TechDivision\ServletContainer\Application The application instance
+     */
+    public function setServletLocator(ServletLocator $servletLocator)
+    {
+        $this->servletLocator = $servletLocator;
+        return $this;
+    }
+
+    /**
+     * Return the servlet locator instance.
+     *
+     * @return \TechDivision\ServletContainer\Service\Locator\ServletLocator The servlet locator instance
+     */
+    public function getServletLocator()
+    {
+        return $this->servletLocator;
     }
 
     /**
@@ -153,13 +191,14 @@ class Application extends AbstractApplication
     }
 
     /**
-     *
-     * @param Request $request
-     * @return type
+     * Locates and returns the servlet instance that handles
+     * the request passed as parameter.
+     * 
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance to handle the request
      */
     public function locate(Request $request)
     {
-        $servletLocator = new ServletLocator($this->getServletManager());
-        return $servletLocator->locate($request);
+        return $this->getServletLocator()->locate($request);
     }
 }
