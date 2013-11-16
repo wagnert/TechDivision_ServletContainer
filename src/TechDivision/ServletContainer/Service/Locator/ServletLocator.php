@@ -39,6 +39,13 @@ class ServletLocator implements ResourceLocatorInterface
      * @var \TechDivision\ServletContainer\ServletManager
      */
     protected $servletManager;
+    
+    /**
+     * The collection with the initialized routes.
+     * 
+     * @var \Symfony\Component\Routing\RouteCollection
+     */
+    protected $routes;
 
     /**
      * Initializes the locator with the actual servlet manager instance.
@@ -50,6 +57,7 @@ class ServletLocator implements ResourceLocatorInterface
     public function __construct($servletManager)
     {
         $this->servletManager = $servletManager;
+        $this->initRoutes();
     }
 
     /**
@@ -78,15 +86,15 @@ class ServletLocator implements ResourceLocatorInterface
      *
      * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
      */
-    public function getRouteCollection()
+    public function initRoutes()
     {
         
         // retrieve the registered servlets
-        $servletMappings = $this->servletManager->getServletMappings();
-        $servlets = $this->servletManager->getServlets();
+        $servletMappings = $this->getServletManager()->getServletMappings();
+        $servlets = $this->getServletManager()->getServlets();
         
         // prepare the collection with the available routes and initialize the route counter
-        $routes = new RouteCollection();
+        $this->routes = new RouteCollection();
         $counter = 0;
         
         // iterate over the available servlets and prepare the routes
@@ -98,11 +106,18 @@ class ServletLocator implements ResourceLocatorInterface
             ), array(
                 "{placeholder_$counter}" => '.*'
             ));
-            $routes->add($counter ++, $route);
+            $this->routes->add($counter ++, $route);
         }
-        
-        // return the collection with the routes
-        return $routes;
+    }
+    
+    /**
+     * Returns the collection with the initialized routes.
+     * 
+     * @return \Symfony\Component\Routing\RouteCollection The initialize routes
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
     }
 
     /**
@@ -134,9 +149,8 @@ class ServletLocator implements ResourceLocatorInterface
         }
         
         // load the route collection, initialize the context for the routing and the URL matcher
-        $routes = $this->getRouteCollection();
         $context = new RequestContext($path, $request->getMethod(), $request->getServerName());
-        $matcher = new UrlMatcher($routes, $context);
+        $matcher = new UrlMatcher($this->getRoutes(), $context);
         
         // traverse the path to find matching servlet
         do {
