@@ -155,42 +155,6 @@ class Application extends AbstractApplication
     }
 
     /**
-     * Return's the applications available VHost configurations.
-     *
-     * @return array The available VHost configurations
-     */
-    public function getVhosts()
-    {
-        return $this->vhosts;
-    }
-
-    /**
-     * Checks if the application is the VHost for the passed server name.
-     *
-     * @param string $serverName
-     *            The server name to check the application being a VHost of
-     * @return boolean TRUE if the application is the VHost, else FALSE
-     */
-    public function isVhostOf($serverName)
-    {
-
-        // check if the application is VHost for the passed server name
-        foreach ($this->getVhosts() as $vhost) {
-
-            // compare the VHost name itself
-            if (strcmp($vhost->getName(), $serverName) === 0) {
-                return true;
-            }
-
-            // then compare all aliases
-            if (in_array($serverName, $vhost->getAliases())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Locates and returns the servlet instance that handles
      * the request passed as parameter.
      * 
