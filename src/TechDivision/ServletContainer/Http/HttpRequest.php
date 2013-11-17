@@ -522,7 +522,7 @@ class HttpRequest implements Request
      * @param Response $response            
      * @return void
      */
-    public function setResponse(Response $response)
+    public function injectResponse(Response $response)
     {
         $this->response = $response;
         // add accepted encoding methods to response

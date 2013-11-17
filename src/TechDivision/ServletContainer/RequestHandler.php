@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\ThreadRequest
+ * TechDivision\ServletContainer\RequestHandler
  *
  * NOTICE OF LICENSE
  *
@@ -15,9 +15,9 @@ use TechDivision\ApplicationServer\AbstractContextThread;
 use TechDivision\ServletContainer\Http\AccessLogger;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
-use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Socket\HttpClient;
-use TechDivision\ServletContainer\Container;
+use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 
 /**
  * The thread implementation that handles the request.
@@ -28,7 +28,7 @@ use TechDivision\ServletContainer\Container;
  *          Open Software License (OSL 3.0)
  * @author Johann Zelger <jz@techdivision.com>
  */
-abstract class AbstractRequest extends AbstractContextThread
+class RequestHandler extends AbstractContextThread
 {
 
     /**
@@ -46,35 +46,47 @@ abstract class AbstractRequest extends AbstractContextThread
     public $resource;
 
     /**
+     * The HTTP client to handle the request.
+     *
+     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface
+     */
+    protected $client;
+
+    /**
      * Initializes the request with the client socket.
      *
-     * @param Container $container
+     * @param \TechDivision\ServletContainer\Container $container
      *            The ServletContainer
      * @param resource $resource
      *            The client socket instance
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
+     *            The HTTP client to handle the request
      * @return void
      */
-    public function init($container, $resource)
+    public function init(Container $container, HttpClientInterface $client, $resource)
     {
         $this->container = $container;
+        $this->client = $client;
         $this->resource = $resource;
     }
 
     /**
+     * Sends the response of the request back to the passed client.
      *
-     * @param
-     *            $client
-     * @param
-     *            $response
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
+     *            The HTTP client to handle the request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response
+     *            The response to send to the client
+     * @return void
      */
-    public function send($client, $response)
+    public function send(HttpClientInterface $client, Response $response)
     {
         // prepare the headers
         $response->prepareHeaders();
-
+        
         // return the string representation of the response content to the client
         $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-
+        
         // try to shutdown client socket
         try {
             $client->shutdown();
@@ -82,16 +94,9 @@ abstract class AbstractRequest extends AbstractContextThread
         } catch (\Exception $e) {
             $client->close();
         }
-
+        
         unset($client);
     }
-
-    /**
-     * Returns the HttpClient class to be used for handling the request.
-     *
-     * @return string
-     */
-    abstract protected function getHttpClientClass();
 
     /**
      *
@@ -99,77 +104,45 @@ abstract class AbstractRequest extends AbstractContextThread
      */
     public function main()
     {
-
-        /**
-         * @var HttpClient $client
-         */
-        // initialize a new client socket
-        $client = $this->newInstance($this->getHttpClientClass());
-        $client->injectHttpRequest($this->newInstance('TechDivision\ServletContainer\Http\HttpRequest'));
-
-        // inject part factory
-        $client->injectHttpPart($this->newInstance('TechDivision\ServletContainer\Http\HttpPart'));
-
-        $client->setNewLine("\r\n\r\n");
-
-        // set the client socket resource
-        $client->setResource($this->resource);
-
-        // initialize the response
-        $response = $this->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
-
         try {
-
-            /**
-             * @var HttpRequest $request
-             */
+            
+            // set the client socket resource
+            $client = $this->client;
+            $client->setResource($this->resource);
+            
             // receive Request Object from client
             $request = $client->receive();
-
+            
             // log the request
-            $this->getAccessLogger()->log($request, $response);
-
-            // inject the request with the session manager
-            $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(
-                $this->initialContext
-            ));
-            $request->injectSessionManager($sessionManager);
-
-            // initialize response container
-            $request->setResponse($response);
-
+            $this->getAccessLogger()->log($request, $response = $request->getResponse());
+            
             // load the application to handle the request
             $application = $this->findApplication($request);
-
+            
             // try to locate a servlet which could service the current request
             $servlet = $application->locate($request);
-
+            
             // inject shutdown handler
             $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
                 $client,
                 $response
             )));
-
-            // inject query parser
-            $servlet->injectQueryParser($this->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser'));
-
+            
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
-
+            
         } catch (\Exception $e) {
-
             error_log($e->__toString());
-
             $response->setContent($e->__toString());
         }
-
+        
         $this->send($client, $response);
     }
 
     /**
-     * Returns and inits an accesslogger
+     * Returns the access logger instance.
      *
-     * @return AccessLogger
+     * @return \TechDivision\ServletContainer\Http\AccessLogger The initialized access logger instance
      */
     public function getAccessLogger()
     {
@@ -197,7 +170,9 @@ abstract class AbstractRequest extends AbstractContextThread
     }
 
     /**
-     *
+     * Tries to find the application that has to handle the
+     * passed request.
+     * 
      * @see \TechDivision\ServletContainer\Application::findApplication($servletRequest)
      */
     public function findApplication($servletRequest)

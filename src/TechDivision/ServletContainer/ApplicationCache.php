@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Stream\SecureRequest
+ * TechDivision\ApplicationServer\ApplicationCache
  *
  * NOTICE OF LICENSE
  *
@@ -9,12 +9,11 @@
  * that is available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  */
-namespace TechDivision\ServletContainer\Stream;
 
-use TechDivision\ServletContainer\AbstractRequest;
+namespace TechDivision\ServletContainer;
 
 /**
- * The request implementation.
+ * The class map to store already loaded files when autoloading via SplClassLoader.
  *
  * @package TechDivision\ServletContainer
  * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
@@ -22,14 +21,13 @@ use TechDivision\ServletContainer\AbstractRequest;
  *          Open Software License (OSL 3.0)
  * @author Tim Wagner <tw@techdivision.com>
  */
-class SecureRequest extends AbstractRequest
+class ApplicationCache extends \Stackable
 {
 
     /**
-     * @see \TechDivision\ServletContainer\AbstractRequest::getHttpClientClass()
+     * (non-PHPdoc)
+     *
+     * @see \Stackable::run()
      */
-    protected function getHttpClientClass()
-    {
-        return 'TechDivision\ServletContainer\Stream\SecureHttpClient';
-    }
+    public function run() {}
 }

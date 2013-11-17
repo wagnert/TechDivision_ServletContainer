@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Socket\Request
+ * TechDivision\ServletContainer\Stream\SecureWorker
  *
  * NOTICE OF LICENSE
  *
@@ -9,20 +9,18 @@
  * that is available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  */
-namespace TechDivision\ServletContainer\Socket;
-
-use TechDivision\ServletContainer\AbstractRequest;
+namespace TechDivision\ServletContainer\Stream;
 
 /**
- * The request implementation.
+ * The worker implementation that handles a HTTP request.
  *
  * @package TechDivision\ServletContainer
  * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license http://opensource.org/licenses/osl-3.0.php
  *          Open Software License (OSL 3.0)
- * @author Tim Wagner <tw@techdivision.com>
+ * @author Johann Zelger <jz@techdivision.com>
  */
-class Request extends AbstractRequest
+class SecureWorker extends Worker
 {
 
     /**
@@ -30,6 +28,6 @@ class Request extends AbstractRequest
      */
     protected function getHttpClientClass()
     {
-        return 'TechDivision\ServletContainer\Socket\HttpClient';
+        return 'TechDivision\ServletContainer\Stream\SecureHttpClient';
     }
 }
