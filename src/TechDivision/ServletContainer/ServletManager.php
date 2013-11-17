@@ -139,6 +139,9 @@ class ServletManager
                 foreach ($servlet->{'init-param'} as $initParam) {
                     $servletConfig->addInitParameter((string) $initParam->{'param-name'}, (string) $initParam->{'param-value'});
                 }
+
+                // inject query parser
+                $instance->injectQueryParser($this->getApplication()->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser'));
                 
                 // initialize the servlet
                 $instance->init($servletConfig);
@@ -258,8 +261,9 @@ class ServletManager
     }
 
     /**
-     *
-     * @return String
+     * Returns the path to the webapp.
+     * 
+     * @return string The path to the webapp
      */
     public function getWebappPath()
     {
