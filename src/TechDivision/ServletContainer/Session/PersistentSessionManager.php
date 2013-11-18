@@ -33,6 +33,11 @@ class PersistentSessionManager implements SessionManager
      */
     protected $initialContext;
     
+    /**
+     * Array to store the sessions that has already been initilized in this request.
+     * 
+     * @var array
+     */
     protected $sessions = array();
 
     /**
@@ -47,6 +52,15 @@ class PersistentSessionManager implements SessionManager
         $this->initialContext = $initialContext;
     }
     
+    /**
+     * Create's a new session with the passed session ID and session name if give.
+     * 
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance    
+     * @param string $sessionId The session ID used to create the session
+     * @param string $sessionName The unique session name to use
+     * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
+     * @todo integrate cookie path handling 
+     */
     public function createSession(Request $request, $sessionId, $sessionName = ServletSession::SESSION_NAME)
     {
         
@@ -77,8 +91,8 @@ class PersistentSessionManager implements SessionManager
         $persistentSession->injectSettings($settings);
         $persistentSession->injectStorage($this->initialContext->getStorage());
         
+        // add session to cache and return it
         $this->sessions[$sessionName] = $persistentSession;
-        
         return $persistentSession;
     }
 
@@ -89,8 +103,8 @@ class PersistentSessionManager implements SessionManager
      * precedence. If no session id is found, a new one is created and assigned 
      * to the request.
      *
-     * @param Request $request            
-     * @return ServletSession
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance         
+     * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
      */
     public function getSessionForRequest(Request $request, $sessionName = ServletSession::SESSION_NAME)
     {
@@ -99,29 +113,21 @@ class PersistentSessionManager implements SessionManager
         if (array_key_exists($sessionName, $this->sessions)) {
             return $this->sessions[$sessionName];
         }
-            
-        // @todo merge refactoring for headers getter by bcmzero
-        $headers = $request->getHeaders();
-        $sessionId = null;
         
-        // try to retrieve the session id from the cookies in request header
-        if (isset($headers['Cookie'])) {
-            foreach (explode(';', $headers['Cookie']) as $cookie) {
-                list ($name, $value) = explode('=', $cookie);
-                if ($name === $sessionName) {
-                    $sessionId = $value;
-                }
-            }
+        // try to initialize the session ID
+        $sessionId = null; 
+        if ($request->getCookie($sessionName)) {
+            $sessionId = $request->getCookie($sessionName)->getValue();
         }
         
         // try to retrieve the session id from the request query string
-        // @todo merge refactoring for query string parameters getter by bcmzero
         $params = array();
         parse_str($request->getQueryString(), $params);
         if (isset($params[$sessionName])) {
             $sessionId = $params[$sessionName];
         }
         
+        // create a new session with the session ID found/or not
         return $this->createSession($request, $sessionId, $sessionName);
     }
 

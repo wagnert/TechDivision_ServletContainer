@@ -19,6 +19,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use TechDivision\ServletContainer\Exceptions\ServletNotFoundException;
 
 /**
  * The servlet resource locator implementation.
@@ -35,14 +36,14 @@ class ServletLocator implements ResourceLocatorInterface
 
     /**
      * The servlet manager instance.
-     * 
+     *
      * @var \TechDivision\ServletContainer\ServletManager
      */
     protected $servletManager;
-    
+
     /**
      * The collection with the initialized routes.
-     * 
+     *
      * @var \Symfony\Component\Routing\RouteCollection
      */
     protected $routes;
@@ -109,10 +110,10 @@ class ServletLocator implements ResourceLocatorInterface
             $this->routes->add($counter ++, $route);
         }
     }
-    
+
     /**
      * Returns the collection with the initialized routes.
-     * 
+     *
      * @return \Symfony\Component\Routing\RouteCollection The initialize routes
      */
     public function getRoutes()
@@ -121,10 +122,12 @@ class ServletLocator implements ResourceLocatorInterface
     }
 
     /**
-     * Tries to locate the servlet that handles the request and returns the instance if one can be found.
+     * Tries to locate a servlet for the passed request instance.
      *
-     * @param Request $request            
-     * @return Servlet
+     * @param Request $request
+     *            The request instance to return the servlet for
+     * @return TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found for the passed request
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
      */
     public function locate(Request $request)
@@ -140,11 +143,13 @@ class ServletLocator implements ResourceLocatorInterface
         }
         
         // load the servlet cache and check if a servlet has already been loaded
-        $servletCache = $this->getApplication()->getInitialContext()->getAttribute("$applicationName.servletCache");
+        $servletCache = $this->getApplication()
+            ->getInitialContext()
+            ->getAttribute("$applicationName.servletCache");
         
         if (is_array($servletCache) && array_key_exists($path, $servletCache)) {
             return $this->servletManager->getServlet($servletCache[$path]);
-        } elseif (!is_array($servletCache)) {
+        } elseif (! is_array($servletCache)) {
             $servletCache = array();
         }
         
@@ -161,15 +166,20 @@ class ServletLocator implements ResourceLocatorInterface
             } catch (ResourceNotFoundException $rnfe) {
                 $path = substr($path, 0, strrpos($path, '/'));
             }
-            
         } while (strpos($path, '/') !== FALSE);
         
+        // check at least one servlet has been found
+        if (is_array($servlet) === false || sizeof($servlet) === 0) {
+            throw new ServletNotFoundException("Can't find servlet for requested path $path");
+        }
         // load the the servlet instance from the matching result
         $mappingServlet = current($servlet);
         
         // append it to the servlet cache and return the servlet
         $servletCache[$path] = $mappingServlet->getServletConfig()->getServletName();
-        $this->getApplication()->getInitialContext()->setAttribute("$applicationName.servletCache", $servletCache);
+        $this->getApplication()
+            ->getInitialContext()
+            ->setAttribute("$applicationName.servletCache", $servletCache);
         return $mappingServlet;
     }
 }
