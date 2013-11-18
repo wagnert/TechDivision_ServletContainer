@@ -31,8 +31,8 @@ interface ResourceLocatorInterface {
     /**
      * Tries to locate the resource related with the request.
      *
-     * @param Request $request
-     * @return Servlet The servlet that serves the request
+     * @param Request $request The request instance to return the servlet for
+     * @return TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
      */
     public function locate(Request $request);
 }
