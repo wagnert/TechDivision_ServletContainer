@@ -110,11 +110,16 @@ class RequestHandler extends AbstractContextThread
             $client = $this->client;
             $client->setResource($this->resource);
             
-            // receive Request Object from client
+            // receive request object from client
             $request = $client->receive();
             
+            // initialize response and set the actual date
+            $response = $request->getResponse();
+            $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
+            $response->addHeader(HttpResponse::HEADER_NAME_DATE, $responseDate);
+            
             // log the request
-            $this->getAccessLogger()->log($request, $response = $request->getResponse());
+            $this->getAccessLogger()->log($request, $response);
             
             // load the application to handle the request
             $application = $this->findApplication($request);
