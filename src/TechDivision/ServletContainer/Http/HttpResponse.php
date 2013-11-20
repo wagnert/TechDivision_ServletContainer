@@ -147,6 +147,7 @@ class HttpResponse implements Response
      */
     public function getHeadersAsString()
     {
+        
         $headers = "";
         
         foreach ($this->getHeaders() as $header => $value) {

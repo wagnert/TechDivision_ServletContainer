@@ -525,14 +525,12 @@ class HttpRequest implements Request
     public function injectResponse(Response $response)
     {
         $this->response = $response;
-        // add accepted encoding methods to response
-        $this->response->setAcceptedEncodings($this->getAcceptedEncodings());
     }
 
     /**
-     * Returns response object
+     * Returns the response instance.
      *
-     * @return Response
+     * @return Response The response instance
      */
     public function getResponse()
     {
