@@ -113,10 +113,11 @@ class RequestHandler extends AbstractContextThread
             // receive request object from client
             $request = $client->receive();
             
-            // initialize response and set the actual date
-            $response = $request->getResponse();
+            // initialize response, set the actual date and add accepted encoding methods
             $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
+            $response = $request->getResponse();
             $response->addHeader(HttpResponse::HEADER_NAME_DATE, $responseDate);
+            $response->setAcceptedEncodings($request->getAcceptedEncodings());
             
             // log the request
             $this->getAccessLogger()->log($request, $response);
