@@ -18,6 +18,9 @@ use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Socket\HttpClient;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
+use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
+use TechDivision\SocketException;
+use TechDivision\StreamException;
 
 /**
  * The thread implementation that handles the request.
@@ -30,7 +33,7 @@ use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
  */
 class RequestHandler extends AbstractContextThread
 {
-
+    
     /**
      * Holds the container instance
      *
@@ -48,7 +51,7 @@ class RequestHandler extends AbstractContextThread
     /**
      * The HTTP client to handle the request.
      *
-     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface
+     * @var The HTTP client to handle the request
      */
     protected $client;
 
@@ -57,13 +60,13 @@ class RequestHandler extends AbstractContextThread
      *
      * @param \TechDivision\ServletContainer\Container $container
      *            The ServletContainer
-     * @param resource $resource
-     *            The client socket instance
      * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
      *            The HTTP client to handle the request
+     * @param resource $resource
+     *            The client socket instance
      * @return void
      */
-    public function init(Container $container, HttpClientInterface $client, $resource)
+    public function init(Container $container, $client, $resource)
     {
         $this->container = $container;
         $this->client = $client;
@@ -102,7 +105,8 @@ class RequestHandler extends AbstractContextThread
             $client->shutdown();
             $client->close();
         } catch (\Exception $e) {
-            $client->close();
+            // $client->close();
+            error_log($e->getMessage());
         }
         
         unset($client);
@@ -116,22 +120,18 @@ class RequestHandler extends AbstractContextThread
     {
         try {
             
-            // set the client socket resource
-            $client = $this->client;
-            $client->setResource($this->resource);
-
+            // initialize variables to handle persistent HTTP/1.1 connections
             $counter = 1;
             $connectionOpen = true;
             $startTime = time();
-            
             $timeout = 120;
             $availableRequests = 5;
-        
+
+            // set the client socket resource
+            $client = $this->client;
+            $client->setResource($this->resource);
+            
             do {
-                    
-                // initialize the timeouts
-                $availableRequests--;
-                $ttl = ($startTime + $timeout) - time();
                 
                 // receive request object from client
                 $request = $client->receive();
@@ -139,15 +139,31 @@ class RequestHandler extends AbstractContextThread
                 // initialize response, set the actual date and add accepted encoding methods
                 $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
                 $response = $request->getResponse();
-                $response->addHeader(HttpResponse::HEADER_NAME_DATE, $responseDate);
+                $response->initHeaders();
                 $response->setAcceptedEncodings($request->getAcceptedEncodings());
-
-                // check if this will be the last requests handled by this thread
-                if ($availableRequests > 0 && $ttl > 0) {
-                    $response->addHeader('Connection', 'keep-alive');
-                    $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$timeout");
+                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
+                
+                // load the Connection Header (keep-alive/close)
+                $connection = strtolower($request->getHeader('Connection'));
+                
+                // check protocol version
+                if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
+                    
+                    // lower the request counter and the TTL
+                    $availableRequests --;
+                    $ttl = ($startTime + $timeout) - time();
+                
+                    // check if this will be the last requests handled by this thread
+                    if ($availableRequests > 0 && $ttl > 0) {
+                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$timeout, thread={$this->getThreadId()}");
+                    }
+                    
                 } else {
-                    $response->addHeader('Connection', 'close');
+                    
+                    // set request counter and TTL to 0
+                    $availableRequests = 0;
+                    $ttl = 0;
+                    
                 }
                 
                 // log the request
@@ -167,33 +183,27 @@ class RequestHandler extends AbstractContextThread
                 
                 // let the servlet process the request send it back to the client
                 $servlet->service($request, $response);
+                
                 $this->send($client, $response);
-        
+                
                 // check if this is the last request
                 if ($availableRequests <= 0 || $ttl <= 0) {
-                    
-                    // if yes, close the socket and end the do/while 
-                    error_log("TTL: $ttl");
-                    error_log("Available requests: $availableRequests");
-                    error_log("Now closing connection for thread: {$this->getThreadId()}");
-
-                    try {
-                        $client->shutdown();
-                        $client->close();
-                    } catch (\Exception $e) {
-                        $client->close();
-                    }
-                    
                     $connectionOpen = false;
                 }
-            
+                
             } while ($connectionOpen);
-                    
+            
+        } catch (ConnectionClosedByPeerException $ccbpe) {
+            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $ccbpe->__toString());
+            $this->close($client);
+        } catch (SocketException $soe) {
+            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $soe->__toString());
+        } catch (StreamException $ste) {
+            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $ste->__toString());
         } catch (\Exception $e) {
-            error_log($e->__toString());
+            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $e->__toString());
             $response->setContent($e->__toString());
             $this->send($client, $response);
-            $this->close($client);
         }
     }
 
@@ -230,7 +240,7 @@ class RequestHandler extends AbstractContextThread
     /**
      * Tries to find the application that has to handle the
      * passed request.
-     * 
+     *
      * @see \TechDivision\ServletContainer\Application::findApplication($servletRequest)
      */
     public function findApplication($servletRequest)

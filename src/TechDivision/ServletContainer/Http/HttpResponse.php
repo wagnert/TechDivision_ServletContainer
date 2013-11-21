@@ -69,6 +69,16 @@ class HttpResponse implements Response
      */
     public function __construct()
     {
+        $this->initHeaders();
+    }
+    
+    /**
+     * Prepares the headers.
+     * 
+     * @return void
+     */
+    public function initHeaders()
+    {
         // prepare the headers
         $this->setHeaders(array(
             self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",

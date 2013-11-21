@@ -14,6 +14,7 @@ namespace TechDivision\ServletContainer\Socket;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\Socket\Client;
+use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
 
 /**
  * The http client implementation that handles the request like a webserver
@@ -110,6 +111,12 @@ class HttpClient extends Client implements HttpClientInterface
             if (false !== strpos($buffer, $this->getNewLine())) {
                 break;
             }
+        }
+            
+        // if the socket has been closed by peer
+        if ($buffer === '' || $buffer === false) {
+            $this->close();
+            throw new ConnectionClosedByPeerException('Connection reset by peer');
         }
         
         // separate header from body chunk
