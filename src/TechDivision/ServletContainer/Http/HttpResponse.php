@@ -290,13 +290,21 @@ class HttpResponse implements Response
             // set headers defined in sapi headers
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
+                
+                // load header key and value
                 $key = trim($h[0]);
                 $value = trim($h[1]);
-                $this->addHeader($key, $value);
                 
-                // set status header to 301 if location is given
-                if ($key == 'Location') {
-                    $this->addHeader('status', 'HTTP/1.1 301');
+                // check if the headers already exists
+                if (!array_key_exists($key, $this->headers)) {
+                    
+                    // if not, add the header
+                    $this->addHeader($key, $value);
+                    
+                    // set status header to 301 if location is given
+                    if ($key == 'Location') {
+                        $this->addHeader('status', 'HTTP/1.1 301');
+                    }
                 }
             }
         }

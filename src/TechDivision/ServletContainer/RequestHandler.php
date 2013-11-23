@@ -33,7 +33,7 @@ use TechDivision\StreamException;
  */
 class RequestHandler extends AbstractContextThread
 {
-    
+
     /**
      * Holds the container instance
      *
@@ -108,8 +108,6 @@ class RequestHandler extends AbstractContextThread
             // $client->close();
             error_log($e->getMessage());
         }
-        
-        unset($client);
     }
 
     /**
@@ -124,18 +122,18 @@ class RequestHandler extends AbstractContextThread
             $counter = 1;
             $connectionOpen = true;
             $startTime = time();
-            $timeout = 120;
             $availableRequests = 5;
-
-            // set the client socket resource
+            
+            // set the client socket resource and timeout
             $client = $this->client;
             $client->setResource($this->resource);
+            $client->setReceiveTimeout($receiveTimeout = 5);
             
-            do {
+            do { // let socket open as long as max request or socket timeout is not reached
                 
                 // receive request object from client
                 $request = $client->receive();
-            
+                
                 // initialize response, set the actual date and add accepted encoding methods
                 $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
                 $response = $request->getResponse();
@@ -151,19 +149,13 @@ class RequestHandler extends AbstractContextThread
                     
                     // lower the request counter and the TTL
                     $availableRequests --;
-                    $ttl = ($startTime + $timeout) - time();
-                
+                    
                     // check if this will be the last requests handled by this thread
-                    if ($availableRequests > 0 && $ttl > 0) {
-                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$timeout, thread={$this->getThreadId()}");
+                    if ($availableRequests > 0) {
+                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$receiveTimeout, thread={$this->getThreadId()}");
                     }
-                    
-                } else {
-                    
-                    // set request counter and TTL to 0
+                } else { // set request counter and TTL to 0
                     $availableRequests = 0;
-                    $ttl = 0;
-                    
                 }
                 
                 // log the request
@@ -183,24 +175,22 @@ class RequestHandler extends AbstractContextThread
                 
                 // let the servlet process the request send it back to the client
                 $servlet->service($request, $response);
-                
                 $this->send($client, $response);
                 
                 // check if this is the last request
-                if ($availableRequests <= 0 || $ttl <= 0) {
+                if ($availableRequests < 1) {
                     $connectionOpen = false;
                 }
-                
             } while ($connectionOpen);
             
-        } catch (ConnectionClosedByPeerException $ccbpe) {
+        } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
             error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $ccbpe->__toString());
             $this->close($client);
-        } catch (SocketException $soe) {
+        } catch (SocketException $soe) { // socket timeout reached
             error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $soe->__toString());
-        } catch (StreamException $ste) {
+        } catch (StreamException $ste) { // streaming socket timeout reached
             error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $ste->__toString());
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // something bad happened
             error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $e->__toString());
             $response->setContent($e->__toString());
             $this->send($client, $response);
