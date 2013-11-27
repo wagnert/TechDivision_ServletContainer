@@ -32,7 +32,7 @@ interface Servlet {
     /**
      * Initializes the servlet with the passed configuration.
      *
-     * @param \TechDivision\ServletContainer\Servlets\ServletConfig $config The configuration to initialize the servlet with
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to initialize the servlet with
      * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
      * @return void
      */
