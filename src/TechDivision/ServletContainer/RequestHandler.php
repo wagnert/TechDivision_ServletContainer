@@ -181,17 +181,18 @@ class RequestHandler extends AbstractContextThread
                 if ($availableRequests < 1) {
                     $connectionOpen = false;
                 }
+                
             } while ($connectionOpen);
             
         } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
-            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $ccbpe->__toString());
+            $this->getInitialContext()->getSystemLogger()->addError($ccbpe);
             $this->close($client);
         } catch (SocketException $soe) { // socket timeout reached
-            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $soe->__toString());
+            $this->getInitialContext()->getSystemLogger()->addError($soe);
         } catch (StreamException $ste) { // streaming socket timeout reached
-            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $ste->__toString());
+            $this->getInitialContext()->getSystemLogger()->addError($ste);
         } catch (\Exception $e) { // something bad happened
-            error_log(__METHOD__ . ':' . __LINE__ . ' - ' . $e->__toString());
+            $this->getInitialContext()->getSystemLogger()->addError($e);
             $response->setContent($e->__toString());
             $this->send($client, $response);
         }
