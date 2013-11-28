@@ -92,25 +92,6 @@ class RequestHandler extends AbstractContextThread
     }
 
     /**
-     * Shutdown and close the client connection.
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
-     *            The HTTP client to handle the request
-     * @return void
-     */
-    public function close(HttpClientInterface $client)
-    {
-        // try to shutdown client socket
-        try {
-            $client->shutdown();
-            $client->close();
-        } catch (\Exception $e) {
-            // $client->close();
-            error_log($e->getMessage());
-        }
-    }
-
-    /**
      *
      * @see AbstractThread::main()
      */
@@ -185,17 +166,19 @@ class RequestHandler extends AbstractContextThread
             } while ($connectionOpen);
             
         } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
-            $this->getInitialContext()->getSystemLogger()->addError($ccbpe);
-            $this->close($client);
+            $this->getInitialContext()->getSystemLogger()->addDebug($ccbpe);
         } catch (SocketException $soe) { // socket timeout reached
-            $this->getInitialContext()->getSystemLogger()->addError($soe);
+            $this->getInitialContext()->getSystemLogger()->addDebug($soe);
         } catch (StreamException $ste) { // streaming socket timeout reached
-            $this->getInitialContext()->getSystemLogger()->addError($ste);
-        } catch (\Exception $e) { // something bad happened
-            $this->getInitialContext()->getSystemLogger()->addError($e);
+            $this->getInitialContext()->getSystemLogger()->addDebug($ste);
+        } catch (\Exception $e) { // a servlet throws an exception -> pass it through to the client!
+            $this->getInitialContext()->getSystemLogger()->addDebug($e);
             $response->setContent($e->__toString());
             $this->send($client, $response);
         }
+        
+        // notify the parent thread that everything has been done
+        $this->notify();
     }
 
     /**
