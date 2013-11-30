@@ -27,7 +27,7 @@ use TechDivision\ServletContainer\Session\Exceptions\InvalidRequestResponseExcep
  *
  * @see \TYPO3\Flow\Session\SessionManager
  */
-class ServletSession
+class ServletSession implements \SessionHandlerInterface
 {
 
     const TAG_PREFIX = 'customtag-';
@@ -506,64 +506,6 @@ class ServletSession
     }
 
     /**
-     * Explicitly writes and closes the session
-     *
-     * @return void @api
-     */
-    public function close()
-    {
-        $this->shutdownObject();
-    }
-
-    /**
-     * Explicitly destroys all session data
-     *
-     * @param string $reason
-     *            A reason for destroying the session – used by the LoggingAspect
-     * @return void
-     * @throws \TechDivision\ServletContainer\Exceptions\SessionNotStartedException @api
-     */
-    public function destroy($reason = NULL)
-    {
-        if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.', 1351162668);
-        }
-        
-        if ($this->response->hasCookie($this->sessionCookieName) === FALSE) {
-            $this->response->addCookie($this->sessionCookie);
-        }
-        $this->sessionCookie->expire();
-        
-        $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
-        $this->storage->flushByTag($this->sessionIdentifier);
-        $this->started = FALSE;
-        $this->sessionIdentifier = NULL;
-        $this->tags = array();
-    }
-
-    /**
-     * Iterates over all existing sessions and removes their data if the inactivity
-     * timeout was reached.
-     *
-     * @return integer The number of outdated entries removed
-     *         @api
-     */
-    public function collectGarbage()
-    {
-        $sessionRemovalCount = 0;
-        if ($this->inactivityTimeout !== 0) {
-            foreach ($this->storage->getByTag('session') as $sessionInfo) {
-                $lastActivitySecondsAgo = $this->now - $sessionInfo['lastActivityTimestamp'];
-                if ($lastActivitySecondsAgo > $this->inactivityTimeout) {
-                    $this->storage->flushByTag($this->sessionIdentifier);
-                    $sessionRemovalCount ++;
-                }
-            }
-        }
-        return $sessionRemovalCount;
-    }
-
-    /**
      * Shuts down this session
      *
      * This method must not be called manually – it is invoked by Flow's object
@@ -581,7 +523,7 @@ class ServletSession
             $decimals = strlen(strrchr($this->garbageCollectionProbability, '.')) - 1;
             $factor = ($decimals > - 1) ? $decimals * 10 : 1;
             if (rand(0, 100 * $factor) <= ($this->garbageCollectionProbability * $factor)) {
-                $this->collectGarbage();
+                $this->gc();
             }
         }
     }
@@ -657,5 +599,133 @@ class ServletSession
     protected function removeSessionInfoCacheEntry($sessionIdentifier)
     {
         $this->storage->remove($sessionIdentifier);
+    }
+
+    /**
+     * Explicitly writes and closes the session
+     *
+     * @return boolean 
+     * @see \SessionHandlerInterface::close()
+     * @api
+     */
+    public function close()
+    {
+        $this->shutdownObject();
+        return true;
+    }
+
+    /**
+     * Explicitly destroys all session data
+     *
+     * @param string $session_id
+     * @return boolean
+     * @throws \TechDivision\ServletContainer\Exceptions\SessionNotStartedException 
+     * @see \SessionHandlerInterface::destroy()
+     * @api
+     */
+    public function destroy($session_id)
+    {
+        
+        error_log("Now destroy session with ID $session_id");
+        
+        /*
+        if ($this->started !== TRUE) {
+            throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.', 1351162668);
+        }
+        
+        if ($this->response->hasCookie($this->sessionCookieName) === FALSE) {
+            $this->response->addCookie($this->sessionCookie);
+        }
+        $this->sessionCookie->expire();
+        
+        $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
+        $this->storage->flushByTag($this->sessionIdentifier);
+        $this->started = FALSE;
+        $this->sessionIdentifier = NULL;
+        $this->tags = array();
+        
+        error_log("Successfully destroyed session with ID $session_id");
+        */
+        
+        return true;
+    }
+    
+    /**
+     * Iterates over all existing sessions and removes their data if the inactivity
+     * timeout was reached.
+     * 
+     * @param string $maxlifetime
+     * @return boolean
+     * @see \SessionHandlerInterface::gc()
+     * @api
+     */
+    public function gc($maxlifetime)
+    {
+        
+        error_log("Collection garbage for maximum lifetime $maxlifetime");
+        
+        /*
+        $sessionRemovalCount = 0;
+        if ($this->inactivityTimeout !== 0) {
+            foreach ($this->storage->getByTag('session') as $sessionInfo) {
+                $lastActivitySecondsAgo = $this->now - $sessionInfo['lastActivityTimestamp'];
+                if ($lastActivitySecondsAgo > $this->inactivityTimeout) {
+                    $this->storage->flushByTag($this->sessionIdentifier);
+                    $sessionRemovalCount ++;
+                }
+            }
+        }
+        */
+        
+        error_log("Successfully flushed $sessionRemovalCount sessions");
+        
+        return true;
+    }
+    
+    /**
+     * @param string $save_path
+     * @param string $name
+     * @return boolean 
+     * @see \SessionHandlerInterface::open()
+     * @api
+     */
+    public function open($save_path, $name)
+    {    
+        error_log("Now open session with save path $save_path and name $name");
+    }
+    
+    /**
+     * @param string $session_id
+     * @return string
+     * @see \SessionHandlerInterface::read()
+     * @api
+     */
+    public function read($session_id)
+    {
+        
+        error_log("Now try to read from session with id $session_id");
+        
+        $data = $this->storage->get($session_id);
+        
+        error_log(var_export($data, true));
+        
+        return (string) $data;
+    }
+        
+    /**
+     * @param string $session_id
+     * @param string $session_data
+     * @return boolean
+     * @see \SessionHandlerInterface::write()
+     * @api
+     */
+    public function write($session_id, $session_data)
+    {
+        error_log("Now try to write session data for session id $session_id");
+        error_log(var_export($session_data, true));
+        
+        $this->storage->set($session_id, $session_data);
+        
+        return true;
     }
 }

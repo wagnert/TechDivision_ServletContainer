@@ -185,7 +185,6 @@ class Mage extends PhpServlet
         	define('BP', $this->getWebappPath());
         	
             Mage::register('original_include_path', get_include_path());
-            Mage::register('original_request', $req);
         	
         	/**
         	 * Set include path
@@ -202,10 +201,14 @@ class Mage extends PhpServlet
            
             // init globals AFTER including the function, else global variables will be resetted
             $this->initGlobals($req);
+    	    
+            // register session handler
+    	    session_set_save_handler($req->getSession(), true);
     	
+    	    // register Magento autoloader
     	    Autoload::register();
             
-            // arien_Profiler::enable();
+            // Varien_Profiler::enable();
             if (isset($_SERVER['MAGE_IS_DEVELOPER_MODE'])) {
                 Mage::setIsDeveloperMode(true);
             }
