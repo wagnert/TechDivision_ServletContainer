@@ -80,7 +80,7 @@ class HttpResponse implements Response
 
     /**
      *
-     * @param array $headers            
+     * @param array $headers
      */
     public function setHeaders(array $headers)
     {
@@ -98,8 +98,8 @@ class HttpResponse implements Response
 
     /**
      *
-     * @param string $header            
-     * @param string $value            
+     * @param string $header
+     * @param string $value
      */
     public function addHeader($header, $value)
     {
@@ -147,29 +147,29 @@ class HttpResponse implements Response
      */
     public function getHeadersAsString()
     {
-        
+
         $headers = "";
-        
+
         foreach ($this->getHeaders() as $header => $value) {
-            
+
             if ($header === self::HEADER_NAME_STATUS) {
                 $headers .= $value . "\r\n";
             } else {
                 $headers .= $header . ': ' . $value . "\r\n";
             }
         }
-        
+
         foreach ($this->cookies as $cookie) {
             $headers .= "Set-Cookie: $cookie\r\n";
         }
-        
+
         return $headers;
     }
 
     /**
      * Removes one single header from the headers array.
      *
-     * @param string $header            
+     * @param string $header
      * @return void
      */
     public function removeHeader($header)
@@ -178,10 +178,11 @@ class HttpResponse implements Response
     }
 
     /**
+     * Prepares the content to be ready for sending to the client
      *
-     * @return string
+     * @return void
      */
-    public function getContent()
+    public function prepareContent()
     {
         // check if encoding is available
         foreach ($this->getAcceptedEncodings() as $acceptedEncoding) {
@@ -190,22 +191,35 @@ class HttpResponse implements Response
                 // set correct header encoding information
                 $this->addHeader('Content-Encoding', 'gzip');
                 // return content encoded by gzip
-                return gzencode($this->content);
+                return $this->setContent(
+                    gzencode($this->getContent())
+                );
                 // check if deflate is possible
             } elseif ($acceptedEncoding == 'deflate') {
                 // set correct header encoding information
                 $this->addHeader('Content-Encoding', 'deflate');
                 // return content deflate
-                return gzdeflate($this->content);
+                return $this->setContent(
+                    gzdeflate($this->getContent())
+                );
             }
         }
-        // return content as default
+    }
+
+    /**
+     * Returns the content string
+     *
+     * @return string
+     */
+    public function getContent()
+    {
+        // return content
         return $this->content;
     }
 
     /**
      *
-     * @param string $content            
+     * @param string $content
      * @return void
      */
     public function setContent($content)
@@ -215,7 +229,7 @@ class HttpResponse implements Response
 
     /**
      *
-     * @param Cookie $cookie            
+     * @param Cookie $cookie
      * @return void
      */
     public function addCookie(Cookie $cookie)
@@ -271,29 +285,29 @@ class HttpResponse implements Response
     {
         // grap headers and set to response object
         foreach (appserver_get_headers() as $i => $h) {
-            
+
             // skip default session delete header
             if (strpos($h, "Set-Cookie: PHPSESSID=deleted;") !== false) {
                 continue;
             }
-            
+
             // set headers defined in sapi headers
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
                 $key = trim($h[0]);
                 $value = trim($h[1]);
                 $this->addHeader($key, $value);
-                
+
                 // set status header to 301 if location is given
                 if ($key == 'Location') {
                     $this->addHeader('status', 'HTTP/1.1 301');
                 }
             }
         }
-        
+
         // prepare the content length
         $contentLength = strlen($this->getContent());
-        
+
         // prepare the dynamic headers
         $this->addHeader("Content-Length", $contentLength);
     }

@@ -81,12 +81,15 @@ class RequestHandler extends AbstractContextThread
      */
     public function send(HttpClientInterface $client, Response $response)
     {
+        // prepare the content to be ready for sending to client
+        $response->prepareContent();
+
         // prepare the headers
         $response->prepareHeaders();
-        
+
         // return the string representation of the response content to the client
         $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-        
+
         // try to shutdown client socket
         try {
             $client->shutdown();
@@ -94,7 +97,7 @@ class RequestHandler extends AbstractContextThread
         } catch (\Exception $e) {
             $client->close();
         }
-        
+
         unset($client);
     }
 
@@ -105,43 +108,43 @@ class RequestHandler extends AbstractContextThread
     public function main()
     {
         try {
-            
+
             // set the client socket resource
             $client = $this->client;
             $client->setResource($this->resource);
-            
+
             // receive request object from client
             $request = $client->receive();
-            
+
             // initialize response, set the actual date and add accepted encoding methods
             $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
             $response = $request->getResponse();
             $response->addHeader(HttpResponse::HEADER_NAME_DATE, $responseDate);
             $response->setAcceptedEncodings($request->getAcceptedEncodings());
-            
+
             // log the request
             $this->getAccessLogger()->log($request, $response);
-            
+
             // load the application to handle the request
             $application = $this->findApplication($request);
-            
+
             // try to locate a servlet which could service the current request
             $servlet = $application->locate($request);
-            
+
             // inject shutdown handler
             $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
                 $client,
                 $response
             )));
-            
+
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
-            
+
         } catch (\Exception $e) {
             error_log($e->__toString());
             $response->setContent($e->__toString());
         }
-        
+
         $this->send($client, $response);
     }
 
@@ -178,7 +181,7 @@ class RequestHandler extends AbstractContextThread
     /**
      * Tries to find the application that has to handle the
      * passed request.
-     * 
+     *
      * @see \TechDivision\ServletContainer\Application::findApplication($servletRequest)
      */
     public function findApplication($servletRequest)
