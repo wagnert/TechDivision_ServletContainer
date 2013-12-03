@@ -35,14 +35,14 @@ abstract class GenericServlet implements Servlet {
 
     /**
      * The unique servlet name.
-     * 
+     *
      * @var string
      */
     protected $name;
-    
+
     /**
      * The servlet configuration.
-     * 
+     *
      * @var \TechDivision\ServletContainer\Interfaces\ServletConfig
      */
     protected $config;
@@ -106,7 +106,7 @@ abstract class GenericServlet implements Servlet {
     {
         $this->queryParser = $queryParser;
     }
-    
+
     /**
      * Returns the injected query parser object
      *
@@ -136,6 +136,9 @@ abstract class GenericServlet implements Servlet {
 
             // set content to response
             $response->setContent($content);
+
+            // prepare the content to be ready for sending to client
+            $response->prepareContent();
 
             // prepare the headers
             $response->prepareHeaders();

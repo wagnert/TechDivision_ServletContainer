@@ -84,9 +84,12 @@ class RequestHandler extends AbstractContextThread
      */
     public function send(HttpClientInterface $client, Response $response)
     {
+        // prepare the content to be ready for sending to client
+        $response->prepareContent();
+
         // prepare the headers
         $response->prepareHeaders();
-        
+
         // return the string representation of the response content to the client
         $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
     }
