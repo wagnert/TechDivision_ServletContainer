@@ -78,7 +78,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 
                 // process the request
                 $request = $this->initialContext->newInstance($this->threadType, $params);
-                $request->start();
+                $request->start(PTHREADS_INHERIT_ALL|PTHREADS_ALLOW_HEADERS);
                 
                 // close the socket after the response has been sent
                 $this->synchronized(function() use($clientSocket, $request) {

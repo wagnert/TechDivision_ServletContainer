@@ -294,8 +294,8 @@ class HttpResponse implements Response
     public function prepareHeaders()
     {
         // grap headers and set to response object
-        foreach (appserver_get_headers() as $i => $h) {
-
+        foreach (appserver_get_headers(true) as $i => $h) {
+            
             // skip default session delete header
             if (strpos($h, "Set-Cookie: PHPSESSID=deleted;") !== false) {
                 continue;
