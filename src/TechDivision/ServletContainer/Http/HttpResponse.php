@@ -293,13 +293,9 @@ class HttpResponse implements Response
      */
     public function prepareHeaders()
     {
+        
         // grap headers and set to response object
         foreach (appserver_get_headers(true) as $i => $h) {
-            
-            // skip default session delete header
-            if (strpos($h, "Set-Cookie: PHPSESSID=deleted;") !== false) {
-                continue;
-            }
 
             // set headers defined in sapi headers
             $h = explode(':', $h, 2);
@@ -308,17 +304,13 @@ class HttpResponse implements Response
                 // load header key and value
                 $key = trim($h[0]);
                 $value = trim($h[1]);
+                    
+                // if not, add the header
+                $this->addHeader($key, $value);
                 
-                // check if the headers already exists
-                if (!array_key_exists($key, $this->headers)) {
-                    
-                    // if not, add the header
-                    $this->addHeader($key, $value);
-                    
-                    // set status header to 301 if location is given
-                    if ($key == 'Location') {
-                        $this->addHeader('status', 'HTTP/1.1 301');
-                    }
+                // set status header to 301 if location is given
+                if ($key == 'Location') {
+                    $this->addHeader('status', 'HTTP/1.1 301');
                 }
             }
         }
