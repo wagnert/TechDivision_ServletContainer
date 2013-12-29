@@ -12,11 +12,7 @@ The following example will give you a short introduction what steps you need to 
 As the servlet container is built to handle mutliple applications the 1st step is to create a folder in the `webapps` folder of your application server installation root directory, that should be `/opt/appserver` by default. For example we'll create a folder named `myapp`.
 ```
 root@debian:~# cd /opt/appserver/webapps
-root@debian:~# mkdir myapp
-root@debian:~# mkdir myapp/WEB-INF
-root@debian:~# mkdir myapp/WEB-INF/classes
-root@debian:~# mkdir myapp/WEB-INF/classes/My
-root@debian:~# mkdir myapp/WEB-INF/classes/My/App
+root@debian:~# mkdir -p myapp/WEB-INF/classes/My/App
 ```
 That's all folders we need, pretty easy, right?
 
