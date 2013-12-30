@@ -59,6 +59,13 @@ class ServletManager
     protected $initParameter = array();
 
     /**
+     * Webapps SecurityContext
+     *
+     * @var array
+     */
+    protected $securityConfigs = array();
+
+    /**
      * Set's the application instance.
      *
      * @param \TechDivision\ServletContainer\Application $application
@@ -103,7 +110,16 @@ class ServletManager
             
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
-            
+
+
+            // parse for securityConfigs
+            $securityConfigs = array();
+            foreach ($config->xpath('/web-app/security') as $securityParam) {
+                $securityConfigs[] = json_decode( json_encode($securityParam) , 1);
+            }
+            $this->setSecurityConfigs($securityConfigs);
+
+
             // initialize the context by parsing the context-param nodes
             foreach ($config->xpath('/web-app/context-param') as $contextParam) {
                 $this->addInitParameter((string) $contextParam->{'param-name'}, (string) $contextParam->{'param-value'});
@@ -311,5 +327,15 @@ class ServletManager
         if (array_key_exists($name, $this->initParameter)) {
             return $this->initParameter[$name];
         }
+    }
+
+    public function getSecurityConfigs()
+    {
+        return $this->securityConfigs;
+    }
+
+    public function setSecurityConfigs($securityConfigs)
+    {
+        $this->securityConfigs = $securityConfigs;
     }
 }

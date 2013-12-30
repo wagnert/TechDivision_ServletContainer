@@ -48,6 +48,8 @@ class ServletLocator implements ResourceLocatorInterface
      */
     protected $routes;
 
+    protected $securityRoutes;
+
     /**
      * Initializes the locator with the actual servlet manager instance.
      *
@@ -59,6 +61,8 @@ class ServletLocator implements ResourceLocatorInterface
     {
         $this->servletManager = $servletManager;
         $this->initRoutes();
+        $this->initSecurityRoutes();
+
     }
 
     /**
@@ -112,6 +116,36 @@ class ServletLocator implements ResourceLocatorInterface
     }
 
     /**
+     * Prepares a collection with routes generated from the available servlets
+     * ans their servlet mappings.
+     *
+     * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
+     */
+    public function initSecurityRoutes()
+    {
+
+        // retrieve the registered servlets
+        $secureConfigs = $this->getServletManager()->getSecurityConfigs();
+
+        // prepare the collection with the available routes and initialize the route counter
+        $routes = new RouteCollection();
+        $counter = 0;
+
+        // iterate over the available servlets and prepare the routes
+        foreach ($secureConfigs as $config) {
+            $urlPattern = $config['url-pattern'];
+            $pattern = str_replace('/*', "/{placeholder_$counter}", $urlPattern);
+            $route = new Route($pattern, array(
+                $config['auth']
+            ), array(
+                "{placeholder_$counter}" => '.*'
+            ));
+            $routes->add($counter ++, $route);
+        }
+        $this->securityRoutes = $routes;
+    }
+
+    /**
      * Returns the collection with the initialized routes.
      *
      * @return \Symfony\Component\Routing\RouteCollection The initialize routes
@@ -119,6 +153,11 @@ class ServletLocator implements ResourceLocatorInterface
     public function getRoutes()
     {
         return $this->routes;
+    }
+
+    public function getSecureRoutes()
+    {
+        return $this->securityRoutes;
     }
 
     /**
@@ -155,6 +194,7 @@ class ServletLocator implements ResourceLocatorInterface
         
         // load the route collection, initialize the context for the routing and the URL matcher
         $context = new RequestContext($path, $request->getMethod(), $request->getServerName());
+        // print_r($this->getRoutes());
         $matcher = new UrlMatcher($this->getRoutes(), $context);
         
         // traverse the path to find matching servlet
@@ -174,6 +214,14 @@ class ServletLocator implements ResourceLocatorInterface
         }
         // load the the servlet instance from the matching result
         $mappingServlet = current($servlet);
+
+        // check if current Path should be secured by HTTP Authentication
+        if ($secureConfig = $this->secureUrlMatcher($context,$path)) {
+            // url has matched
+            $mappingServlet->injectSecurityConfig($secureConfig);
+            $mappingServlet->setAuthenticationRequired(TRUE);
+        }
+
         
         // append it to the servlet cache and return the servlet
         $servletCache[$path] = $mappingServlet->getServletConfig()->getServletName();
@@ -181,5 +229,29 @@ class ServletLocator implements ResourceLocatorInterface
             ->getInitialContext()
             ->setAttribute("$applicationName.servletCache", $servletCache);
         return $mappingServlet;
+    }
+
+
+    /**
+     * search for a matching url pattern
+     *
+     * @param $context
+     * @param $path
+     * @return array
+     */
+    protected function secureUrlMatcher($context, $path)
+    {
+        $matcher = new UrlMatcher($this->getSecureRoutes(), $context);
+        // traverse the path to find matching servlet
+        do {
+
+            try {
+                $config = $matcher->match($path);
+                break;
+            } catch (ResourceNotFoundException $rnfe) {
+                $path = substr($path, 0, strrpos($path, '/'));
+            }
+        } while (strpos($path, '/') !== FALSE);
+        return $config;
     }
 }
