@@ -137,6 +137,9 @@ class RequestHandler extends AbstractContextThread
                 $response
             )));
 
+            // inject authentication manager
+            $servlet->injectAuthenticationManager($this->newInstance('TechDivision\ServletContainer\AuthenticationManager', array()));
+
             // let the servlet process the request and store the result in the response
             $servlet->service($request, $response);
 

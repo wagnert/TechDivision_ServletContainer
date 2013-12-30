@@ -139,7 +139,12 @@ abstract class HttpServlet extends GenericServlet
         
         // pre-initialize response
         $res->addHeader('Server', $req->getServerVar('SERVER_SOFTWARE'));
-        
+
+        // check if servlet needs authentication and return if authentication is not provided.
+        if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($req, $res, $this)) {
+            return;
+        }
+
         // check if there is no vhost call going on
         if (! $this->getServletConfig()
             ->getApplication()
