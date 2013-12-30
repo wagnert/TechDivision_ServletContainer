@@ -68,14 +68,13 @@ class AuthenticationManager
 
             // if credentials are provided and authorization method is the same as configured
             if ($credentials && $configuredAuthType == $authType) {
-
                 // get real credentials
                 list($user, $pwd) = explode(':', $credentials);
 
                 // instantiate configured authentication adapter
                 /* @var $authAdapter AuthenticationAdapter */
                 $authAdapter = $servlet->getServletManager()->getApplication()->newInstance(
-                    'TechDivision\ServletContainer\Authentication\Adapters\\' . ucfirst($adapterType),
+                    'TechDivision\ServletContainer\Authentication\Adapters\\' . ucfirst($adapterType) . 'Adapter',
                     array($options, $servlet)
                 );
 

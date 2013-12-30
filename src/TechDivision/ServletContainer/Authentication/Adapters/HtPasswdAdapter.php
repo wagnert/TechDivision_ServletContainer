@@ -55,7 +55,7 @@ class HtpasswdAdapter extends AuthenticationAdapter
         $webAppPath = $this->servlet->getServletManager()->getWebappPath();
 
         // get content of htpasswd file.
-        $htpasswdData = file_get_contents($webAppPath . DS . 'WEB-INF' . DS . $this->filename);
+        $htpasswdData = file_get_contents($webAppPath . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . $this->filename);
         $htpasswdData = explode('\n', $htpasswdData);
 
         // prepare htpasswd entries
@@ -76,9 +76,9 @@ class HtpasswdAdapter extends AuthenticationAdapter
     public function authenticate($user, $pwd)
     {
         // if user is valid
-        if (in_array($user, $this->htpasswd)) {
-            // check if password correct
-            if (crypt($pwd) == $this->htpasswd[$user]) {
+        if (in_array($user, array_keys($this->htpasswd))) {
+            // check if password is correct
+            if (md5($pwd) == $this->htpasswd[$user]) {
                 return true;
             }
         }

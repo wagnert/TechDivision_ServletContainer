@@ -145,7 +145,7 @@ abstract class GenericServlet implements Servlet {
      *
      * @param array $configuration
      */
-    public function injectSecurityConfiguration($configuration)
+    public function injectSecurityConfig($configuration)
     {
         $this->securityConfiguration = $configuration;
     }
@@ -195,7 +195,7 @@ abstract class GenericServlet implements Servlet {
      *
      * @return array
      */
-    public function getSecurityConfiguration()
+    public function getSecurityConfig()
     {
         return $this->securityConfiguration;
     }
