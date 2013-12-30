@@ -33,43 +33,29 @@ abstract class AbstractHttpWorker extends AbstractWorker
      */
     public function main()
     {
-
-        // the counter with the number of requests to handle
-        $handleRequests = 100;
-        
-        // initialize the array with the clients to handle the requests
-        $clients = array();
         
         // initialize the session manager itself
         $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(
             $this->initialContext
         ));
-        
-        // initialize the array with the preinitialized clients
-        for ($i = 0; $i < $handleRequests; $i++) {
 
-            // initialize the HTTP request/response
-            $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
-            $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
-            $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
-            
-            // inject response und session manager
-            $request->injectResponse($response);
-            $request->injectSessionManager($sessionManager);
-            
-            // initialize a new HTTP client
-            $client = $this->initialContext->newInstance($this->getHttpClientClass());
-            $client->injectHttpRequest($request);
-            $client->injectHttpPart($httpPart);
-            $client->setNewLine("\r\n\r\n");
-            
-            // add the client to the array
-            $clients[$i] = $client;
-        }
+        // initialize the HTTP request/response
+        $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
+        $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
+        $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
         
-        // handle requests and then QUIT (to free client sockets and memory)
-        $i = 0;
-        while ($i++ < $handleRequests) {
+        // inject response und session manager
+        $request->injectResponse($response);
+        $request->injectSessionManager($sessionManager);
+        
+        // initialize a new HTTP client
+        $client = $this->initialContext->newInstance($this->getHttpClientClass());
+        $client->injectHttpRequest($request);
+        $client->injectHttpPart($httpPart);
+        $client->setNewLine("\r\n\r\n");
+        
+        // handle requests as long as container has been started
+        while ($this->getContainer()->isStarted()) {
             
             // reinitialize the server socket
             $serverSocket = $this->initialContext->newInstance($this->getResourceClass(), array(
@@ -82,17 +68,24 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 // load the client resource
                 $resource = $clientSocket->getResource();
                 
-                // initialize the params for thread handling the request
+                // prepare the params for thread handling the request
                 $params = array(
                     $this->initialContext,
                     $this->container,
-                    $clients[$i],
+                    $client,
                     $resource
                 );
                 
                 // process the request
                 $request = $this->initialContext->newInstance($this->threadType, $params);
-                $request->start();
+                $request->start(PTHREADS_INHERIT_ALL|PTHREADS_ALLOW_HEADERS);
+                
+                // close the socket after the response has been sent
+                $this->synchronized(function() use($clientSocket, $request) {
+                    if ($request->wait()) {
+                       $clientSocket->close();
+                    }
+                });
             }
         }
     }

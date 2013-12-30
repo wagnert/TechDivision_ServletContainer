@@ -143,13 +143,15 @@ abstract class GenericServlet implements Servlet {
             // prepare the headers
             $response->prepareHeaders();
 
-            // return the string representation of the response content to the client
-            $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-
             // try to shutdown client socket
             try {
+
+                // return the string representation of the response content to the client
+                $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
+            
                 $client->shutdown();
                 $client->close();
+                
             } catch (\Exception $e) {
                 $client->close();
             }

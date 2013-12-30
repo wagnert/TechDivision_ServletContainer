@@ -18,6 +18,9 @@ use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Socket\HttpClient;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
+use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
+use TechDivision\SocketException;
+use TechDivision\StreamException;
 
 /**
  * The thread implementation that handles the request.
@@ -48,7 +51,7 @@ class RequestHandler extends AbstractContextThread
     /**
      * The HTTP client to handle the request.
      *
-     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface
+     * @var The HTTP client to handle the request
      */
     protected $client;
 
@@ -57,13 +60,13 @@ class RequestHandler extends AbstractContextThread
      *
      * @param \TechDivision\ServletContainer\Container $container
      *            The ServletContainer
-     * @param resource $resource
-     *            The client socket instance
      * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
      *            The HTTP client to handle the request
+     * @param resource $resource
+     *            The client socket instance
      * @return void
      */
-    public function init(Container $container, HttpClientInterface $client, $resource)
+    public function init(Container $container, $client, $resource)
     {
         $this->container = $container;
         $this->client = $client;
@@ -89,16 +92,6 @@ class RequestHandler extends AbstractContextThread
 
         // return the string representation of the response content to the client
         $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-
-        // try to shutdown client socket
-        try {
-            $client->shutdown();
-            $client->close();
-        } catch (\Exception $e) {
-            $client->close();
-        }
-
-        unset($client);
     }
 
     /**
@@ -108,44 +101,87 @@ class RequestHandler extends AbstractContextThread
     public function main()
     {
         try {
-
-            // set the client socket resource
+            
+            // initialize variables to handle persistent HTTP/1.1 connections
+            $counter = 1;
+            $connectionOpen = true;
+            $startTime = time();
+            $availableRequests = 5;
+            
+            // set the client socket resource and timeout
             $client = $this->client;
             $client->setResource($this->resource);
-
-            // receive request object from client
-            $request = $client->receive();
-
-            // initialize response, set the actual date and add accepted encoding methods
-            $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
-            $response = $request->getResponse();
-            $response->addHeader(HttpResponse::HEADER_NAME_DATE, $responseDate);
-            $response->setAcceptedEncodings($request->getAcceptedEncodings());
-
-            // log the request
-            $this->getAccessLogger()->log($request, $response);
-
-            // load the application to handle the request
-            $application = $this->findApplication($request);
-
-            // try to locate a servlet which could service the current request
-            $servlet = $application->locate($request);
-
-            // inject shutdown handler
-            $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
-                $client,
-                $response
-            )));
-
-            // let the servlet process the request and store the result in the response
-            $servlet->service($request, $response);
-
-        } catch (\Exception $e) {
-            error_log($e->__toString());
+            $client->setReceiveTimeout($receiveTimeout = 5);
+            
+            do { // let socket open as long as max request or socket timeout is not reached
+                
+                // receive request object from client
+                $request = $client->receive();
+                
+                // initialize response, set the actual date and add accepted encoding methods
+                $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
+                $response = $request->getResponse();
+                $response->initHeaders();
+                $response->setAcceptedEncodings($request->getAcceptedEncodings());
+                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
+                
+                // load the Connection Header (keep-alive/close)
+                $connection = strtolower($request->getHeader('Connection'));
+                
+                // check protocol version
+                if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
+                    
+                    // lower the request counter and the TTL
+                    $availableRequests --;
+                    
+                    // check if this will be the last requests handled by this thread
+                    if ($availableRequests > 0) {
+                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$receiveTimeout, thread={$this->getThreadId()}");
+                    }
+                } else { // set request counter and TTL to 0
+                    $availableRequests = 0;
+                }
+                
+                // log the request
+                $this->getAccessLogger()->log($request, $response);
+                
+                // load the application to handle the request
+                $application = $this->findApplication($request);
+                
+                // try to locate a servlet which could service the current request
+                $servlet = $application->locate($request);
+                
+                // inject shutdown handler
+                $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
+                    $client,
+                    $response
+                )));
+                
+                // let the servlet process the request send it back to the client
+                $servlet->service($request, $response);
+                $this->send($client, $response);
+                
+                // check if this is the last request
+                if ($availableRequests < 1) {
+                    $connectionOpen = false;
+                }
+                
+            } while ($connectionOpen);
+            
+        } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
+            $this->getInitialContext()->getSystemLogger()->addDebug($ccbpe);
+        } catch (SocketException $soe) { // socket timeout reached
+            $this->getInitialContext()->getSystemLogger()->addDebug($soe);
+        } catch (StreamException $ste) { // streaming socket timeout reached
+            $this->getInitialContext()->getSystemLogger()->addDebug($ste);
+        } catch (\Exception $e) { // a servlet throws an exception -> pass it through to the client!
+            $this->getInitialContext()->getSystemLogger()->addDebug($e);
             $response->setContent($e->__toString());
+            $this->send($client, $response);
         }
-
-        $this->send($client, $response);
+        
+        // notify the parent thread that everything has been done
+        $this->notify();
     }
 
     /**
