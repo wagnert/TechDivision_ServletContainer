@@ -307,7 +307,7 @@ class HttpResponse implements Response
                     
                 // if not, add the header
                 $this->addHeader($key, $value);
-                
+
                 // set status header to 301 if location is given
                 if ($key == 'Location') {
                     $this->addHeader('status', 'HTTP/1.1 301');

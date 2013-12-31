@@ -59,6 +59,13 @@ class ServletManager
     protected $initParameter = array();
 
     /**
+     * Webapps SecurityContext
+     *
+     * @var array
+     */
+    protected $securedUrlConfigs = array();
+
+    /**
      * Set's the application instance.
      *
      * @param \TechDivision\ServletContainer\Application $application
@@ -103,7 +110,16 @@ class ServletManager
             
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
-            
+
+
+            // parse for securityConfigs
+            $securityConfigs = array();
+            foreach ($config->xpath('/web-app/security') as $securityParam) {
+                $securityConfigs[] = json_decode( json_encode($securityParam) , 1);
+            }
+            $this->setSecuredUrlConfigs($securityConfigs);
+
+
             // initialize the context by parsing the context-param nodes
             foreach ($config->xpath('/web-app/context-param') as $contextParam) {
                 $this->addInitParameter((string) $contextParam->{'param-name'}, (string) $contextParam->{'param-value'});
@@ -167,6 +183,10 @@ class ServletManager
                 
                 // append the url-pattern - servlet mapping to the array
                 $this->servletMappings['/' . $urlPattern] = (string) $mapping->{'servlet-name'};
+
+                $this->application->getInitialContext()->getSystemLogger()->debug(
+                    sprintf('Successfully initialized servlet %s for url-pattern %s in application %s',
+                        $servletName, $urlPattern, $this->application->getName()));
             }
         }
     }
@@ -311,5 +331,15 @@ class ServletManager
         if (array_key_exists($name, $this->initParameter)) {
             return $this->initParameter[$name];
         }
+    }
+
+    public function getSecuredUrlConfigs()
+    {
+        return $this->securedUrlConfigs;
+    }
+
+    public function setSecuredUrlConfigs($securedUrlConfigs)
+    {
+        $this->securedUrlConfigs = $securedUrlConfigs;
     }
 }
