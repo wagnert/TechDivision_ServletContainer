@@ -167,6 +167,10 @@ class ServletManager
                 
                 // append the url-pattern - servlet mapping to the array
                 $this->servletMappings['/' . $urlPattern] = (string) $mapping->{'servlet-name'};
+
+                $this->application->getInitialContext()->getSystemLogger()->debug(
+                    sprintf('Successfully initialized servlet %s for url-pattern %s in application %s',
+                        $servletName, $urlPattern, $this->application->getName()));
             }
         }
     }
