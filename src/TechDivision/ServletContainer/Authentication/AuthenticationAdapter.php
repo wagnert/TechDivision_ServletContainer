@@ -35,6 +35,11 @@ abstract class AuthenticationAdapter
     protected $servlet;
 
     /**
+     * @var string $filename The filename of the htdigest file.
+     */
+    protected $filename;
+
+    /**
      * Instantiates an authentication adapter
      *
      * @param array $options Necessary options for specific adapter.
@@ -43,6 +48,8 @@ abstract class AuthenticationAdapter
     {
         $this->options = $options;
         $this->servlet = $servlet;
+
+        $this->setFilename($options['file']);
     }
 
     /**
@@ -51,12 +58,49 @@ abstract class AuthenticationAdapter
     abstract function init();
 
     /**
-     * Authenticates a user/password combination.
+     * Return's Servlet object
      *
-     * @param string $user Username
-     * @param string $pwd Password
-     * @param array $options Necessary options for adapter
-     * @return bool
+     * @return Servlet
      */
-    abstract function authenticate($user, $pwd);
+    public function getServlet()
+    {
+        return $this->servlet;
+    }
+
+    /**
+     * Set's htdigest Filename
+     *
+     * @param $filename
+     * @return void
+     */
+    protected  function setFilename($filename)
+    {
+        $this->filename = $filename;
+    }
+
+    /**
+     * Return's htdigest Filename
+     *
+     * @return string
+     */
+    protected function getFilename()
+    {
+        return $this->filename;
+    }
+
+    protected function setOptions($options)
+    {
+        $this->options = $options;
+    }
+
+    protected function getOptions()
+    {
+        return $this->options;
+    }
+
+    protected function setServlet($servlet)
+    {
+        $this->servlet = $servlet;
+    }
+
 }
