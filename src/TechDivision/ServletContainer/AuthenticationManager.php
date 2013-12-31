@@ -88,7 +88,7 @@ class AuthenticationManager
         // either authentication data was not provided or authentication failed
         $res->addHeader("status", 'HTTP/1.1 401 Authentication required');
         $res->addHeader("WWW-Authenticate", $configuredAuthType . ' ' . 'realm="' . $realm . '"');
-        $res->setContent(PHP_EOL);
+        $res->setContent("<html><head><title>401 Authorization Required</title></head><body><h1>401 Authorization Required</h1><p>This server could not verify that you are authorized to access the document requested. Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required. Confused</p></body></html>");
         return false;
     }
 
