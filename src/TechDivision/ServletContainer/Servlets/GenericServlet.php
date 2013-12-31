@@ -75,7 +75,7 @@ abstract class GenericServlet implements Servlet {
      *
      * @var
      */
-    protected $securityConfiguration;
+    protected $securedUrlConfig;
 
     /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::init(ServletConfig $config)
@@ -145,9 +145,9 @@ abstract class GenericServlet implements Servlet {
      *
      * @param array $configuration
      */
-    public function injectSecurityConfig($configuration)
+    public function injectSecuredUrlConfig($configuration)
     {
-        $this->securityConfiguration = $configuration;
+        $this->securedUrlConfig = $configuration;
     }
 
     /**
@@ -195,9 +195,9 @@ abstract class GenericServlet implements Servlet {
      *
      * @return array
      */
-    public function getSecurityConfig()
+    public function getSecuredUrlConfig()
     {
-        return $this->securityConfiguration;
+        return $this->securedUrlConfig;
     }
 
     /**

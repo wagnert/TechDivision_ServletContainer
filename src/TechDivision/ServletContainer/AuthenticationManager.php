@@ -48,7 +48,7 @@ class AuthenticationManager
     public function handleRequest(Request $req, Response $res, Servlet $servlet)
     {
         // get security configuration
-        $securityConfig = $servlet->getSecurityConfig();
+        $securityConfig = $servlet->getSecuredUrlConfig();
         $configuredAuthType = $securityConfig['auth_type'];
         $realm = $securityConfig['realm'];
         $adapterType = $securityConfig['adapter_type'];

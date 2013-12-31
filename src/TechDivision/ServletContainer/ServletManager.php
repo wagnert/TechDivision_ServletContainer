@@ -63,7 +63,7 @@ class ServletManager
      *
      * @var array
      */
-    protected $securityConfigs = array();
+    protected $securedUrlConfigs = array();
 
     /**
      * Set's the application instance.
@@ -117,7 +117,7 @@ class ServletManager
             foreach ($config->xpath('/web-app/security') as $securityParam) {
                 $securityConfigs[] = json_decode( json_encode($securityParam) , 1);
             }
-            $this->setSecurityConfigs($securityConfigs);
+            $this->setSecuredUrlConfigs($securityConfigs);
 
 
             // initialize the context by parsing the context-param nodes
@@ -329,13 +329,13 @@ class ServletManager
         }
     }
 
-    public function getSecurityConfigs()
+    public function getSecuredUrlConfigs()
     {
-        return $this->securityConfigs;
+        return $this->securedUrlConfigs;
     }
 
-    public function setSecurityConfigs($securityConfigs)
+    public function setSecuredUrlConfigs($securedUrlConfigs)
     {
-        $this->securityConfigs = $securityConfigs;
+        $this->securedUrlConfigs = $securedUrlConfigs;
     }
 }

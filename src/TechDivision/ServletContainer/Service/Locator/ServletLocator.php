@@ -48,7 +48,7 @@ class ServletLocator implements ResourceLocatorInterface
      */
     protected $routes;
 
-    protected $securityRoutes;
+    protected $securedUrlRoutes;
 
     /**
      * Initializes the locator with the actual servlet manager instance.
@@ -61,7 +61,7 @@ class ServletLocator implements ResourceLocatorInterface
     {
         $this->servletManager = $servletManager;
         $this->initRoutes();
-        $this->initSecurityRoutes();
+        $this->initSecuredUrlRoutes();
 
     }
 
@@ -121,18 +121,17 @@ class ServletLocator implements ResourceLocatorInterface
      *
      * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
      */
-    public function initSecurityRoutes()
+    public function initSecuredUrlRoutes()
     {
-
         // retrieve the registered servlets
-        $secureConfigs = $this->getServletManager()->getSecurityConfigs();
+        $securedUrlConfigs = $this->getServletManager()->getSecuredUrlConfigs();
 
         // prepare the collection with the available routes and initialize the route counter
         $routes = new RouteCollection();
         $counter = 0;
 
         // iterate over the available servlets and prepare the routes
-        foreach ($secureConfigs as $config) {
+        foreach ($securedUrlConfigs as $config) {
             $urlPattern = $config['url-pattern'];
             $pattern = str_replace('/*', "/{placeholder_$counter}", $urlPattern);
             $route = new Route($pattern, array(
@@ -142,7 +141,7 @@ class ServletLocator implements ResourceLocatorInterface
             ));
             $routes->add($counter ++, $route);
         }
-        $this->securityRoutes = $routes;
+        $this->securedUrlRoutes = $routes;
     }
 
     /**
@@ -155,9 +154,9 @@ class ServletLocator implements ResourceLocatorInterface
         return $this->routes;
     }
 
-    public function getSecureRoutes()
+    public function getSecuredUrlRoutes()
     {
-        return $this->securityRoutes;
+        return $this->securedUrlRoutes;
     }
 
     /**
@@ -239,7 +238,7 @@ class ServletLocator implements ResourceLocatorInterface
      */
     protected function secureUrlMatcher($context, $path, $servlet)
     {
-        $matcher = new UrlMatcher($this->getSecureRoutes(), $context);
+        $matcher = new UrlMatcher($this->getSecuredUrlRoutes(), $context);
         // traverse the path to find matching servlet
         do {
 
@@ -247,7 +246,7 @@ class ServletLocator implements ResourceLocatorInterface
                 $config = $matcher->match($path);
 
                 // url has matched
-                $servlet->injectSecurityConfig($config[0]);
+                $servlet->injectSecuredUrlConfig($config[0]);
                 $servlet->setAuthenticationRequired(true);
                 break;
             } catch (ResourceNotFoundException $rnfe) {
