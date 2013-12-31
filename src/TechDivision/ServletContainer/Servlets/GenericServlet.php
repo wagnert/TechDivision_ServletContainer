@@ -12,6 +12,7 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
+use TechDivision\ServletContainer\AuthenticationtManager;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
@@ -19,6 +20,7 @@ use TechDivision\ServletContainer\Interfaces\ShutdownHandler;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Socket\HttpClient;
+use TechDivision\ServletContainer\AuthenticationManager;
 
 /**
  * Abstract servlet implementation.
@@ -53,6 +55,27 @@ abstract class GenericServlet implements Servlet {
      * @var QueryParser
      */
     protected $queryParser;
+
+    /**
+     * Holds the authentication manager
+     *
+     * @var AuthenticationManager
+     */
+    protected $authenticationManager;
+
+    /**
+     * Holds the flag if authentication is required for specific servlet.
+     *
+     * @var bool
+     */
+    protected $authenticationRequired;
+
+    /**
+     * Holds the configured security configuration.
+     *
+     * @var
+     */
+    protected $securedUrlConfig;
 
     /**
      * @see \TechDivision\ServletContainer\Interfaces\Servlet::init(ServletConfig $config)
@@ -108,6 +131,26 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
+     * Injects the authentication manager.
+     *
+     * @param AuthenticationManager $authenticationManager
+     */
+    public function injectAuthenticationManager(AuthenticationManager $authenticationManager)
+    {
+        $this->authenticationManager = $authenticationManager;
+    }
+
+    /**
+     * Injects the security configuration.
+     *
+     * @param array $configuration
+     */
+    public function injectSecuredUrlConfig($configuration)
+    {
+        $this->securedUrlConfig = $configuration;
+    }
+
+    /**
      * Returns the injected query parser object
      *
      * @return QueryParser
@@ -115,6 +158,46 @@ abstract class GenericServlet implements Servlet {
     public function getQueryParser()
     {
         return $this->queryParser;
+    }
+
+    /**
+     * Returns the injected authentication manager.
+     *
+     * @return \TechDivision\ServletContainer\AuthenticationManager
+     */
+    public function getAuthenticationManager()
+    {
+        return $this->authenticationManager;
+    }
+
+    /**
+     * Sets the authentication required flag.
+     *
+     * @param $authenticationRequired
+     */
+    public function setAuthenticationRequired($authenticationRequired)
+    {
+        $this->authenticationRequired = $authenticationRequired;
+    }
+
+    /**
+     * Returns the authentication required flag.
+     *
+     * @return bool
+     */
+    public function getAuthenticationRequired()
+    {
+        return $this->authenticationRequired;
+    }
+
+    /**
+     * Returns the security configuration.
+     *
+     * @return array
+     */
+    public function getSecuredUrlConfig()
+    {
+        return $this->securedUrlConfig;
     }
 
     /**
@@ -166,4 +249,5 @@ abstract class GenericServlet implements Servlet {
     public function destroy()
     {
     }
+
 }
