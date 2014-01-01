@@ -27,15 +27,7 @@ use TechDivision\ServletContainer\Authentication\AuthenticationAdapter;
  */
 class AuthenticationManager
 {
-    /**
-     * Basic HTTP authentication method
-     */
-    const AUTHENTICATION_METHOD_BASIC = 'Basic';
 
-    /**
-     * Digest HTTP authentication method
-     */
-    const AUTHENTICATION_METHOD_DIGEST = 'Digest';
 
     /**
      * Handles request in order to authenticate.
@@ -62,11 +54,9 @@ class AuthenticationManager
         }
 
 
-        $auth = $servlet->getServletManager()->getApplication()->newInstance($authImplementation,
-            array($servlet, $req, $res)
-        );
+        $auth = $servlet->getServletManager()->getApplication()->newInstance($authImplementation);
 
-        $auth->init();
+        $auth->init($servlet, $req, $res);
 
         return $auth->authenticate();
 

@@ -27,7 +27,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
  * @author Florian Sydekum <fs@techdivision.com>
  * @author Philipp Dittert <pd@techdivision.com>
  */
-class HtdisgestAdapter
+class HtdigestAdapter extends AuthenticationAdapter
 {
     /**
      * @var array $htdigest The content of the htdigest file.
@@ -62,17 +62,23 @@ class HtdisgestAdapter
     /**
      *  Authenticates a user/realm/H1 hash combination.
      *
-     * @param string $user
-     * @param string $realm
-     * @param string $hash
+     * @param array $data
+     * @param string $reqMethod e.g. GET or POST
      * @return bool
      */
-    public function authenticate($user, $realm, $hash)
+    public function authenticate($data,$reqMethod)
     {
         // if user is valid
         $credentials = $this->getHtDigest();
-        if ($credentials[$user] && $credentials[$user]['realm'] == $realm) {
-            if ($credentials[$user]['hash'] == $hash) {
+        $user = $data['username'];
+        if ($credentials[$user] && $credentials[$user]['realm'] == $data['realm']) {
+
+            $HA1 = $credentials[$user]['hash'];
+            $HA2 = md5($reqMethod.":".$data['uri']);
+            $middle = ':'.$data['nonce'].':'.$data['nc'].':'.$data['cnonce'].':'.$data['qop'].':';
+            $response = md5($HA1.$middle.$HA2);
+
+            if ($data['response'] == $response) {
                 return true;
             }
         }
