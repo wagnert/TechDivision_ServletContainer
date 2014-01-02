@@ -78,7 +78,6 @@ class HtpasswdAdapter extends AuthenticationAdapter
         if ($this->htpasswd[$user]) {
 
             if ($this->checkPlainMd5($pwd, $this->htpasswd[$user])) {
-                error_log("return true");
                 return true;
             } elseif ($this->checkApr1Md5($pwd, $this->htpasswd[$user])) {
                 return true;
@@ -100,13 +99,9 @@ class HtpasswdAdapter extends AuthenticationAdapter
      */
     protected function checkPlainMd5($clearTextPassword, $hashedPassword)
     {
-        error_log(md5($clearTextPassword));
-        error_log($hashedPassword);
         if (md5($clearTextPassword) == $hashedPassword) {
-            error_log("return true inside");
             return true;
         }
-        error_log("return false inside");
         return false;
     }
 
