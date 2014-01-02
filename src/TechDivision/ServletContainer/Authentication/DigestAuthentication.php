@@ -24,7 +24,11 @@ namespace TechDivision\ServletContainer\Authentication;
 
 class DigestAuthentication extends AbstractAuthentication
 {
-
+    /**
+     * Authenticate against Backend
+     *
+     * @return bool
+     */
     public function authenticate()
     {
         $config = $this->getServlet()->getSecuredUrlConfig();

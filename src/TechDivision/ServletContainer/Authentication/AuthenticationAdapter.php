@@ -88,16 +88,31 @@ abstract class AuthenticationAdapter
         return $this->filename;
     }
 
+    /**
+     * Set authentication options
+     *
+     * @param array $options
+     */
     protected function setOptions($options)
     {
         $this->options = $options;
     }
 
+    /**
+     * Return's auhtenication options
+     *
+     * @return array
+     */
     protected function getOptions()
     {
         return $this->options;
     }
 
+    /**
+     * Set's Servlet Object
+     *
+     * @param $servlet
+     */
     protected function setServlet($servlet)
     {
         $this->servlet = $servlet;

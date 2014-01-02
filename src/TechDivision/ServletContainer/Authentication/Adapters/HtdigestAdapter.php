@@ -86,7 +86,7 @@ class HtdigestAdapter extends AuthenticationAdapter
     }
 
     /**
-     * Return's htdigest credential list
+     * Return's htdigest credential array
      *
      * @return array
      */
