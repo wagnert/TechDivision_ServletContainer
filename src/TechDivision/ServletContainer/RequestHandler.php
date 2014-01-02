@@ -156,7 +156,11 @@ class RequestHandler extends AbstractContextThread
                     $client,
                     $response
                 )));
-                
+
+                // inject authentication manager
+                $servlet->injectAuthenticationManager($this->newInstance('TechDivision\ServletContainer\AuthenticationManager', array()));
+
+
                 // let the servlet process the request send it back to the client
                 $servlet->service($request, $response);
                 $this->send($client, $response);
