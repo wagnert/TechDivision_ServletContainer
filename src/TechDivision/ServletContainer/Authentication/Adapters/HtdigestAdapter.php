@@ -55,7 +55,7 @@ class HtdigestAdapter extends AuthenticationAdapter
         // prepare htdigest entries
         foreach ($htDigestData as $entry) {
             list($user, $realm, $hash) = explode(':', $entry);
-            $this->htdigest[$user] = array('user'=>$user, 'realm'=>$realm, 'hash'=>$hash);
+            $this->htdigest[$user] = array('user'=>$user, 'realm'=>$realm, 'hash'=>trim($hash));
         }
     }
 

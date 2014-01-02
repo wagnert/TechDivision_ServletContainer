@@ -55,14 +55,13 @@ class HtpasswdAdapter extends AuthenticationAdapter
         $webAppPath = $this->servlet->getServletManager()->getWebappPath();
 
         // get content of htpasswd file.
-        $htpasswdData = file_get_contents($webAppPath . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . $this->filename);
-        $htpasswdData = explode('\n', $htpasswdData);
+        $htpasswdData = file($webAppPath . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . $this->filename);
 
         // prepare htpasswd entries
         $this->htpasswd = array();
         foreach ($htpasswdData as $entry) {
             list($user, $pwd) = explode(':', $entry);
-            $this->htpasswd[$user] = $pwd;
+            $this->htpasswd[$user] = trim($pwd);
         }
     }
 
@@ -79,6 +78,7 @@ class HtpasswdAdapter extends AuthenticationAdapter
         if ($this->htpasswd[$user]) {
 
             if ($this->checkPlainMd5($pwd, $this->htpasswd[$user])) {
+                error_log("return true");
                 return true;
             } elseif ($this->checkApr1Md5($pwd, $this->htpasswd[$user])) {
                 return true;
@@ -100,10 +100,13 @@ class HtpasswdAdapter extends AuthenticationAdapter
      */
     protected function checkPlainMd5($clearTextPassword, $hashedPassword)
     {
+        error_log(md5($clearTextPassword));
+        error_log($hashedPassword);
         if (md5($clearTextPassword) == $hashedPassword) {
+            error_log("return true inside");
             return true;
         }
-
+        error_log("return false inside");
         return false;
     }
 
