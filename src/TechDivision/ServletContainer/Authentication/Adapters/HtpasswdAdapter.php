@@ -55,14 +55,13 @@ class HtpasswdAdapter extends AuthenticationAdapter
         $webAppPath = $this->servlet->getServletManager()->getWebappPath();
 
         // get content of htpasswd file.
-        $htpasswdData = file_get_contents($webAppPath . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . $this->filename);
-        $htpasswdData = explode('\n', $htpasswdData);
+        $htpasswdData = file($webAppPath . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . $this->filename);
 
         // prepare htpasswd entries
         $this->htpasswd = array();
         foreach ($htpasswdData as $entry) {
             list($user, $pwd) = explode(':', $entry);
-            $this->htpasswd[$user] = $pwd;
+            $this->htpasswd[$user] = trim($pwd);
         }
     }
 
@@ -103,7 +102,6 @@ class HtpasswdAdapter extends AuthenticationAdapter
         if (md5($clearTextPassword) == $hashedPassword) {
             return true;
         }
-
         return false;
     }
 
