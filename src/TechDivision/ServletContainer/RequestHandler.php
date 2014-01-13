@@ -106,12 +106,12 @@ class RequestHandler extends AbstractContextThread
             $counter = 1;
             $connectionOpen = true;
             $startTime = time();
-            $availableRequests = 5;
+            $availableRequests = 100;
             
             // set the client socket resource and timeout
             $client = $this->client;
             $client->setResource($this->resource);
-            $client->setReceiveTimeout($receiveTimeout = 5);
+            $client->setReceiveTimeout($receiveTimeout = 75);
             
             do { // let socket open as long as max request or socket timeout is not reached
                 
@@ -135,9 +135,15 @@ class RequestHandler extends AbstractContextThread
                     $availableRequests --;
                     
                     // check if this will be the last requests handled by this thread
-                    if ($availableRequests > 0) {
-                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$receiveTimeout, thread={$this->getThreadId()}");
+                    if ($availableRequests >= 0) {
+                        
+                        // set the ttl (how long the connection will still be open before closed by the server)
+                        $ttl = ($startTime + $receiveTimeout) - time();
+                        
+                        // add the apropriate response header
+                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$ttl, thread={$this->getThreadId()}");
                     }
+                    
                 } else { // set request counter and TTL to 0
                     $availableRequests = 0;
                 }
@@ -159,7 +165,6 @@ class RequestHandler extends AbstractContextThread
 
                 // inject authentication manager
                 $servlet->injectAuthenticationManager($this->newInstance('TechDivision\ServletContainer\AuthenticationManager', array()));
-
 
                 // let the servlet process the request send it back to the client
                 $servlet->service($request, $response);
