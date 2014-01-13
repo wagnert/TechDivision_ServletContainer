@@ -24,38 +24,30 @@ use TechDivision\ApplicationServer\AbstractWorker;
  */
 abstract class AbstractHttpWorker extends AbstractWorker
 {
-    
+
     /**
      * (non-PHPdoc)
-     * 
+     *
      * @see \TechDivision\ApplicationServer\AbstractWorker::main()
      * @see \Thread::run()
      */
     public function main()
     {
         
+        // the counter with the number of requests to handle
+        $handleRequests = 100;
+        
+        // initialize the array with the clients to handle the requests
+        $clients = array();
+        
         // initialize the session manager itself
         $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(
             $this->initialContext
         ));
-
-        // initialize the HTTP request/response
-        $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
-        $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
-        $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
         
-        // inject response und session manager
-        $request->injectResponse($response);
-        $request->injectSessionManager($sessionManager);
-        
-        // initialize a new HTTP client
-        $client = $this->initialContext->newInstance($this->getHttpClientClass());
-        $client->injectHttpRequest($request);
-        $client->injectHttpPart($httpPart);
-        $client->setNewLine("\r\n\r\n");
-        
-        // handle requests as long as container has been started
-        while ($this->getContainer()->isStarted()) {
+        // handle requests and then QUIT (to free client sockets and memory)
+        $i = 0;
+        while ($i ++ < $handleRequests) {
             
             // reinitialize the server socket
             $serverSocket = $this->initialContext->newInstance($this->getResourceClass(), array(
@@ -65,10 +57,25 @@ abstract class AbstractHttpWorker extends AbstractWorker
             // accept client connection and process the request
             if ($clientSocket = $serverSocket->accept()) {
                 
+                // initialize the HTTP request/response
+                $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
+                $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
+                $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
+                
+                // inject response und session manager
+                $request->injectResponse($response);
+                $request->injectSessionManager($sessionManager);
+                
+                // initialize a new HTTP client
+                $client = $this->initialContext->newInstance($this->getHttpClientClass());
+                $client->injectHttpRequest($request);
+                $client->injectHttpPart($httpPart);
+                $client->setNewLine("\r\n\r\n");
+                
                 // load the client resource
                 $resource = $clientSocket->getResource();
                 
-                // prepare the params for thread handling the request
+                // initialize the params for thread handling the request
                 $params = array(
                     $this->initialContext,
                     $this->container,
@@ -78,14 +85,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 
                 // process the request
                 $request = $this->initialContext->newInstance($this->threadType, $params);
-                $request->start(PTHREADS_INHERIT_ALL|PTHREADS_ALLOW_HEADERS);
-                
-                // close the socket after the response has been sent
-                $this->synchronized(function() use($clientSocket, $request) {
-                    if ($request->wait()) {
-                       $clientSocket->close();
-                    }
-                });
+                $request->start(PTHREADS_INHERIT_ALL | PTHREADS_ALLOW_HEADERS);
             }
         }
     }
