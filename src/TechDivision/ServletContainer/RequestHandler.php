@@ -188,9 +188,6 @@ class RequestHandler extends AbstractContextThread
             $response->setContent($e->__toString());
             $this->send($client, $response);
         }
-        
-        // notify the parent thread that everything has been done
-        $this->notify();
     }
 
     /**
