@@ -106,7 +106,7 @@ class RequestHandler extends AbstractContextThread
             $counter = 1;
             $connectionOpen = true;
             $startTime = time();
-            $availableRequests = 100;
+            $availableRequests = 5;
             
             // set the client socket resource and timeout
             $client = $this->client;
