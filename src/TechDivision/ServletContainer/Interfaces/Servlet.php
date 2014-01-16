@@ -41,7 +41,7 @@ interface Servlet {
     /**
      * Return's the servlet's configuration.
      *
-     * @return \TechDivision\ServletContainer\Servlets\ServletConfig The servlet's configuration
+     * @return \TechDivision\ServletContainer\Interfaces\ServletConfig The servlet's configuration
      */
     public function getServletConfig();
 
@@ -56,8 +56,8 @@ interface Servlet {
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request $request The request
      * @param \TechDivision\ServletContainer\Interfaces\Response $response The response sent back to the client
-     * @throws ServletException
-     * @throws IOException
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException
+     * @throws \TechDivision\ServletContainer\Exceptions\IOException
      * @return mixed
      */
     public function service(Request $req, Response $res);
