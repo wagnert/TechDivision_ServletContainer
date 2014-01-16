@@ -203,7 +203,7 @@ class ServletManager
 
     /**
      *
-     * @return \TechDivision_Collections_Dictionary
+     * @return array|\TechDivision_Collections_Dictionary
      */
     public function getServlets()
     {
