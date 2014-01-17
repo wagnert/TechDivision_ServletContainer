@@ -117,7 +117,8 @@ class StaticResourceLocator extends AbstractResourceLocator
         }
         
         // prepare the static file name to load
-        $staticFileName = $documentRoot . DIRECTORY_SEPARATOR . parse_url($request->getUri(), PHP_URL_PATH);
-        return $staticFileName;
+        $relativeFilePath = str_replace('/', DIRECTORY_SEPARATOR, parse_url($request->getUri(), PHP_URL_PATH));
+        $absoluteFilePath = $documentRoot . DIRECTORY_SEPARATOR . $relativeFilePath;
+        return $absoluteFilePath;
     }
 }
