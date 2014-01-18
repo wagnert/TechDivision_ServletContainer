@@ -33,7 +33,7 @@ class AccessLogger
      *
      * @var string
      */
-    const LOG_FILEPATH = '/opt/appserver/var/log/appserver-access.log';
+    const LOG_FILEPATH = 'var/log/appserver-access.log';
 
     /**
      * Log format like apache default combined type
@@ -93,8 +93,7 @@ class AccessLogger
             );
         }
 
-        if ($type == self::LOG_TYPE_COMMON)
-        {
+        if ($type == self::LOG_TYPE_COMMON) {
             /**
              * This logs in apaches default common format
              * LogFormat "%h %l %u %t \"%r\" %>s %b" common
@@ -111,7 +110,5 @@ class AccessLogger
                 ), 3, self::LOG_FILEPATH
             );
         }
-
     }
-
 }
