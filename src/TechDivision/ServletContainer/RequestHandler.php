@@ -178,13 +178,13 @@ class RequestHandler extends AbstractContextThread
             } while ($connectionOpen);
             
         } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
-            $this->getInitialContext()->getSystemLogger()->addDebug($ccbpe);
+            $this->getInitialContext()->getSystemLogger()->debug($ccbpe);
         } catch (SocketException $soe) { // socket timeout reached
-            $this->getInitialContext()->getSystemLogger()->addDebug($soe);
+            $this->getInitialContext()->getSystemLogger()->debug($soe);
         } catch (StreamException $ste) { // streaming socket timeout reached
-            $this->getInitialContext()->getSystemLogger()->addDebug($ste);
+            $this->getInitialContext()->getSystemLogger()->debug($ste);
         } catch (\Exception $e) { // a servlet throws an exception -> pass it through to the client!
-            $this->getInitialContext()->getSystemLogger()->addDebug($e);
+            $this->getInitialContext()->getSystemLogger()->error($e);
             $response->setContent($e->__toString());
             $this->send($client, $response);
         }
