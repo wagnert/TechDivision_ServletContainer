@@ -113,7 +113,7 @@ class StaticResourceLocator extends AbstractResourceLocator
          // if the application has not been called over a vhost configuration append application folder name
         if ($this->getApplication()->isVhostOf($request->getServerName()) === false) {
             $count = 1;
-            $documentRoot = str_replace("/{$this->getApplication()->getName()}", "", $documentRoot, $count);
+            $documentRoot = str_replace(DIRECTORY_SEPARATOR . $this->getApplication()->getName(), "", $documentRoot, $count);
         }
         
         // prepare the static file name to load
