@@ -60,6 +60,16 @@ class StaticResourceServlet extends HttpServlet
         $this->locator = new StaticResourceLocator($this);
         $this->mimeTypeDictionary = new MimeTypeDictionary();
     }
+    
+    /**
+     * (non-PHPdoc)
+     * 
+     * @see \TechDivision\ServletContainer\Servlets\HttpServlet::doPost()
+     */
+    public function doPost(Request $req, Response $res)
+    {
+        $this->doGet($req, $res);
+    }
 
     /**
      * Tries to load the requested file and adds the content to the response.
