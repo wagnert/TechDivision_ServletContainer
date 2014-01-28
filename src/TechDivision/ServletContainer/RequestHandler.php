@@ -185,8 +185,15 @@ class RequestHandler extends AbstractContextThread
             $this->getInitialContext()->getSystemLogger()->debug($ste);
         } catch (\Exception $e) { // a servlet throws an exception -> pass it through to the client!
             $this->getInitialContext()->getSystemLogger()->error($e);
-            $response->setContent($e->__toString());
-            $this->send($client, $response);
+            // if the resource is available, send the stacktrace back to the client
+            if (is_resource($this->resource)) {
+                // prepare stacktrace and send it back
+                $response->setContent($e->__toString());
+                $this->send($client, $response);
+                // shutdown + close the client connection
+                $client->shutdown();
+                $client->close();
+            }
         }
     }
 
