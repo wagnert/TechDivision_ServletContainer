@@ -21,6 +21,7 @@ use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
 use TechDivision\SocketException;
 use TechDivision\StreamException;
+use TechDivision\ServletContainer\Exceptions\BadRequestException;
 
 /**
  * The thread implementation that handles the request.
@@ -33,16 +34,30 @@ use TechDivision\StreamException;
  */
 class RequestHandler extends AbstractContextThread
 {
+    
+    /**
+     * The maximum number of requests handled by the Keep-Alive functionality.
+     * 
+     * @var integer
+     */
+    const AVAILABLE_REQUESTS = 5;
+    
+    /**
+     * The timeout before the Keep-Alive functionality closes the socket connection.
+     * 
+     * @var integer
+     */
+    const RECEIVE_TIMEOUT = 75;
 
     /**
-     * Holds the container instance
+     * Holds the container instance.
      *
      * @var Container
      */
     public $container;
 
     /**
-     * Holds the main socket resource
+     * Holds the main socket resource.
      *
      * @var resource
      */
@@ -51,7 +66,7 @@ class RequestHandler extends AbstractContextThread
     /**
      * The HTTP client to handle the request.
      *
-     * @var The HTTP client to handle the request
+     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface
      */
     protected $client;
 
@@ -106,12 +121,12 @@ class RequestHandler extends AbstractContextThread
             $counter = 1;
             $connectionOpen = true;
             $startTime = time();
-            $availableRequests = 5;
+            $availableRequests = RequestHandler::AVAILABLE_REQUESTS;
             
             // set the client socket resource and timeout
-            $client = $this->client;
-            $client->setResource($this->resource);
-            $client->setReceiveTimeout($receiveTimeout = 75);
+            $client = $this->getClient();
+            $client->setResource($resource = $this->getResource());
+            $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
             
             do { // let socket open as long as max request or socket timeout is not reached
                 
@@ -183,11 +198,51 @@ class RequestHandler extends AbstractContextThread
             $this->getInitialContext()->getSystemLogger()->debug($soe);
         } catch (StreamException $ste) { // streaming socket timeout reached
             $this->getInitialContext()->getSystemLogger()->debug($ste);
+        } catch (BadRequestException $bre) { // servlet can not be found
+            $this->getInitialContext()->getSystemLogger()->error($bre);
+            // if the resource is available, send the stacktrace back to the client
+            if (is_resource($resource)) {
+                // prepare stacktrace and send it back
+                $response->setContent('<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL ' . $request->getUri() . ' was not found on this server.</p></body></html>');
+                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
+                $this->send($client, $response);
+                // shutdown + close the client connection
+                $client->shutdown();
+                $client->close();
+            }
         } catch (\Exception $e) { // a servlet throws an exception -> pass it through to the client!
             $this->getInitialContext()->getSystemLogger()->error($e);
-            $response->setContent($e->__toString());
-            $this->send($client, $response);
+            // if the resource is available, send the stacktrace back to the client
+            if (is_resource($resource)) {
+                // prepare stacktrace and send it back
+                $response->setContent('<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>505 Internal Server Error</title></head><body><h1>Internal Server Error</h1><p>' . $e->__toString() . '</p></body></html>');
+                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, 'HTTP/1.1 500 Internal Server Error');
+                $this->send($client, $response);
+                // shutdown + close the client connection
+                $client->shutdown();
+                $client->close();
+            }
         }
+    }
+    
+    /**
+     * Returns the main socket resource.
+     * 
+     * @return resource The main socket resource
+     */
+    public function getResource()
+    {
+        return $this->resource;
+    }
+    
+    /**
+     * Returns the HTTP client to handle the request.
+     * 
+     * @return \TechDivision\ServletContainer\Interfaces\HttpClientInterface The client instance
+     */
+    public function getClient()
+    {
+        return $this->client;
     }
 
     /**
