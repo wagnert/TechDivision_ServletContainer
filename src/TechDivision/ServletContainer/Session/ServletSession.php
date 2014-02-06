@@ -2,7 +2,13 @@
 namespace TechDivision\ServletContainer\Session;
 
 /*
- * This script belongs to the TYPO3 Flow framework. * * It is free software; you can redistribute it and/or modify it under * the terms of the GNU Lesser General Public License, either version 3 * of the License, or (at your option) any later version. * * The TYPO3 project - inspiring people to share! *
+ * This script belongs to the TYPO3 Flow framework. 
+ * 
+ * It is free software; you can redistribute it and/or modify it under 
+ * the terms of the GNU Lesser General Public License, either version 3 
+ * of the License, or (at your option) any later version. 
+ * 
+ * The TYPO3 project - inspiring people to share!
  */
 use TechDivision\ServletContainer\Http\Cookie;
 use TechDivision\ApplicationServer\Utilities\Algorithms;
@@ -27,7 +33,7 @@ use TechDivision\ServletContainer\Session\Exceptions\InvalidRequestResponseExcep
  *
  * @see \TYPO3\Flow\Session\SessionManager
  */
-class ServletSession implements \SessionHandlerInterface
+class ServletSession
 {
 
     const TAG_PREFIX = 'customtag-';
@@ -344,7 +350,7 @@ class ServletSession implements \SessionHandlerInterface
     public function getId()
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to retrieve the session identifier, but the session has not been started yet.)', 1351171517);
+            throw new SessionNotStartedException('Tried to retrieve the session identifier, but the session has not been started yet.');
         }
         return $this->sessionIdentifier;
     }
@@ -361,7 +367,7 @@ class ServletSession implements \SessionHandlerInterface
     public function renewId()
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to renew the session identifier, but the session has not been started yet.', 1351182429);
+            throw new SessionNotStartedException('Tried to renew the session identifier, but the session has not been started yet.');
         }
         
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
@@ -383,7 +389,7 @@ class ServletSession implements \SessionHandlerInterface
     public function getData($key)
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to get session data, but the session has not been started yet.', 1351162255);
+            throw new SessionNotStartedException('Tried to get session data, but the session has not been started yet.');
         }
         return $this->storage->get($this->sessionIdentifier . md5($key));
     }
@@ -399,7 +405,7 @@ class ServletSession implements \SessionHandlerInterface
     public function hasKey($key)
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to check a session data entry, but the session has not been started yet.', 1352488661);
+            throw new SessionNotStartedException('Tried to check a session data entry, but the session has not been started yet.');
         }
         return $this->storage->has($this->sessionIdentifier . md5($key));
     }
@@ -419,10 +425,10 @@ class ServletSession implements \SessionHandlerInterface
     public function putData($key, $data)
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to create a session data entry, but the session has not been started yet.', 1351162259);
+            throw new SessionNotStartedException('Tried to create a session data entry, but the session has not been started yet.');
         }
         if (is_resource($data)) {
-            throw new DataNotSerializableException('The given data cannot be stored in a session, because it is of type "' . gettype($data) . '".', 1351162262);
+            throw new DataNotSerializableException('The given data cannot be stored in a session, because it is of type "' . gettype($data) . '".');
         }
         $this->storage->set($this->sessionIdentifier . md5($key), $data, array(
             $this->sessionIdentifier
@@ -442,7 +448,7 @@ class ServletSession implements \SessionHandlerInterface
     public function getLastActivityTimestamp()
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to retrieve the last activity timestamp of a session which has not been started yet.', 1354290378);
+            throw new SessionNotStartedException('Tried to retrieve the last activity timestamp of a session which has not been started yet.');
         }
         return $this->lastActivityTimestamp;
     }
@@ -462,7 +468,7 @@ class ServletSession implements \SessionHandlerInterface
     public function addTag($tag)
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to tag a session which has not been started yet.', 1355143533);
+            throw new SessionNotStartedException('Tried to tag a session which has not been started yet.');
         }
         if (! $this->storage->isValidTag($tag)) {
             throw new \InvalidArgumentException(sprintf('The tag used for tagging session %s contained invalid characters. Make sure it matches this regular expression: "%s"', $this->sessionIdentifier, FrontendInterface::PATTERN_TAG));
@@ -483,7 +489,7 @@ class ServletSession implements \SessionHandlerInterface
     public function removeTag($tag)
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to tag a session which has not been started yet.', 1355150140);
+            throw new SessionNotStartedException('Tried to tag a session which has not been started yet.');
         }
         $index = array_search($tag, $this->tags);
         if ($index !== FALSE) {
@@ -500,7 +506,7 @@ class ServletSession implements \SessionHandlerInterface
     public function getTags()
     {
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to retrieve tags from a session which has not been started yet.', 1355141501);
+            throw new SessionNotStartedException('Tried to retrieve tags from a session which has not been started yet.');
         }
         return $this->tags;
     }
@@ -523,7 +529,7 @@ class ServletSession implements \SessionHandlerInterface
             $decimals = strlen(strrchr($this->garbageCollectionProbability, '.')) - 1;
             $factor = ($decimals > - 1) ? $decimals * 10 : 1;
             if (rand(0, 100 * $factor) <= ($this->garbageCollectionProbability * $factor)) {
-                $this->gc();
+                $this->collectGarbage();
             }
         }
     }
@@ -604,67 +610,45 @@ class ServletSession implements \SessionHandlerInterface
     /**
      * Explicitly writes and closes the session
      *
-     * @return boolean 
-     * @see \SessionHandlerInterface::close()
-     * @api
+     * @return void @api
      */
     public function close()
     {
         $this->shutdownObject();
-        return true;
     }
 
     /**
      * Explicitly destroys all session data
      *
-     * @param string $session_id
-     * @return boolean
      * @throws \TechDivision\ServletContainer\Exceptions\SessionNotStartedException 
-     * @see \SessionHandlerInterface::destroy()
+     * @return void
      * @api
      */
-    public function destroy($session_id)
+    public function destroy()
     {
-        
-        error_log("Now destroy session with ID $session_id");
-        
-        /*
         if ($this->started !== TRUE) {
-            throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.', 1351162668);
-        }
-        
+            throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.');
+        }   
         if ($this->response->hasCookie($this->sessionCookieName) === FALSE) {
             $this->response->addCookie($this->sessionCookie);
         }
         $this->sessionCookie->expire();
-        
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
         $this->storage->flushByTag($this->sessionIdentifier);
         $this->started = FALSE;
         $this->sessionIdentifier = NULL;
         $this->tags = array();
-        
-        error_log("Successfully destroyed session with ID $session_id");
-        */
-        
-        return true;
     }
     
     /**
      * Iterates over all existing sessions and removes their data if the inactivity
      * timeout was reached.
      * 
-     * @param string $maxlifetime
-     * @return boolean
-     * @see \SessionHandlerInterface::gc()
+     * @return void
      * @api
      */
-    public function gc($maxlifetime)
+    public function collectGarbage()
     {
-        
-        error_log("Collection garbage for maximum lifetime $maxlifetime");
-        
-        /*
         $sessionRemovalCount = 0;
         if ($this->inactivityTimeout !== 0) {
             foreach ($this->storage->getByTag('session') as $sessionInfo) {
@@ -675,57 +659,5 @@ class ServletSession implements \SessionHandlerInterface
                 }
             }
         }
-        */
-        
-        error_log("Successfully flushed $sessionRemovalCount sessions");
-        
-        return true;
-    }
-    
-    /**
-     * @param string $save_path
-     * @param string $name
-     * @return boolean 
-     * @see \SessionHandlerInterface::open()
-     * @api
-     */
-    public function open($save_path, $name)
-    {    
-        error_log("Now open session with save path $save_path and name $name");
-    }
-    
-    /**
-     * @param string $session_id
-     * @return string
-     * @see \SessionHandlerInterface::read()
-     * @api
-     */
-    public function read($session_id)
-    {
-        
-        error_log("Now try to read from session with id $session_id");
-        
-        $data = $this->storage->get($session_id);
-        
-        error_log(var_export($data, true));
-        
-        return (string) $data;
-    }
-        
-    /**
-     * @param string $session_id
-     * @param string $session_data
-     * @return boolean
-     * @see \SessionHandlerInterface::write()
-     * @api
-     */
-    public function write($session_id, $session_data)
-    {
-        error_log("Now try to write session data for session id $session_id");
-        error_log(var_export($session_data, true));
-        
-        $this->storage->set($session_id, $session_data);
-        
-        return true;
     }
 }
