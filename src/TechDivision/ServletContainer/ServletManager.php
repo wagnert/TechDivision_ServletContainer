@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\ServletManager
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Markus Stockbauer <ms@techdivision.com>
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ServletContainer\Interfaces\Servlet;
@@ -20,13 +25,14 @@ use TechDivision\ServletContainer\Exceptions\InvalidServletMappingException;
 /**
  * The servlet manager handles the servlets registered for the application.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Tim Wagner <tw@techdivision.com>
- * @author Johann Zelger <jz@techdivision.com>
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Markus Stockbauer <ms@techdivision.com>
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
 class ServletManager
 {
@@ -39,6 +45,7 @@ class ServletManager
     protected $application;
 
     /**
+     * The servlets
      *
      * @var array
      */
@@ -68,8 +75,8 @@ class ServletManager
     /**
      * Set's the application instance.
      *
-     * @param \TechDivision\ServletContainer\Application $application
-     *            The application instance
+     * @param \TechDivision\ServletContainer\Application $application The application instance
+     *
      * @return void
      */
     public function __construct($application)
@@ -155,8 +162,9 @@ class ServletManager
                 }
                 
                 // inject query parser
-                $instance->injectQueryParser($this->getApplication()
-                    ->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser'));
+                $instance->injectQueryParser(
+                    $this->getApplication()->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser')
+                );
                 
                 // initialize the servlet
                 $instance->init($servletConfig);
@@ -195,8 +203,6 @@ class ServletManager
     /**
      * Registers the default servlet for the passed webapp.
      *
-     * @param $key The
-     *            webapp name to register the default servlet for
      * @return false
      */
     protected function addDefaultServlet()
@@ -213,8 +219,11 @@ class ServletManager
     }
 
     /**
+     * Set's all servlets as array
      *
-     * @param \TechDivision_Collections_Dictionary $servlets            
+     * @param array $servlets The servlets collection
+     *
+     * @return void
      */
     public function setServlets($servlets)
     {
@@ -222,8 +231,9 @@ class ServletManager
     }
 
     /**
+     * Return's all servlets
      *
-     * @return array \TechDivision_Collections_Dictionary
+     * @return array The servlets collection
      */
     public function getServlets()
     {
@@ -244,8 +254,8 @@ class ServletManager
     /**
      * Returns the servlet with the passed name.
      *
-     * @param string $key
-     *            The name of the servlet to return
+     * @param string $key The name of the servlet to return
+     *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance
      */
     public function getServlet($key)
@@ -258,8 +268,8 @@ class ServletManager
     /**
      * Returns the servlet for the passed URL mapping.
      *
-     * @param string $urlMapping
-     *            The URL mapping to return the servlet for
+     * @param string $urlMapping The URL mapping to return the servlet for
+     *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance
      */
     public function getServletByMapping($urlMapping)
@@ -272,10 +282,10 @@ class ServletManager
     /**
      * Registers a servlet under the passed key.
      *
-     * @param string $key
-     *            The servlet to key to register with
-     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet
-     *            The servlet to be registered
+     * @param string                                            $key     The servlet to key to register with
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet The servlet to be registered
+     *
+     * @return void
      */
     public function addServlet($key, Servlet $servlet)
     {
@@ -315,10 +325,10 @@ class ServletManager
     /**
      * Register's the init parameter under the passed name.
      *
-     * @param string $name
-     *            Name to register the init parameter with
-     * @param string $value
-     *            The value of the init parameter
+     * @param string $name  Name to register the init parameter with
+     * @param string $value The value of the init parameter
+     *
+     * @return void
      */
     public function addInitParameter($name, $value)
     {
@@ -328,8 +338,9 @@ class ServletManager
     /**
      * Return's the init parameter with the passed name.
      *
-     * @param string $name
-     *            Name of the init parameter to return
+     * @param string $name Name of the init parameter to return
+     *
+     * @return null|string
      */
     public function getInitParameter($name)
     {
@@ -351,8 +362,9 @@ class ServletManager
     /**
      * Sets the webapps security context configuerations.
      *
-     * @param array $securedUrlConfigs
-     *            The security context configurations
+     * @param array $securedUrlConfigs The security context configurations
+     *
+     * @return void
      */
     public function setSecuredUrlConfigs($securedUrlConfigs)
     {

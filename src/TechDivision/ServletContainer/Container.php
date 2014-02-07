@@ -1,14 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Container
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractContainer;
@@ -16,12 +19,14 @@ use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Exceptions\BadRequestException;
 
 /**
+ * Class Container
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Tim Wagner <tw@techdivision.com>
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
 class Container extends AbstractContainer
 {
@@ -37,12 +42,12 @@ class Container extends AbstractContainer
      * Initializes the container with the initial context, the unique container ID
      * and the deployed applications.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext $initialContext
-     *            The initial context instance
-     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode $containerNode
-     *            The container's UUID
-     * @todo Application deployment only works this way because of Thread compatibilty
+     * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial context instance
+     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The container's UUID
+     * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application instance
+     *
      * @return void
+     * @todo Application deployment only works this way because of Thread compatibilty
      */
     public function __construct($initialContext, $containerNode, $applications)
     {
@@ -57,14 +62,14 @@ class Container extends AbstractContainer
      */
     public function getAccessLogger()
     {
-        return $this->accessLogger;   
+        return $this->accessLogger;
     }
 
     /**
      * Tries to find and return the application for the passed request.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request
-     *            The request to find and return the application instance for
+     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request to find and return the application instance for
+     *
      * @return \TechDivision\ServletContainer\Application The application instance
      * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found for the passed application name
      */
@@ -112,18 +117,23 @@ class Container extends AbstractContainer
      * Prepare's the request with the server vars $_SERVER from the container's
      * specific data.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request
-     *            The request instance to be prepared with the container specific data
+     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request instance to be prepared with the container specific data
+     *
      * @return void
      */
     public function prepareServerVars(Request $servletRequest)
     {
-        $servletRequest->setServerVar('PATH', $this->getBaseDirectory(DIRECTORY_SEPARATOR . 'bin') . PATH_SEPARATOR . getenv('PATH'));
-        $servletRequest->setServerVar('SERVER_SOFTWARE', $this->getContainerNode()
-            ->getHost()
-            ->getServerSoftware());
-        $servletRequest->setServerVar('SERVER_ADMIN', $this->getContainerNode()
-            ->getHost()
-            ->getServerAdmin());
+        $servletRequest->setServerVar(
+            'PATH',
+            $this->getBaseDirectory(DIRECTORY_SEPARATOR . 'bin') . PATH_SEPARATOR . getenv('PATH')
+        );
+        $servletRequest->setServerVar(
+            'SERVER_SOFTWARE',
+            $this->getContainerNode()->getHost()->getServerSoftware()
+        );
+        $servletRequest->setServerVar(
+            'SERVER_ADMIN',
+            $this->getContainerNode()->getHost()->getServerAdmin()
+        );
     }
 }

@@ -1,4 +1,17 @@
 <?php
+/**
+ * \TechDivision\ServletContainer\Session\Exceptions\SessionNotStartedException
+ *
+ * PHP version 5
+ *
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Session
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
+ */
 
 namespace TechDivision\ServletContainer\Session\Exceptions;
 
@@ -15,7 +28,14 @@ namespace TechDivision\ServletContainer\Session\Exceptions;
 /**
  * A "\TYPO3\Flow\Session\Exception\SessionNotStartedException" Exception
  *
- * @api
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Session
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-class SessionNotStartedException extends \Exception {
+class SessionNotStartedException extends \Exception
+{
 }

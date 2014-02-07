@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\ServletConfiguration
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
@@ -16,12 +21,14 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
 /**
  * Servlet configuration.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Tim Wagner <tw@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class ServletConfiguration implements ServletConfig
 {
@@ -50,9 +57,7 @@ class ServletConfiguration implements ServletConfig
     /**
      * Initializes the servlet configuration with the servlet manager instance.
      *
-     * @param \TechDivision\ServletContainer\ServletManager $servletManager
-     *            The servlet manager instance
-     * @return void
+     * @param \TechDivision\ServletContainer\ServletManager $servletManager The servlet manager instance
      */
     public function __construct($servletManager)
     {
@@ -113,6 +118,7 @@ class ServletConfiguration implements ServletConfig
      * Set's the servlet's Uname from the web.xml configuration file.
      * 
      * @param string $servletName The servlet name
+     *
      * @return void
      */
     public function setServletName($servletName)
@@ -133,8 +139,10 @@ class ServletConfiguration implements ServletConfig
     /**
      * Register's the init parameter under the passed name.
      * 
-     * @param string $name Name to register the init parameter with
+     * @param string $name  Name to register the init parameter with
      * @param string $value The value of the init parameter
+     *
+     * @return void
      */
     public function addInitParameter($name, $value)
     {
@@ -145,6 +153,8 @@ class ServletConfiguration implements ServletConfig
      * Return's the init parameter with the passed name.
      * 
      * @param string $name Name of the init parameter to return
+     *
+     * @return string
      */
     public function getInitParameter($name)
     {

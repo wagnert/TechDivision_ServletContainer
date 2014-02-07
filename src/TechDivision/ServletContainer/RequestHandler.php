@@ -1,14 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\RequestHandler
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractContextThread;
@@ -26,11 +29,12 @@ use TechDivision\ServletContainer\Exceptions\BadRequestException;
 /**
  * The thread implementation that handles the request.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Johann Zelger <jz@techdivision.com>
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
 class RequestHandler extends AbstractContextThread
 {
@@ -73,12 +77,10 @@ class RequestHandler extends AbstractContextThread
     /**
      * Initializes the request with the client socket.
      *
-     * @param \TechDivision\ServletContainer\Container $container
-     *            The ServletContainer
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
-     *            The HTTP client to handle the request
-     * @param resource $resource
-     *            The client socket instance
+     * @param \TechDivision\ServletContainer\Container                      $container The ServletContainer
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client    The HTTP client to handle the request
+     * @param resource                                                      $resource  The client socket instance
+     *
      * @return void
      */
     public function init(Container $container, $client, $resource)
@@ -91,10 +93,9 @@ class RequestHandler extends AbstractContextThread
     /**
      * Sends the response of the request back to the passed client.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
-     *            The HTTP client to handle the request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response
-     *            The response to send to the client
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The HTTP client to handle the request
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response to send to the client
+     *
      * @return void
      */
     public function send(HttpClientInterface $client, Response $response)
@@ -110,8 +111,9 @@ class RequestHandler extends AbstractContextThread
     }
 
     /**
+     * The thread implementation main method which will be called from run in abstractness
      *
-     * @see AbstractThread::main()
+     * @return void
      */
     public function main()
     {
@@ -276,10 +278,12 @@ class RequestHandler extends AbstractContextThread
     }
 
     /**
-     * Tries to find the application that has to handle the
-     * passed request.
+     * Tries to find and return the application for the passed request.
      *
-     * @see \TechDivision\ServletContainer\Application::findApplication($servletRequest)
+     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request to find and return the application instance for
+     *
+     * @return \TechDivision\ServletContainer\Application The application instance
+     * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found for the passed application name
      */
     public function findApplication($servletRequest)
     {

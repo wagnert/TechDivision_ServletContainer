@@ -1,14 +1,18 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Session\PersistentSessionManager
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Session
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Session;
 
 use TechDivision\ServletContainer\Interfaces\Request;
@@ -17,11 +21,13 @@ use TechDivision\ServletContainer\Interfaces\Response;
 /**
  * A session manager implementation.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Tim Wagner <tw@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Session
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class PersistentSessionManager implements SessionManager
 {
@@ -43,9 +49,7 @@ class PersistentSessionManager implements SessionManager
     /**
      * Initialize the session manager with the inital context instance.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext $initialContext
-     *            The initial context instance
-     * @return void
+     * @param \TechDivision\ApplicationServer\InitialContext $initialContext The initial context instance
      */
     public function __construct($initialContext)
     {
@@ -55,9 +59,10 @@ class PersistentSessionManager implements SessionManager
     /**
      * Create's a new session with the passed session ID and session name if give.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance    
-     * @param string $sessionId The session ID used to create the session
-     * @param string $sessionName The unique session name to use
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request     The request instance
+     * @param string                                            $sessionId   The session ID used to create the session
+     * @param string                                            $sessionName The unique session name to use
+     *
      * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
      * @todo integrate cookie path handling 
      */
@@ -103,7 +108,9 @@ class PersistentSessionManager implements SessionManager
      * precedence. If no session id is found, a new one is created and assigned 
      * to the request.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance         
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request     The request instance
+     * @param string                                            $sessionName The session name
+     *
      * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
      */
     public function getSessionForRequest(Request $request, $sessionName = ServletSession::SESSION_NAME)
@@ -115,7 +122,7 @@ class PersistentSessionManager implements SessionManager
         }
         
         // try to initialize the session ID
-        $sessionId = null; 
+        $sessionId = null;
         if ($request->getCookie($sessionName)) {
             $sessionId = $request->getCookie($sessionName)->getValue();
         }
@@ -134,10 +141,9 @@ class PersistentSessionManager implements SessionManager
     /**
      * Returns a new instance of the passed class name.
      *
-     * @param string $className
-     *            The fully qualified class name to return the instance for
-     * @param array $args
-     *            Arguments to pass to the constructor of the instance
+     * @param string $className The fully qualified class name to return the instance for
+     * @param array  $args      Arguments to pass to the constructor of the instance
+     *
      * @return object The instance itself
      * @todo Has to be refactored to avoid registering autoloader on every call
      */

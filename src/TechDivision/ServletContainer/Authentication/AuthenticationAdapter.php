@@ -1,14 +1,18 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\ServletManager
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Florian Sydekum <fs@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Authentication;
 
 use TechDivision\ServletContainer\Interfaces\Servlet;
@@ -16,11 +20,13 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
 /**
  * Abstract class for authentication adapters.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Florian Sydekum <fs@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Florian Sydekum <fs@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 abstract class AuthenticationAdapter
 {
@@ -30,7 +36,7 @@ abstract class AuthenticationAdapter
     protected $options;
 
     /**
-     * @var Servlet $servlet Current servlet which needs authentication.
+     * @var \TechDivision\ServletContainer\Interfaces\Servlet $servlet Current servlet which needs authentication.
      */
     protected $servlet;
 
@@ -42,7 +48,8 @@ abstract class AuthenticationAdapter
     /**
      * Instantiates an authentication adapter
      *
-     * @param array $options Necessary options for specific adapter.
+     * @param array                                             $options Necessary options for specific adapter.
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
      */
     public function __construct($options, Servlet $servlet)
     {
@@ -54,8 +61,10 @@ abstract class AuthenticationAdapter
 
     /**
      * Initializes the adapter.
+     *
+     * @return void
      */
-    abstract function init();
+    abstract public function init();
 
     /**
      * Return's Servlet object
@@ -70,10 +79,11 @@ abstract class AuthenticationAdapter
     /**
      * Set's htdigest Filename
      *
-     * @param $filename
+     * @param string $filename The filename
+     *
      * @return void
      */
-    protected  function setFilename($filename)
+    protected function setFilename($filename)
     {
         $this->filename = $filename;
     }
@@ -91,7 +101,9 @@ abstract class AuthenticationAdapter
     /**
      * Set authentication options
      *
-     * @param array $options
+     * @param array $options The options
+     *
+     * @return void
      */
     protected function setOptions($options)
     {
@@ -111,11 +123,12 @@ abstract class AuthenticationAdapter
     /**
      * Set's Servlet Object
      *
-     * @param $servlet
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     *
+     * @return void
      */
-    protected function setServlet($servlet)
+    protected function setServlet(Servlet $servlet)
     {
         $this->servlet = $servlet;
     }
-
 }
