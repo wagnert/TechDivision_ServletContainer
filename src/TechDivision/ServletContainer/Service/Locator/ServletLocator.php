@@ -89,19 +89,19 @@ class ServletLocator implements ResourceLocatorInterface
      * Prepares a collection with routes generated from the available servlets
      * ans their servlet mappings.
      *
-     * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
+     * @return void
      */
     public function initRoutes()
     {
-        
+
         // retrieve the registered servlets
         $servletMappings = $this->getServletManager()->getServletMappings();
         $servlets = $this->getServletManager()->getServlets();
-        
+
         // prepare the collection with the available routes and initialize the route counter
         $this->routes = new RouteCollection();
         $counter = 0;
-        
+
         // iterate over the available servlets and prepare the routes
         foreach ($servletMappings as $urlPattern => $servletName) {
             $servlet = $servlets[$servletName];
@@ -119,7 +119,7 @@ class ServletLocator implements ResourceLocatorInterface
      * Prepares a collection with routes generated from the available servlets
      * ans their servlet mappings.
      *
-     * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
+     * @return void
      */
     public function initSecuredUrlRoutes()
     {
@@ -154,6 +154,11 @@ class ServletLocator implements ResourceLocatorInterface
         return $this->routes;
     }
 
+    /**
+     * Returns the collection with the initialized routes.
+     *
+     * @return \Symfony\Component\Routing\RouteCollection The initialize routes
+     */
     public function getSecuredUrlRoutes()
     {
         return $this->securedUrlRoutes;
@@ -164,7 +169,7 @@ class ServletLocator implements ResourceLocatorInterface
      *
      * @param Request $request
      *            The request instance to return the servlet for
-     * @return TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
      * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found for the passed request
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
      */
@@ -172,7 +177,7 @@ class ServletLocator implements ResourceLocatorInterface
     {
         // build the file-path of the request
         $path = $request->getPathInfo();
-        
+
         // check if the application is loaded by a VHost
         $applicationName = $this->getApplication()->getName();
         if (! $this->getApplication()->isVhostOf($request->getServerName())) {
@@ -195,13 +200,13 @@ class ServletLocator implements ResourceLocatorInterface
         } elseif (! is_array($servletCache)) {
             $servletCache = array();
         }
-        
+
         // print_r($this->getRoutes());
         $matcher = new UrlMatcher($this->getRoutes(), $context);
-        
+
         // traverse the path to find matching servlet
         do {
-            
+
             try {
                 $servlet = $matcher->match($path);
                 break;
@@ -209,7 +214,7 @@ class ServletLocator implements ResourceLocatorInterface
                 $path = substr($path, 0, strrpos($path, '/'));
             }
         } while (strpos($path, '/') !== FALSE);
-        
+
         // check at least one servlet has been found
         if (is_array($servlet) === false || sizeof($servlet) === 0) {
             throw new ServletNotFoundException("Can't find servlet for requested path $path");

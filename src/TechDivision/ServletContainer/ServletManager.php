@@ -96,93 +96,93 @@ class ServletManager
      */
     protected function registerServlets()
     {
-        
+
         // the phar files have been deployed into folders
         if (is_dir($folder = $this->getWebappPath())) {
-            
+
             // it's no valid application without at least the web.xml file
             if (! file_exists($web = $folder . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'web.xml')) {
                 throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $folder));
             }
-            
+
             // add the default servlet (StaticResourceServlet)
             $this->addDefaultServlet();
-            
+
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
-            
+
             // parse for security configs
             $securityConfigs = array();
             foreach ($config->xpath('/web-app/security') as $securityParam) {
                 $securityConfigs[] = json_decode(json_encode($securityParam), 1);
             }
             $this->setSecuredUrlConfigs($securityConfigs);
-            
+
             // initialize the context by parsing the context-param nodes
             foreach ($config->xpath('/web-app/context-param') as $contextParam) {
                 $this->addInitParameter((string) $contextParam->{'param-name'}, (string) $contextParam->{'param-value'});
             }
-            
+
             // initialize the servlets by parsing the servlet-mapping nodes
             foreach ($config->xpath('/web-app/servlet') as $servlet) {
-                
+
                 // load the servlet name and check if it already has been initialized
                 $servletName = (string) $servlet->{'servlet-name'};
                 if (array_key_exists($servletName, $this->servlets)) {
                     continue;
                 }
-                
+
                 // try to resolve the mapped servlet class
                 $className = (string) $servlet->{'servlet-class'};
                 if (! count($className)) {
                     throw new InvalidApplicationArchiveException(sprintf('No servlet class defined for servlet %s', $servlet->{'servlet-class'}));
                 }
-                
+
                 // instantiate the servlet
                 $instance = $this->getApplication()->newInstance($className);
-                
+
                 // initialize the servlet configuration
                 $servletConfig = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
                     $this
                 ));
-                
+
                 // set the unique servlet name
                 $servletConfig->setServletName($servletName);
-                
+
                 // append the init params to the servlet configuration
                 foreach ($servlet->{'init-param'} as $initParam) {
                     $servletConfig->addInitParameter((string) $initParam->{'param-name'}, (string) $initParam->{'param-value'});
                 }
-                
+
                 // inject query parser
                 $instance->injectQueryParser($this->getApplication()
                     ->newInstance('TechDivision\ServletContainer\Http\HttpQueryParser'));
-                
+
                 // initialize the servlet
                 $instance->init($servletConfig);
-                
+
                 // the servlet is added to the dictionary using the complete request path as the key
                 $this->addServlet((string) $servlet->{'servlet-name'}, $instance);
             }
-            
+
             // initialize the servlets by parsing the servlet-mapping nodes
             foreach ($config->xpath('/web-app/servlet-mapping') as $mapping) {
-                
+
                 // load the url pattern and the servlet name
                 $urlPattern = (string) $mapping->{'url-pattern'};
                 $servletName = (string) $mapping->{'servlet-name'};
-                
+
                 // make sure that the URL pattern always starts with a leading slash
                 $urlPattern = ltrim($urlPattern, '/');
-                
+
                 // the servlet is added to the dictionary using the complete request path as the key
                 if (! array_key_exists($servletName, $this->servlets)) {
                     throw new InvalidServletMappingException(sprintf("Can't find servlet %s for url-pattern %s", $servletName, $urlPattern));
                 }
-                
+
                 // append the url-pattern - servlet mapping to the array
                 $this->servletMappings['/' . $urlPattern] = (string) $mapping->{'servlet-name'};
-                
+
                 // log a message that the servlet has successfully been registered
                 $this->getApplication()
                     ->getInitialContext()
@@ -195,9 +195,7 @@ class ServletManager
     /**
      * Registers the default servlet for the passed webapp.
      *
-     * @param $key The
-     *            webapp name to register the default servlet for
-     * @return false
+     * @return void
      */
     protected function addDefaultServlet()
     {
@@ -214,7 +212,7 @@ class ServletManager
 
     /**
      *
-     * @param \TechDivision_Collections_Dictionary $servlets            
+     * @param \TechDivision_Collections_Dictionary $servlets
      */
     public function setServlets($servlets)
     {
@@ -223,7 +221,7 @@ class ServletManager
 
     /**
      *
-     * @return array \TechDivision_Collections_Dictionary
+     * @return array
      */
     public function getServlets()
     {
