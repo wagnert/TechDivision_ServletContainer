@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Stream\HttpClient
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Stream
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Stream;
 
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
@@ -19,12 +24,14 @@ use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
 /**
  * The http client implementation that handles the request like a webserver
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Johann Zelger <jz@techdivision.com>
- *         Philipp Dittert <p.dittert@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Stream
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HttpClient extends Client implements HttpClientInterface
 {
@@ -46,8 +53,9 @@ class HttpClient extends Client implements HttpClientInterface
     /**
      * The new line character.
      * 
-     * @param
-     *            $newLine
+     * @param string $newLine The new line separator
+     *
+     * @return void
      */
     public function setNewLine($newLine)
     {
@@ -57,8 +65,8 @@ class HttpClient extends Client implements HttpClientInterface
     /**
      * Injects the HttpRequest instance to use as factory.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request
-     *            The request instance to use
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance to use
+     *
      * @return void
      */
     public function injectHttpRequest($request)
@@ -69,8 +77,8 @@ class HttpClient extends Client implements HttpClientInterface
     /**
      * Injects the Part instance.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Part $part
-     *            The part instance to use
+     * @param \TechDivision\ServletContainer\Interfaces\Part $part The part instance to use
+     *
      * @return void
      */
     public function injectHttpPart($part)
@@ -79,8 +87,9 @@ class HttpClient extends Client implements HttpClientInterface
     }
 
     /**
+     * Returns the HttpRequest factory instance.
      *
-     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpRequest()
+     * @return \TechDivision\ServletContainer\Interfaces\Request The request factory instance
      */
     public function getHttpRequest()
     {
@@ -88,8 +97,9 @@ class HttpClient extends Client implements HttpClientInterface
     }
 
     /**
+     * Returns the HttpPart factory instance.
      *
-     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::getHttpPart()
+     * @return \TechDivision\ServletContainer\Interfaces\Part The part as factory instance
      */
     public function getHttpPart()
     {
@@ -97,8 +107,9 @@ class HttpClient extends Client implements HttpClientInterface
     }
 
     /**
+     * Returns the Request instance initialized with request data read from the socket.
      *
-     * @see \TechDivision\ServletContainer\Interfaces\HttpClientInterface::receive()
+     * @return \TechDivision\ServletContainer\Interfaces\Request The initialized Request instance
      */
     public function receive()
     {

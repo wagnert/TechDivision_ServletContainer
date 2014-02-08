@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\StaticResourceServlet
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Servlets;
 
 use Symfony\Component\Security\Acl\Exception\Exception;
@@ -24,12 +29,14 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 /**
  * A servlet implementation to handle static file requests.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class StaticResourceServlet extends HttpServlet
 {
@@ -49,10 +56,12 @@ class StaticResourceServlet extends HttpServlet
     protected $locator;
 
     /**
+     * Initializes the servlet with the passed configuration.
      *
-     * @param ServletConfig $config            
-     * @throws ServletException;
-     * @return mixed
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to initialize the servlet with
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
+     * @return void
      */
     public function init(ServletConfig $config)
     {
@@ -60,11 +69,15 @@ class StaticResourceServlet extends HttpServlet
         $this->locator = new StaticResourceLocator($this);
         $this->mimeTypeDictionary = new MimeTypeDictionary();
     }
-    
+
     /**
-     * (non-PHPdoc)
-     * 
-     * @see \TechDivision\ServletContainer\Servlets\HttpServlet::doPost()
+     * Implements http method POST
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
+     * @return void
      */
     public function doPost(Request $req, Response $res)
     {
@@ -74,10 +87,9 @@ class StaticResourceServlet extends HttpServlet
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param Request $req
-     *            The servlet request
-     * @param Response $res
-     *            The servlet response
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */

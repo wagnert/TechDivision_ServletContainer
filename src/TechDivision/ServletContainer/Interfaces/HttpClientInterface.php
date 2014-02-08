@@ -1,13 +1,16 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Interfaces\HttpClientInterface
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Interfaces
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Interfaces;
@@ -16,13 +19,16 @@ namespace TechDivision\ServletContainer\Interfaces;
  * Interface for the Http clients that read's the data from the socket
  * and initialzes the Request instance.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Tim Wagner <tw@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Interfaces
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-interface HttpClientInterface {
+interface HttpClientInterface
+{
 
     /**
      * Returns the HttpRequest factory instance.
@@ -39,8 +45,7 @@ interface HttpClientInterface {
     public function getHttpPart();
 
     /**
-     * Returns the Request instance initialized with request data
-     * read from the socket.
+     * Returns the Request instance initialized with request data read from the socket.
      *
      * @return \TechDivision\ServletContainer\Interfaces\Request The initialized Request instance
      */

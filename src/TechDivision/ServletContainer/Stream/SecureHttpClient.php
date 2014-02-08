@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Stream\SecureHttpClient
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Stream
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Stream;
 
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
@@ -18,12 +23,14 @@ use TechDivision\Stream\Client;
 /**
  * The http client implementation that handles the request like a webserver
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Johann Zelger <jz@techdivision.com>
- *         Philipp Dittert <p.dittert@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Stream
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class SecureHttpClient extends HttpClient
 {
@@ -33,10 +40,9 @@ class SecureHttpClient extends HttpClient
      * {@link http://de3.php.net/stream_socket_recvfrom stream_socket_recvfrom()} doesn't
      * support SSL handling.
      *
-     * @param integer $length
-     *            The maximum number of bytes read is specified by the length parameter
-     * @param integer $flags
-     *            The value of flags can be any combination of the following flags, joined with the binary OR (|) operator
+     * @param int $length The maximum number of bytes read is specified by the length parameter
+     * @param int $flags  The value of flags can be any combination of the following flags, joined with the binary OR (|) operator
+     *
      * @return string The string read from the socket
      */
     public function readFrom($length, $flags = 0)

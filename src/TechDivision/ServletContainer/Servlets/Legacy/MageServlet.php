@@ -1,14 +1,18 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Servlets\Legacy\MageServlet
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Servlets\Legacy;
 
 use TechDivision\ServletContainer\Http\HttpPart;
@@ -18,20 +22,25 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Servlets\PhpServlet;
 
 /**
+ * A servlet implementation for magento
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class MageServlet extends PhpServlet
 {
 
     /**
-     * (non-PHPdoc)
+     * Prepares the passed request instance for generating the globals.
      *
-     * @see \TechDivision\ServletContainer\Servlets\PhpServlet::prepareGlobals()
+     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
+     * @return void
      */
     protected function prepareGlobals(Request $req)
     {
@@ -52,16 +61,15 @@ class MageServlet extends PhpServlet
         $req->setServerVar('PHP_SELF', $directoryIndex);
         
         // ATTENTION: This is necessary because of a Magento bug!!!!
-        $req->setServerVar('SERVER_PORT', NULL);
+        $req->setServerVar('SERVER_PORT', null);
     }
 
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req
-     *            The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res
-     *            The servlet response
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
@@ -89,6 +97,8 @@ class MageServlet extends PhpServlet
 
     /**
      * Runs the WebApplication
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Request $req The servlet request
      *
      * @return string The WebApplications content
      */

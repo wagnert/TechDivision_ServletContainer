@@ -1,14 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Socket\AbstractHttpWorker
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractWorker;
@@ -16,11 +19,12 @@ use TechDivision\ApplicationServer\AbstractWorker;
 /**
  * The worker implementation that handles the request.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Johann Zelger <jz@techdivision.com>
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
 abstract class AbstractHttpWorker extends AbstractWorker
 {
@@ -31,28 +35,25 @@ abstract class AbstractHttpWorker extends AbstractWorker
      * @var integer
      */
     const HANDLE_REQUESTS = 100;
-    
+
     /**
-     * (non-PHPdoc)
+     * The main function which will be called by doing start()
      *
-     * @see \TechDivision\ApplicationServer\AbstractWorker::main()
-     * @see \Thread::run()
+     * @return void
      */
     public function main()
     {
-        
         try {
-
             // the counter with the number of requests to handle
             $handleRequests = AbstractHttpWorker::HANDLE_REQUESTS;
-            
-            // initialize the array with the clients to handle the requests
-            $clients = array();
-            
+
             // initialize the session manager itself
-            $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array(
-                $this->initialContext
-            ));
+            $sessionManager = $this->newInstance(
+                'TechDivision\ServletContainer\Session\PersistentSessionManager',
+                array(
+                    $this->initialContext
+                )
+            );
             
             // handle requests and then QUIT (to free client sockets and memory)
             $i = 0;
@@ -95,10 +96,9 @@ abstract class AbstractHttpWorker extends AbstractWorker
                     // process the request
                     $request = $this->initialContext->newInstance($this->threadType, $params);
                     $request->start(PTHREADS_INHERIT_ALL | PTHREADS_ALLOW_HEADERS);
-                }    
+                }
             }
-            
-        } catch(\Exception $e) { // catch the exception if thrown, e. g. when socket can't be accepted
+        } catch (\Exception $e) { // catch the exception if thrown, e. g. when socket can't be accepted
             $this->getInitialContext()->getSystemLogger()->critical($e->__toString());
         }
     }

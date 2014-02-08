@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Http\HttpResponse
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Http;
 
 use TechDivision\ServletContainer\Interfaces\Response;
@@ -17,12 +22,14 @@ use TechDivision\ServletContainer\Http\Cookie;
 /**
  * A servlet response implementation.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HttpResponse implements Response
 {
@@ -89,8 +96,11 @@ class HttpResponse implements Response
     }
 
     /**
+     * Set's the headers
      *
-     * @param array $headers
+     * @param array $headers The headers array
+     *
+     * @return void
      */
     public function setHeaders(array $headers)
     {
@@ -98,6 +108,7 @@ class HttpResponse implements Response
     }
 
     /**
+     * Return's the headers array
      *
      * @return array
      */
@@ -107,9 +118,12 @@ class HttpResponse implements Response
     }
 
     /**
+     * Add's a header to array
      *
-     * @param string $header
-     * @param string $value
+     * @param string $header The header label e.g. Accept or Content-Length
+     * @param string $value  The header value
+     *
+     * @return void
      */
     public function addHeader($header, $value)
     {
@@ -119,8 +133,9 @@ class HttpResponse implements Response
     /**
      * Returns header info by given key
      *
-     * @param
-     *            $key
+     * @param string $key The headers key to return
+     *
+     * @return string|null
      */
     public function getHeader($key)
     {
@@ -152,12 +167,12 @@ class HttpResponse implements Response
     }
 
     /**
+     * Return's the headers as string
      *
      * @return string
      */
     public function getHeadersAsString()
     {
-
         $headers = "";
 
         foreach ($this->getHeaders() as $header => $value) {
@@ -179,7 +194,8 @@ class HttpResponse implements Response
     /**
      * Removes one single header from the headers array.
      *
-     * @param string $header
+     * @param string $header The header to remove
+     *
      * @return void
      */
     public function removeHeader($header)
@@ -228,8 +244,10 @@ class HttpResponse implements Response
     }
 
     /**
+     * Set's the content
      *
-     * @param string $content
+     * @param string $content The content to set
+     *
      * @return void
      */
     public function setContent($content)
@@ -238,8 +256,10 @@ class HttpResponse implements Response
     }
 
     /**
+     * Add's a cookie
      *
-     * @param Cookie $cookie
+     * @param \TechDivision\ServletContainer\Http\Cookie $cookie The cookie instance to add
+     *
      * @return void
      */
     public function addCookie(Cookie $cookie)
@@ -251,8 +271,8 @@ class HttpResponse implements Response
      * Returns TRUE if the response already has a cookie with the passed
      * name, else FALSE.
      *
-     * @param string $cookieName
-     *            Name of the cookie to be checked
+     * @param string $cookieName Name of the cookie to be checked
+     *
      * @return boolean TRUE if the response already has the cookie, else FALSE
      */
     public function hasCookie($cookieName)
@@ -266,10 +286,11 @@ class HttpResponse implements Response
     }
 
     /**
-     * Sets accepted encodings data
+     * Set's accepted encodings data
      *
-     * @param
-     *            $acceptedEncodings
+     * @param array $acceptedEncodings The accepted codings as array
+     *
+     * @return void
      */
     public function setAcceptedEncodings($acceptedEncodings)
     {
@@ -277,7 +298,7 @@ class HttpResponse implements Response
     }
 
     /**
-     * Returns accepted encodings data
+     * Return's accepted encodings data
      *
      * @return array
      */

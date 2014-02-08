@@ -3,12 +3,18 @@
 /**
  * TechDivision\ServletContainer\Service\Locator\ServletLocator
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Service
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Service\Locator;
 
 use TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface;
@@ -24,12 +30,14 @@ use TechDivision\ServletContainer\Exceptions\ServletNotFoundException;
 /**
  * The servlet resource locator implementation.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Tim Wagner <tw@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Service
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class ServletLocator implements ResourceLocatorInterface
 {
@@ -48,13 +56,18 @@ class ServletLocator implements ResourceLocatorInterface
      */
     protected $routes;
 
+    /**
+     * Holds the secured url routes
+     *
+     * @var \Symfony\Component\Routing\RouteCollection
+     */
     protected $securedUrlRoutes;
 
     /**
      * Initializes the locator with the actual servlet manager instance.
      *
-     * @param \TechDivision\ServletContainer\ServletManager $servletManager
-     *            The servlet manager instance
+     * @param \TechDivision\ServletContainer\ServletManager $servletManager The servlet manager instance
+     *
      * @return void
      */
     public function __construct($servletManager)
@@ -62,7 +75,6 @@ class ServletLocator implements ResourceLocatorInterface
         $this->servletManager = $servletManager;
         $this->initRoutes();
         $this->initSecuredUrlRoutes();
-
     }
 
     /**
@@ -167,8 +179,8 @@ class ServletLocator implements ResourceLocatorInterface
     /**
      * Tries to locate a servlet for the passed request instance.
      *
-     * @param Request $request
-     *            The request instance to return the servlet for
+     * @param Request $request The request instance to return the servlet for
+     *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
      * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found for the passed request
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
@@ -177,7 +189,7 @@ class ServletLocator implements ResourceLocatorInterface
     {
         // build the file-path of the request
         $path = $request->getPathInfo();
-
+        
         // check if the application is loaded by a VHost
         $applicationName = $this->getApplication()->getName();
         if (! $this->getApplication()->isVhostOf($request->getServerName())) {
@@ -200,21 +212,21 @@ class ServletLocator implements ResourceLocatorInterface
         } elseif (! is_array($servletCache)) {
             $servletCache = array();
         }
-
+        
         // print_r($this->getRoutes());
         $matcher = new UrlMatcher($this->getRoutes(), $context);
-
+        
         // traverse the path to find matching servlet
         do {
-
+            
             try {
                 $servlet = $matcher->match($path);
                 break;
             } catch (ResourceNotFoundException $rnfe) {
                 $path = substr($path, 0, strrpos($path, '/'));
             }
-        } while (strpos($path, '/') !== FALSE);
-
+        } while (strpos($path, '/') !== false);
+        
         // check at least one servlet has been found
         if (is_array($servlet) === false || sizeof($servlet) === 0) {
             throw new ServletNotFoundException("Can't find servlet for requested path $path");
@@ -235,18 +247,20 @@ class ServletLocator implements ResourceLocatorInterface
 
 
     /**
-     * search for a matching url pattern
+     * Search for a matching url pattern
      *
-     * @param $context
-     * @param $path
+     * @param \Symfony\Component\Routing\RequestContext         $context A request context object
+     * @param string                                            $path    The path to resolve
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     *
      * @return array
      */
     protected function secureUrlMatcher($context, $path, $servlet)
     {
+        // init url matcher
         $matcher = new UrlMatcher($this->getSecuredUrlRoutes(), $context);
         // traverse the path to find matching servlet
         do {
-
             try {
                 $config = $matcher->match($path);
 
@@ -257,7 +271,7 @@ class ServletLocator implements ResourceLocatorInterface
             } catch (ResourceNotFoundException $rnfe) {
                 $path = substr($path, 0, strrpos($path, '/'));
             }
-        } while (strpos($path, '/') !== FALSE);
+        } while (strpos($path, '/') !== false);
 
         return;
     }

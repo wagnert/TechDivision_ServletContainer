@@ -1,14 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Application
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractApplication;
@@ -22,11 +25,12 @@ use TechDivision\ApplicationServer\Vhost;
  * The application instance holds all information about the deployed application
  * and provides a reference to the servlet manager and the initial context.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Tim Wagner <tw@techdivision.com>
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
 class Application extends AbstractApplication
 {
@@ -78,7 +82,7 @@ class Application extends AbstractApplication
         
         // initialize the servlet locator instance
         $servletLocator = $this->newInstance('TechDivision\ServletContainer\Service\Locator\ServletLocator', array(
-        	$this->servletManager
+            $this->servletManager
         ));
         
         // set the servlet locator
@@ -111,8 +115,8 @@ class Application extends AbstractApplication
     /**
      * Sets the applications servlet manager instance.
      *
-     * @param \TechDivision\ServletContainer\ServletManager $servletManager
-     *            The servlet manager instance
+     * @param \TechDivision\ServletContainer\ServletManager $servletManager The servlet manager instance
+     *
      * @return \TechDivision\ServletContainer\Application The application instance
      */
     public function setServletManager(ServletManager $servletManager)
@@ -134,8 +138,8 @@ class Application extends AbstractApplication
     /**
      * Sets the applications servlet locator instance.
      *
-     * @param \TechDivision\ServletContainer\Service\Locator\ServletLocator $servletLocator
-     *            The servlet locator instance
+     * @param \TechDivision\ServletContainer\Service\Locator\ServletLocator $servletLocator The servlet locator instance
+     *
      * @return \TechDivision\ServletContainer\Application The application instance
      */
     public function setServletLocator(ServletLocator $servletLocator)
@@ -159,6 +163,7 @@ class Application extends AbstractApplication
      * the request passed as parameter.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance
+     *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance to handle the request
      */
     public function locate(Request $request)
