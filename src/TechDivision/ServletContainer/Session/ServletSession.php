@@ -1,4 +1,17 @@
 <?php
+/**
+ * TechDivision\ServletContainer\Session\ServletSession
+ *
+ * PHP version 5
+ *
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Session
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
+ */
 namespace TechDivision\ServletContainer\Session;
 
 /*
@@ -31,7 +44,13 @@ use TechDivision\ServletContainer\Session\Exceptions\InvalidRequestResponseExcep
  * You can use the Session Manager for accessing sessions which are not currently
  * active.
  *
- * @see \TYPO3\Flow\Session\SessionManager
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Session
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class ServletSession
 {
@@ -80,13 +99,13 @@ class ServletSession
      *
      * @var boolean
      */
-    protected $sessionCookieSecure = TRUE;
+    protected $sessionCookieSecure = true;
 
     /**
      *
      * @var boolean
      */
-    protected $sessionCookieHttpOnly = TRUE;
+    protected $sessionCookieHttpOnly = true;
 
     /**
      *
@@ -136,7 +155,7 @@ class ServletSession
      *
      * @var boolean
      */
-    protected $started = FALSE;
+    protected $started = false;
 
     /**
      *
@@ -160,27 +179,26 @@ class ServletSession
      * Session instances MUST NOT be created manually! They should be retrieved via
      * the Session Manager or through dependency injection (use SessionInterface!).
      *
-     * @param
-     *            \TechDivision\ServletContainer\Interfaces\Request The request instance
-     * @param
-     *            \TechDivision\ServletContainer\Interfaces\Response The response instance
-     * @param string $sessionIdentifier
-     *            The public session identifier which is also used in the session cookie
-     * @param integer $lastActivityTimestamp
-     *            Unix timestamp of the last known activity for this session
-     * @param array $tags
-     *            A list of tags set for this session
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request               The request instance
+     * @param string                                            $sessionIdentifier     The public session identifier which is also used in the session cookie
+     * @param integer                                           $lastActivityTimestamp Unix timestamp of the last known activity for this session
+     * @param array                                             $tags                  A list of tags set for this session
+     *
      * @throws \InvalidArgumentException
      */
-    public function __construct(Request $request, $sessionIdentifier = NULL, $lastActivityTimestamp = NULL, array $tags = array())
-    {
+    public function __construct(
+        Request $request,
+        $sessionIdentifier = null,
+        $lastActivityTimestamp = null,
+        array $tags = array()
+    ) {
         $this->request = $request;
         $this->response = $request->getResponse();
 
-        if ($sessionIdentifier !== NULL) {
+        if ($sessionIdentifier !== null) {
             $this->sessionIdentifier = $sessionIdentifier;
             $this->lastActivityTimestamp = $lastActivityTimestamp;
-            $this->started = TRUE;
+            $this->started = true;
             $this->tags = $tags;
         }
 
@@ -190,8 +208,8 @@ class ServletSession
     /**
      * Injects the storage to persist session data.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext\StorageInterface $storage
-     *            The session storage to use
+     * @param \TechDivision\ApplicationServer\InitialContext\StorageInterface $storage The session storage to use
+     *
      * @return void
      */
     public function injectStorage(StorageInterface $storage)
@@ -202,8 +220,8 @@ class ServletSession
     /**
      * Injects the settings
      *
-     * @param array $settings
-     *            Settings for the session handling
+     * @param array $settings Settings for the session handling
+     *
      * @return void
      */
     public function injectSettings(array $settings)
@@ -222,6 +240,7 @@ class ServletSession
      * Set's the unique session identifier.
      *
      * @param string $sessionIdentifier The unique session identifier
+     *
      * @return void
      */
     public function setSessionIdentifier($sessionIdentifier)
@@ -259,14 +278,23 @@ class ServletSession
     public function start()
     {
 
-        if ($this->started === FALSE) {
+        if ($this->started === false) {
 
             $this->sessionIdentifier = Algorithms::generateRandomString(32);
-            $this->sessionCookie = new Cookie($this->sessionCookieName, $this->sessionIdentifier, $this->sessionCookieLifetime, NULL, $this->sessionCookieDomain, $this->sessionCookiePath, $this->sessionCookieSecure, $this->sessionCookieHttpOnly);
+            $this->sessionCookie = new Cookie(
+                $this->sessionCookieName,
+                $this->sessionIdentifier,
+                $this->sessionCookieLifetime,
+                null,
+                $this->sessionCookieDomain,
+                $this->sessionCookiePath,
+                $this->sessionCookieSecure,
+                $this->sessionCookieHttpOnly
+            );
             $this->response->addCookie($this->sessionCookie);
 
             $this->lastActivityTimestamp = $this->now;
-            $this->started = TRUE;
+            $this->started = true;
 
             $this->writeSessionInfoCacheEntry();
 
@@ -293,13 +321,13 @@ class ServletSession
 
         $this->initializeHttpAndCookie();
 
-        if ($this->sessionCookie === NULL || $this->request === NULL || $this->started === TRUE) {
-            return FALSE;
+        if ($this->sessionCookie === null || $this->request === null || $this->started === true) {
+            return false;
         }
 
         $sessionInfo = $this->storage->get($this->sessionCookie->getValue());
-        if ($sessionInfo === FALSE) {
-            return FALSE;
+        if ($sessionInfo === false) {
+            return false;
         }
 
         $this->lastActivityTimestamp = $sessionInfo['lastActivityTimestamp'];
@@ -315,11 +343,11 @@ class ServletSession
      */
     public function resume()
     {
-        if ($this->started === FALSE && $this->canBeResumed()) {
+        if ($this->started === false && $this->canBeResumed()) {
 
             $this->sessionIdentifier = $this->sessionCookie->getValue();
             $this->response->setCookie($this->sessionCookie);
-            $this->started = TRUE;
+            $this->started = true;
 
             $sessionObjects = $this->storage->get($this->sessionIdentifier . md5(__CLASS__));
 
@@ -349,7 +377,7 @@ class ServletSession
      */
     public function getId()
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to retrieve the session identifier, but the session has not been started yet.');
         }
         return $this->sessionIdentifier;
@@ -366,7 +394,7 @@ class ServletSession
      */
     public function renewId()
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to renew the session identifier, but the session has not been started yet.');
         }
 
@@ -381,14 +409,14 @@ class ServletSession
     /**
      * Returns the data associated with the given key.
      *
-     * @param string $key
-     *            An identifier for the content stored in the session.
+     * @param string $key An identifier for the content stored in the session.
+     *
      * @return mixed The contents associated with the given key
      * @throws SessionNotStartedException
      */
     public function getData($key)
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to get session data, but the session has not been started yet.');
         }
         return $this->storage->get($this->sessionIdentifier . md5($key));
@@ -397,14 +425,14 @@ class ServletSession
     /**
      * Returns TRUE if a session data entry $key is available.
      *
-     * @param string $key
-     *            Entry identifier of the session data
+     * @param string $key Entry identifier of the session data
+     *
      * @return boolean
      * @throws SessionNotStartedException
      */
     public function hasKey($key)
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to check a session data entry, but the session has not been started yet.');
         }
         return $this->storage->has($this->sessionIdentifier . md5($key));
@@ -413,10 +441,9 @@ class ServletSession
     /**
      * Stores the given data under the given key in the session
      *
-     * @param string $key
-     *            The key under which the data should be stored
-     * @param mixed $data
-     *            The data to be stored
+     * @param string $key  The key under which the data should be stored
+     * @param mixed  $data The data to be stored
+     *
      * @return void
      * @throws \TechDivision\ServletContainer\Exceptions\DataNotSerializableException
      * @throws SessionNotStartedException
@@ -424,7 +451,7 @@ class ServletSession
      */
     public function putData($key, $data)
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to create a session data entry, but the session has not been started yet.');
         }
         if (is_resource($data)) {
@@ -447,7 +474,7 @@ class ServletSession
      */
     public function getLastActivityTimestamp()
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to retrieve the last activity timestamp of a session which has not been started yet.');
         }
         return $this->lastActivityTimestamp;
@@ -459,15 +486,15 @@ class ServletSession
      * Note that third-party libraries might also tag your session. Therefore it is
      * recommended to use namespaced tags such as "Acme-Demo-MySpecialTag".
      *
-     * @param string $tag
-     *            The tag – must match be a valid cache frontend tag
+     * @param string $tag The tag – must match be a valid cache frontend tag
+     *
      * @return void
      * @throws SessionNotStartedException
      * @throws \InvalidArgumentException @api
      */
     public function addTag($tag)
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to tag a session which has not been started yet.');
         }
         if (! $this->storage->isValidTag($tag)) {
@@ -481,18 +508,18 @@ class ServletSession
     /**
      * Removes the specified tag from this session.
      *
-     * @param string $tag
-     *            The tag – must match be a valid cache frontend tag
+     * @param string $tag The tag – must match be a valid cache frontend tag
+     *
      * @return void
      * @throws SessionNotStartedException @api
      */
     public function removeTag($tag)
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to tag a session which has not been started yet.');
         }
         $index = array_search($tag, $this->tags);
-        if ($index !== FALSE) {
+        if ($index !== false) {
             unset($this->tags[$index]);
         }
     }
@@ -505,7 +532,7 @@ class ServletSession
      */
     public function getTags()
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to retrieve tags from a session which has not been started yet.');
         }
         return $this->tags;
@@ -521,11 +548,11 @@ class ServletSession
      */
     public function shutdownObject()
     {
-        if ($this->started === TRUE) {
+        if ($this->started === true) {
             if ($this->storage->has($this->sessionIdentifier)) {
                 $this->writeSessionInfoCacheEntry();
             }
-            $this->started = FALSE;
+            $this->started = false;
             $decimals = strlen(strrchr($this->garbageCollectionProbability, '.')) - 1;
             $factor = ($decimals > - 1) ? $decimals * 10 : 1;
             if (rand(0, 100 * $factor) <= ($this->garbageCollectionProbability * $factor)) {
@@ -542,12 +569,12 @@ class ServletSession
     protected function autoExpire()
     {
         $lastActivitySecondsAgo = $this->now - $this->lastActivityTimestamp;
-        $expired = FALSE;
+        $expired = false;
         if ($this->inactivityTimeout !== 0 && $lastActivitySecondsAgo > $this->inactivityTimeout) {
-            $this->started = TRUE;
+            $this->started = true;
             $this->sessionIdentifier = $this->sessionCookie->getValue();
             $this->destroy(sprintf('Session %s was inactive for %s seconds, more than the configured timeout of %s seconds.', $this->sessionIdentifier, $lastActivitySecondsAgo, $this->inactivityTimeout));
-            $expired = TRUE;
+            $expired = true;
         }
         return $expired;
     }
@@ -561,7 +588,16 @@ class ServletSession
     {
         if ($this->request->hasCookie($this->sessionCookieName)) {
             $sessionIdentifier = $this->request->getCookie($this->sessionCookieName)->getValue();
-            $this->sessionCookie = new Cookie($this->sessionCookieName, $sessionIdentifier, $this->sessionCookieLifetime, NULL, $this->sessionCookieDomain, $this->sessionCookiePath, $this->sessionCookieSecure, $this->sessionCookieHttpOnly);
+            $this->sessionCookie = new Cookie(
+                $this->sessionCookieName,
+                $sessionIdentifier,
+                $this->sessionCookieLifetime,
+                null,
+                $this->sessionCookieDomain,
+                $this->sessionCookiePath,
+                $this->sessionCookieSecure,
+                $this->sessionCookieHttpOnly
+            );
         }
     }
 
@@ -584,10 +620,13 @@ class ServletSession
             'tags' => $this->tags
         );
 
-        $tagsForCacheEntry = array_map(function ($tag)
-        {
-            return ServletSession::TAG_PREFIX . $tag;
-        }, $this->tags);
+        $tagsForCacheEntry = array_map(
+            function ($tag) {
+                return ServletSession::TAG_PREFIX . $tag;
+            },
+            $this->tags
+        );
+
         $tagsForCacheEntry[] = 'session';
 
         $this->storage->set($this->sessionIdentifier, $sessionInfo, $tagsForCacheEntry, 0);
@@ -599,7 +638,8 @@ class ServletSession
      * Note that this function does only remove the "head" cache entry, not the
      * related data referred to by the storage identifier.
      *
-     * @param string $sessionIdentifier
+     * @param string $sessionIdentifier The sessions's id
+     *
      * @return void
      */
     protected function removeSessionInfoCacheEntry($sessionIdentifier)
@@ -620,23 +660,23 @@ class ServletSession
     /**
      * Explicitly destroys all session data
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\SessionNotStartedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\SessionNotStartedException
      * @api
      */
     public function destroy()
     {
-        if ($this->started !== TRUE) {
+        if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.');
         }
-        if ($this->response->hasCookie($this->sessionCookieName) === FALSE) {
+        if ($this->response->hasCookie($this->sessionCookieName) === false) {
             $this->response->addCookie($this->sessionCookie);
         }
         $this->sessionCookie->expire();
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);
         $this->storage->flushByTag($this->sessionIdentifier);
-        $this->started = FALSE;
-        $this->sessionIdentifier = NULL;
+        $this->started = false;
+        $this->sessionIdentifier = null;
         $this->tags = array();
     }
 
