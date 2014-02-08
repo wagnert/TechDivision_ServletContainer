@@ -203,7 +203,7 @@ class ServletManager
     /**
      * Registers the default servlet for the passed webapp.
      *
-     * @return false
+     * @return void
      */
     protected function addDefaultServlet()
     {

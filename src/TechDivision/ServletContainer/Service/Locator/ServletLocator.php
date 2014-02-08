@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Service\Locator\ServletLocator
  *
@@ -100,19 +101,19 @@ class ServletLocator implements ResourceLocatorInterface
      * Prepares a collection with routes generated from the available servlets
      * ans their servlet mappings.
      *
-     * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
+     * @return void
      */
     public function initRoutes()
     {
-        
+
         // retrieve the registered servlets
         $servletMappings = $this->getServletManager()->getServletMappings();
         $servlets = $this->getServletManager()->getServlets();
-        
+
         // prepare the collection with the available routes and initialize the route counter
         $this->routes = new RouteCollection();
         $counter = 0;
-        
+
         // iterate over the available servlets and prepare the routes
         foreach ($servletMappings as $urlPattern => $servletName) {
             $servlet = $servlets[$servletName];
@@ -130,7 +131,7 @@ class ServletLocator implements ResourceLocatorInterface
      * Prepares a collection with routes generated from the available servlets
      * ans their servlet mappings.
      *
-     * @return \Symfony\Component\Routing\RouteCollection The collection with the available routes
+     * @return void
      */
     public function initSecuredUrlRoutes()
     {
@@ -166,9 +167,9 @@ class ServletLocator implements ResourceLocatorInterface
     }
 
     /**
-     * Returns the collection with the initialized secured routes.
+     * Returns the collection with the initialized routes.
      *
-     * @return \Symfony\Component\Routing\RouteCollection The secured routes
+     * @return \Symfony\Component\Routing\RouteCollection The initialize routes
      */
     public function getSecuredUrlRoutes()
     {
@@ -180,7 +181,7 @@ class ServletLocator implements ResourceLocatorInterface
      *
      * @param Request $request The request instance to return the servlet for
      *
-     * @return TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
      * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found for the passed request
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
      */
