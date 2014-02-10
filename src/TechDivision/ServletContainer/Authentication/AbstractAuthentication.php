@@ -1,31 +1,37 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\ServletManager
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Philipp Dittert <pd@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Authentication;
+
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 
-
 /**
  * Abstract class for authentication adapters.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Philipp Dittert <pd@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Philipp Dittert <pd@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-
-abstract class AbstractAuthentication {
+abstract class AbstractAuthentication
+{
 
     /**
      * Basic HTTP authentication method
@@ -56,14 +62,15 @@ abstract class AbstractAuthentication {
      *
      * @var Response
      */
-    Protected $response;
+    protected $response;
 
     /**
      * alternative manuell called constructor
      *
-     * @param Servlet $servlet
-     * @param Request $req
-     * @param Response $res
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet  $servlet The servlet to process
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req     The request object
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res     The response object
+     *
      * @return void
      */
     public function init(Servlet $servlet, Request $req, Response $res)
@@ -71,13 +78,13 @@ abstract class AbstractAuthentication {
         $this->setServlet($servlet);
         $this->setResponse($res);
         $this->setRequest($req);
-
     }
 
     /**
      * Set's Servlet object
      *
-     * @param $servlet
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     *
      * @return $this
      */
     protected function setServlet($servlet)
@@ -89,7 +96,7 @@ abstract class AbstractAuthentication {
     /**
      * Returns Servlet object
      *
-     * @return Servlet
+     * @return \TechDivision\ServletContainer\Interfaces\Servlet
      */
     protected function getServlet()
     {
@@ -99,10 +106,11 @@ abstract class AbstractAuthentication {
     /**
      * Sets Request object
      *
-     * @param $request
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance
+     *
      * @return $this
      */
-    protected function setRequest($request)
+    protected function setRequest(Request $request)
     {
         $this->request = $request;
         return $this;
@@ -111,7 +119,7 @@ abstract class AbstractAuthentication {
     /**
      * Returns Request object
      *
-     * @return Request
+     * @return \TechDivision\ServletContainer\Interfaces\Request
      */
     protected function getRequest()
     {
@@ -121,10 +129,11 @@ abstract class AbstractAuthentication {
     /**
      * set Response object
      *
-     * @param $response
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response instance
+     *
      * @return $this
      */
-    protected function setResponse($response)
+    protected function setResponse(Response $response)
     {
         $this->response = $response;
         return $this;

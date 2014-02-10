@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\ServletManager
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Florian Sydekum <fs@techdivision.com>
+ * @author     Philipp Dittert <pd@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Authentication\Adapters;
 
 use TechDivision\ServletContainer\Interfaces\Response;
@@ -20,12 +25,14 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
 /**
  * Authentication adapter for htdigest file.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Florian Sydekum <fs@techdivision.com>
- * @author Philipp Dittert <pd@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ApplicationServer
+ * @subpackage Authentication
+ * @author     Florian Sydekum <fs@techdivision.com>
+ * @author     Philipp Dittert <pd@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HtdigestAdapter extends AuthenticationAdapter
 {
@@ -34,15 +41,22 @@ class HtdigestAdapter extends AuthenticationAdapter
      */
     protected $htdigest = array();
 
+    /**
+     * Constructor
+     *
+     * @param array                                             $options The options
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     */
     public function __construct($options, Servlet $servlet)
     {
         parent::__construct($options, $servlet);
-
         $this->init();
     }
 
     /**
      * Initializes the adapter.
+     *
+     * @return void
      */
     public function init()
     {
@@ -60,13 +74,14 @@ class HtdigestAdapter extends AuthenticationAdapter
     }
 
     /**
-     *  Authenticates a user/realm/H1 hash combination.
+     * Authenticates a user/realm/H1 hash combination.
      *
-     * @param array $data
+     * @param array  $data      The auth data
      * @param string $reqMethod e.g. GET or POST
+     *
      * @return bool
      */
-    public function authenticate($data,$reqMethod)
+    public function authenticate($data, $reqMethod)
     {
         // if user is valid
         $credentials = $this->getHtDigest();
@@ -94,5 +109,4 @@ class HtdigestAdapter extends AuthenticationAdapter
     {
         return $this->htdigest;
     }
-
 }

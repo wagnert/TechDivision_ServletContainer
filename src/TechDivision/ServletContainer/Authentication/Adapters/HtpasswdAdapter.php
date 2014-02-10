@@ -1,30 +1,34 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\ServletManager
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Florian Sydekum <fs@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Authentication\Adapters;
 
-use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Servlets\ServletConfiguration;
 use TechDivision\ServletContainer\Authentication\AuthenticationAdapter;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 
 /**
  * Authentication adapter for htpasswd file.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Florian Sydekum <fs@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Authentication
+ * @author     Florian Sydekum <fs@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HtpasswdAdapter extends AuthenticationAdapter
 {
@@ -39,6 +43,12 @@ class HtpasswdAdapter extends AuthenticationAdapter
      */
     protected $filename;
 
+    /**
+     * Construct
+     *
+     * @param array                                             $options The options
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     */
     public function __construct($options, Servlet $servlet)
     {
         parent::__construct($options, $servlet);
@@ -48,6 +58,8 @@ class HtpasswdAdapter extends AuthenticationAdapter
 
     /**
      * Initializes the adapter.
+     *
+     * @return void
      */
     public function init()
     {
@@ -66,10 +78,11 @@ class HtpasswdAdapter extends AuthenticationAdapter
     }
 
     /**
-     *  Authenticates a user/password combination.
+     * Authenticates a user/password combination.
      *
-     * @param string $user
-     * @param string $pwd
+     * @param string $user The username
+     * @param string $pwd  The password
+     *
      * @return bool
      */
     public function authenticate($user, $pwd)
@@ -93,8 +106,9 @@ class HtpasswdAdapter extends AuthenticationAdapter
     /**
      * check if htpasswd password is md5 hashed and if clearTextPassword is equal
      *
-     * @param $cleartextPassword
-     * @param $hashedPassword
+     * @param string $clearTextPassword The password plaintext
+     * @param string $hashedPassword    The password hashed
+     *
      * @return bool
      */
     protected function checkPlainMd5($clearTextPassword, $hashedPassword)
@@ -106,10 +120,11 @@ class HtpasswdAdapter extends AuthenticationAdapter
     }
 
     /**
-     * check if htpasswd password is apr1-md5 hashed and if clearTextPassword is eqal
+     * check if htpasswd password is apr1-md5 hashed and if clearTextPassword is not relevant
      *
-     * @param $clearTextPassword
-     * @param $hashedPassword
+     * @param string $clearTextPassword The password plaintext
+     * @param string $hashedPassword    The password hashed
+     *
      * @return bool
      */
     protected function checkApr1Md5($clearTextPassword, $hashedPassword)
@@ -117,7 +132,7 @@ class HtpasswdAdapter extends AuthenticationAdapter
         //if hash starts with $apr1$
         if (strpos($hashedPassword, "$"."apr1"."$") === 0) {
             //strip $arp1$ from string
-            $hash = substr($hashedPassword,6);
+            $hash = substr($hashedPassword, 6);
             // return string until fist "$"
             $salt = strstr($hash, "$", true);
             $newHashedPassword = $this->generateCryptApr1Md5($clearTextPassword, $salt);
@@ -132,8 +147,9 @@ class HtpasswdAdapter extends AuthenticationAdapter
      * check if htpasswd password is crypt hashed and if clearTextPassword is eqal
      * following crypt hashes are allowed: DES, MD5 (salted), Blowfish, SHA-256, SHA-512
      *
-     * @param $clearTextPassword
-     * @param $hashedPassword
+     * @param string $clearTextPassword The password plaintext
+     * @param string $hashedPassword    The password hashed
+     *
      * @return bool
      */
     protected function checkCrypt($clearTextPassword, $hashedPassword)
@@ -148,13 +164,14 @@ class HtpasswdAdapter extends AuthenticationAdapter
     /**
      * check if htpasswd password is sha hashed and if clearTextPassword is equal
      *
-     * @param $clearTextPassword
-     * @param $hashedPassword
+     * @param string $clearTextPassword The password plaintext
+     * @param string $hashedPassword    The password hashed
+     *
      * @return bool
      */
     protected function checkSha1($clearTextPassword, $hashedPassword)
     {
-        if (base64_encode(sha1($clearTextPassword, TRUE)) == $hashedPassword) {
+        if (base64_encode(sha1($clearTextPassword, true)) == $hashedPassword) {
             return true;
         }
     }
@@ -172,23 +189,34 @@ class HtpasswdAdapter extends AuthenticationAdapter
     /**
      * generates a apr1-md5 (apache compatible) password hash
      *
-     * @param $plainpasswd
+     * @param string $plainpasswd The password in plaintext
+     * @param string $salt        The salt
+     *
      * @return string
      */
-    protected function generateCryptApr1Md5($plainpasswd, $salt = null) {
+    protected function generateCryptApr1Md5($plainpasswd, $salt = null)
+    {
         if (!$salt) {
             $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
         }
         $len = strlen($plainpasswd);
         $text = $plainpasswd.'$apr1$'.$salt;
         $bin = pack("H32", md5($plainpasswd.$salt.$plainpasswd));
-        for($i = $len; $i > 0; $i -= 16) { $text .= substr($bin, 0, min(16, $i)); }
-        for($i = $len; $i > 0; $i >>= 1) { $text .= ($i & 1) ? chr(0) : $plainpasswd{0}; }
+        for ($i = $len; $i > 0; $i -= 16) {
+            $text .= substr($bin, 0, min(16, $i));
+        }
+        for ($i = $len; $i > 0; $i >>= 1) {
+            $text .= ($i & 1) ? chr(0) : $plainpasswd{0};
+        }
         $bin = pack("H32", md5($text));
-        for($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $new = ($i & 1) ? $plainpasswd : $bin;
-            if ($i % 3) $new .= $salt;
-            if ($i % 7) $new .= $plainpasswd;
+            if ($i % 3) {
+                $new .= $salt;
+            }
+            if ($i % 7) {
+                $new .= $plainpasswd;
+            }
             $new .= ($i & 1) ? $bin : $plainpasswd;
             $bin = pack("H32", md5($new));
         }
@@ -196,13 +224,22 @@ class HtpasswdAdapter extends AuthenticationAdapter
         for ($i = 0; $i < 5; $i++) {
             $k = $i + 6;
             $j = $i + 12;
-            if ($j == 16) $j = 5;
+            if ($j == 16) {
+                $j = 5;
+            }
             $tmp = $bin[$i].$bin[$k].$bin[$j].$tmp;
         }
         $tmp = chr(0).chr(0).$bin[11].$tmp;
-        $tmp = strtr(strrev(substr(base64_encode($tmp), 2)),
+        $tmp = strtr(
+            strrev(
+                substr(
+                    base64_encode($tmp),
+                    2
+                )
+            ),
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-            "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+            "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        );
         return "$"."apr1"."$".$salt."$".$tmp;
     }
 }

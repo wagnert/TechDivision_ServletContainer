@@ -3,11 +3,17 @@
 /**
  * TechDivision\ServletContainer\HttpServlet
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 namespace TechDivision\ServletContainer\Servlets;
 
@@ -23,13 +29,15 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
  * This servlet emulates an Apache webserver request by initializing the 
  * globals and making them available in the excecuted script.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Tim Wagner <tw@techdivision.com>
- * @author Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class PhpServlet extends StaticResourceServlet
 {
@@ -52,6 +60,7 @@ class PhpServlet extends StaticResourceServlet
      * Set all headers for php script execution.
      *
      * @param \TechDivision\ServletContainer\Interfaces\Response $res The HTTP response to append the headers to
+     *
      * @return void
      */
     public function addHeaders(Response $res)
@@ -66,6 +75,7 @@ class PhpServlet extends StaticResourceServlet
      * Returns the directory index file that defaults to index.php.
      * 
      * @param string $directoryToPrepend Directory to prepend to the default directory index file
+     *
      * @return string The directory index file prepended with the passed directory
      */
     protected function getDirectoryIndex($directoryToPrepend = DIRECTORY_SEPARATOR)
@@ -77,6 +87,7 @@ class PhpServlet extends StaticResourceServlet
      * Prepares the passed request instance for generating the globals.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return void
      */
     protected function prepareGlobals(Request $req)
@@ -104,6 +115,7 @@ class PhpServlet extends StaticResourceServlet
      * Returns the array with the $_FILES vars.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return array The $_FILES vars
      */
     protected function initFileGlobals(Request $req)
@@ -154,6 +166,7 @@ class PhpServlet extends StaticResourceServlet
      * Returns the array with the $_COOKIE vars.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return array The $_COOKIE vars
      */
     protected function initCookieGlobals(Request $req)
@@ -170,6 +183,7 @@ class PhpServlet extends StaticResourceServlet
      * Returns the array with the $_REQUEST vars.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return array The $_REQUEST vars
      */
     protected function initRequestGlobals(Request $req)
@@ -181,6 +195,7 @@ class PhpServlet extends StaticResourceServlet
      * Returns the array with the $_POST vars.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return array The $_POST vars
      */
     protected function initPostGlobals(Request $req)
@@ -196,10 +211,11 @@ class PhpServlet extends StaticResourceServlet
      * Returns the array with the $_GET vars.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return array The $_GET vars
      */
     protected function initGetGlobals(Request $req)
-    {   
+    {
         // check post type and set params to globals
         if ($req->getMethod() == 'POST') {
             parse_str($req->getQueryString(), $parameterMap);
@@ -213,6 +229,7 @@ class PhpServlet extends StaticResourceServlet
      * Returns the array with the $_SERVER vars.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return array The $_SERVER vars
      */
     protected function initServerGlobals(Request $req)
@@ -225,10 +242,11 @@ class PhpServlet extends StaticResourceServlet
      * for standard applications.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     *
      * @return void
      */
     protected function initGlobals(Request $req)
-    {   
+    {
         // prepare the request before initializing the globals
         $this->prepareGlobals($req);
         // initialize the globals
@@ -243,16 +261,14 @@ class PhpServlet extends StaticResourceServlet
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req
-     *            The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res
-     *            The servlet response
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
     public function doGet(Request $req, Response $res)
     {
-        
         // let the locator retrieve the file
         $file = $this->locator->locate($req);
         
@@ -276,9 +292,13 @@ class PhpServlet extends StaticResourceServlet
     }
 
     /**
-     * (non-PHPdoc)
-     * 
-     * @see \TechDivision\ServletContainer\Servlets\PhpServlet::doGet()
+     * Tries to load the requested file and adds the content to the response.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
+     * @return void
      */
     public function doPost(Request $req, Response $res)
     {

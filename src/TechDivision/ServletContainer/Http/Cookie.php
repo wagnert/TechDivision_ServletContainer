@@ -1,4 +1,17 @@
 <?php
+/**
+ * TechDivision\ServletContainer\Http\AccessLogger
+ *
+ * PHP version 5
+ *
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
+ */
 
 namespace TechDivision\ServletContainer\Http;
 
@@ -15,7 +28,14 @@ namespace TechDivision\ServletContainer\Http;
 /**
  * Represents a HTTP Cookie as of RFC 6265
  *
- * @see http://tools.ietf.org/html/rfc6265
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
+ * @see        http://tools.ietf.org/html/rfc6265
  */
 class Cookie
 {
@@ -95,25 +115,18 @@ class Cookie
     /**
      * Constructs a new Cookie object
      *
-     * @param string $name
-     *            The cookie name as a valid token (RFC 2616)
-     * @param mixed $value
-     *            The value to store in the cookie. Must be possible to cast into a string.
-     * @param integer|DateTime $expires
-     *            Date and time after which this cookie expires.
-     * @param integer $maximumAge
-     *            Number of seconds until the cookie expires.
-     * @param string $domain
-     *            The host to which the user agent will send this cookie
-     * @param string $path
-     *            The path describing the scope of this cookie
-     * @param boolean $secure
-     *            If this cookie should only be sent through a "secure" channel by the user agent
-     * @param boolean $httpOnly
-     *            If this cookie should only be used through the HTTP protocol
+     * @param string           $name       The cookie name as a valid token (RFC 2616)
+     * @param mixed            $value      The value to store in the cookie. Must be possible to cast into a string.
+     * @param integer|DateTime $expires    Date and time after which this cookie expires.
+     * @param integer          $maximumAge Number of seconds until the cookie expires.
+     * @param string           $domain     The host to which the user agent will send this cookie
+     * @param string           $path       The path describing the scope of this cookie
+     * @param boolean          $secure     If this cookie should only be sent through a "secure" channel by the user agent
+     * @param boolean          $httpOnly   If this cookie should only be used through the HTTP protocol
+     *
      * @api
      */
-    public function __construct($name, $value = NULL, $expires = 0, $maximumAge = NULL, $domain = NULL, $path = '/', $secure = FALSE, $httpOnly = TRUE)
+    public function __construct($name, $value = null, $expires = 0, $maximumAge = null, $domain = null, $path = '/', $secure = false, $httpOnly = true)
     {
         if (preg_match(self::PATTERN_TOKEN, $name) !== 1) {
             throw new \InvalidArgumentException('The parameter "name" passed to the Cookie constructor must be a valid token as per RFC 2616, Section 2.2.', 1345101977);
@@ -124,13 +137,13 @@ class Cookie
         if (! is_integer($expires)) {
             throw new \InvalidArgumentException('The parameter "expires" passed to the Cookie constructor must be a unix timestamp or a DateTime object.', 1345108785);
         }
-        if ($maximumAge !== NULL && ! is_integer($maximumAge)) {
+        if ($maximumAge !== null && ! is_integer($maximumAge)) {
             throw new \InvalidArgumentException('The parameter "maximumAge" passed to the Cookie constructor must be an integer value.', 1345108786);
         }
-        if ($domain !== NULL && preg_match(self::PATTERN_DOMAIN, $domain) !== 1) {
+        if ($domain !== null && preg_match(self::PATTERN_DOMAIN, $domain) !== 1) {
             throw new \InvalidArgumentException('The parameter "domain" passed to the Cookie constructor must be a valid domain as per RFC 6265, Section 4.1.2.3.', 1345116246);
         }
-        if ($path !== NULL && preg_match(self::PATTERN_PATH, $path) !== 1) {
+        if ($path !== null && preg_match(self::PATTERN_PATH, $path) !== 1) {
             throw new \InvalidArgumentException('The parameter "path" passed to the Cookie constructor must be a valid path as per RFC 6265, Section 4.1.1.', 1345123078);
         }
         
@@ -140,8 +153,8 @@ class Cookie
         $this->maximumAge = $maximumAge;
         $this->domain = $domain;
         $this->path = $path;
-        $this->secure = ($secure == TRUE);
-        $this->httpOnly = ($httpOnly == TRUE);
+        $this->secure = ($secure == true);
+        $this->httpOnly = ($httpOnly == true);
     }
 
     /**
@@ -152,8 +165,8 @@ class Cookie
      * in case a required condition is not met. In these cases this function will return NULL
      * rather than the created cookie.
      *
-     * @param string $header
-     *            The Set-Cookie string without the actual "Set-Cookie:" part
+     * @param string $header The Set-Cookie string without the actual "Set-Cookie:" part
+     *
      * @return \TYPO3\Flow\Http\Cookie
      * @see http://tools.ietf.org/html/rfc6265
      */
@@ -163,22 +176,22 @@ class Cookie
         $expectedNameValuePair = $nameValueAndUnparsedAttributes[0];
         $unparsedAttributes = isset($nameValueAndUnparsedAttributes[1]) ? $nameValueAndUnparsedAttributes[1] : '';
         
-        if (strpos($expectedNameValuePair, '=') === FALSE) {
-            return NULL;
+        if (strpos($expectedNameValuePair, '=') === false) {
+            return null;
         }
         $cookieNameAndValue = explode('=', $expectedNameValuePair, 2);
         $cookieName = trim($cookieNameAndValue[0]);
         $cookieValue = isset($cookieNameAndValue[1]) ? trim($cookieNameAndValue[1]) : '';
         if ($cookieName === '') {
-            return NULL;
+            return null;
         }
         
         $expiresAttribute = 0;
-        $maxAgeAttribute = NULL;
-        $domainAttribute = NULL;
-        $pathAttribute = NULL;
-        $secureAttribute = FALSE;
-        $httpOnlyAttribute = TRUE;
+        $maxAgeAttribute = null;
+        $domainAttribute = null;
+        $pathAttribute = null;
+        $secureAttribute = false;
+        $httpOnlyAttribute = true;
         
         if ($unparsedAttributes !== '') {
             foreach (explode(';', $unparsedAttributes) as $cookieAttributeValueString) {
@@ -214,10 +227,10 @@ class Cookie
                         }
                         break;
                     case 'SECURE':
-                        $secureAttribute = TRUE;
+                        $secureAttribute = true;
                         break;
                     case 'HTTPONLY':
-                        $httpOnlyAttribute = TRUE;
+                        $httpOnlyAttribute = true;
                         break;
                 }
             }
@@ -253,8 +266,8 @@ class Cookie
     /**
      * Sets the value of this cookie
      *
-     * @param mixed $value
-     *            The new value
+     * @param mixed $value The new value
+     *
      * @return void 
      * @api
      */
@@ -371,7 +384,7 @@ class Cookie
      */
     public function __toString()
     {
-        if ($this->value === FALSE) {
+        if ($this->value === false) {
             $value = 0;
         } else {
             $value = $this->value;
@@ -384,7 +397,7 @@ class Cookie
             $attributes .= '; Expires=' . gmdate('D, d-M-Y H:i:s T', $this->expiresTimestamp);
         }
         
-        if ($this->domain !== NULL) {
+        if ($this->domain !== null) {
             $attributes .= '; Domain=' . $this->domain;
         }
         

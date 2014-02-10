@@ -1,13 +1,16 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Exceptions
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Exceptions;
@@ -15,11 +18,14 @@ namespace TechDivision\ServletContainer\Exceptions;
 /**
  * Is thrown if a servlet doesn't implement the necessary methods to be serviced.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Markus Stockbauer <ms@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Exceptions
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-class MethodNotImplementedException extends \Exception {
+class MethodNotImplementedException extends \Exception
+{
 }

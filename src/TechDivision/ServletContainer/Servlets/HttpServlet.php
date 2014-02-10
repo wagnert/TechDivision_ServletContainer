@@ -1,39 +1,50 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\HttpServlet
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Servlets\GenericServlet;
 use TechDivision\ServletContainer\Exceptions\MethodNotImplementedException;
+use TechDivision\ServletContainer\Exceptions\ServletException;
+use TechDivision\ServletContainer\Exceptions\IOException;
 
 /**
  * Abstract Http servlet implementation.
  *
- * @package TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author Markus Stockbauer <ms@techdivision.com>
- * @author Tim Wagner <tw@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 abstract class HttpServlet extends GenericServlet
 {
 
     /**
+     * Implements http method CONNECT
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doConnect(Request $req, Response $res)
@@ -42,10 +53,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method DELETE
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doDelete(Request $req, Response $res)
@@ -54,10 +67,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method GET
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doGet(Request $req, Response $res)
@@ -66,10 +81,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method HEAD
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doHead(Request $req, Response $res)
@@ -78,10 +95,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method OPTIONS
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doOptions(Request $req, Response $res)
@@ -90,10 +109,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method POST
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doPost(Request $req, Response $res)
@@ -102,10 +123,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method PUT
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doPut(Request $req, Response $res)
@@ -114,10 +137,12 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Implements http method TRACE
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
      */
     public function doTrace(Request $req, Response $res)
@@ -126,12 +151,14 @@ abstract class HttpServlet extends GenericServlet
     }
 
     /**
+     * Delegation method for specific http methods
      *
-     * @param Request $req            
-     * @param Response $res            
-     * @throws ServletException
-     * @throws IOException
-     * @throws MethodNotImplementedException
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException
+     * @throws \TechDivision\ServletContainer\Exceptions\IOException
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return mixed
      */
     public function service(Request $req, Response $res)

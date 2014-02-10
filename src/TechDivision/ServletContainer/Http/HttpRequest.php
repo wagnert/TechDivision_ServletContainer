@@ -1,14 +1,19 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Http\HttpRequest
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer\Http;
 
 use TechDivision\ServletContainer\Interfaces\Request;
@@ -21,14 +26,16 @@ use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 
 /**
- * A web request implementation.
+ * A http server request implementation.
  *
- * @package   TechDivision\ServletContainer
- * @copyright Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license   http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
- * @author    Johann Zelger <jz@techdivision.com>
- *         Philipp Dittert <p.dittert@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HttpRequest implements Request
 {
@@ -221,7 +228,7 @@ class HttpRequest implements Request
     /**
      * Inject the query parser
      *
-     * @param QueryParser $queryParser The query parser
+     * @param QueryParser $queryParser The query parser implementation to use for
      *
      * @return void
      */
@@ -233,7 +240,7 @@ class HttpRequest implements Request
     /**
      * Inject a part factory
      *
-     * @param Part $part A part implementation with factory function
+     * @param Part $part A Part implementation with factory function
      *
      * @return void
      */
@@ -258,6 +265,7 @@ class HttpRequest implements Request
      * @param string $buffer InputStream
      *
      * @return \TechDivision\ServletContainer\Http\HttpRequest
+     *
      */
     public function initFromRawHeader($buffer)
     {
@@ -297,7 +305,7 @@ class HttpRequest implements Request
     /**
      * Parse multipart form data
      *
-     * @param string $content Content
+     * @param string $content The content to parse
      *
      * @return void
      */
@@ -393,10 +401,7 @@ class HttpRequest implements Request
         }
 
         // finally set parameter map
-        $this->setParameterMap(
-            $this->getQueryParser()
-                ->getResult()
-        );
+        $this->setParameterMap($this->getQueryParser()->getResult());
     }
 
     /**
@@ -515,7 +520,7 @@ class HttpRequest implements Request
     /**
      * Set ParameterMap
      *
-     * @param array $parameterMap Map of parameters
+     * @param array $parameterMap The parameter map array
      *
      * @return void
      */
@@ -537,7 +542,7 @@ class HttpRequest implements Request
     /**
      * Sets response object
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response object
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response A response instance
      *
      * @return void
      */
@@ -549,7 +554,7 @@ class HttpRequest implements Request
     /**
      * Returns the response instance.
      *
-     * @return Response The response instance
+     * @return \TechDivision\ServletContainer\Interfaces\Response The response instance
      */
     public function getResponse()
     {
@@ -559,7 +564,7 @@ class HttpRequest implements Request
     /**
      * Returns header info by given key
      *
-     * @param string $key The key for the needed header
+     * @param string $key The header key to get
      *
      * @return string|null
      */
@@ -595,7 +600,7 @@ class HttpRequest implements Request
     /**
      * Sets query string
      *
-     * @param string $queryString The query string
+     * @param string $queryString The query string to set
      *
      * @return void
      */
@@ -706,7 +711,7 @@ class HttpRequest implements Request
     /**
      * Set headers data
      *
-     * @param array $headers
+     * @param array $headers The headers array to set
      *
      * @return void
      */
@@ -718,7 +723,7 @@ class HttpRequest implements Request
     /**
      * Sets the body content
      *
-     * @param string $content Request content
+     * @param string $content The content to set
      *
      * @return void
      */
@@ -772,7 +777,7 @@ class HttpRequest implements Request
     /**
      * Set request uri
      *
-     * @param string $uri URI
+     * @param string $uri The uri to set
      *
      * @return void
      */
@@ -794,7 +799,7 @@ class HttpRequest implements Request
     /**
      * Set protocol version
      *
-     * @param string $version Protocol version
+     * @param string $version The http protocol version
      *
      * @return void
      */
@@ -838,8 +843,10 @@ class HttpRequest implements Request
     /**
      * Set specific server var data
      *
-     * @param string $key   The variable to set
-     * @param string $value The value it will get
+     * @param string $key   The server var key
+     * @param string $value The value for given server var key
+     *
+     * @return void
      */
     public function setServerVar($key, $value)
     {
@@ -849,9 +856,9 @@ class HttpRequest implements Request
     /**
      * Returns specific server var data
      *
-     * @param string $key The variable to return
+     * @param string $key The key to get
      *
-     * @return mixed
+     * @return null|string
      */
     public function getServerVar($key)
     {
@@ -863,7 +870,7 @@ class HttpRequest implements Request
     /**
      * Sets clients ip address
      *
-     * @param string $clientIp Ip of the client
+     * @param string $clientIp The client's ip address as string
      *
      * @return void
      */
@@ -885,7 +892,7 @@ class HttpRequest implements Request
     /**
      * Sets clients port
      *
-     * @param int $clientPort Port of the client
+     * @param int|string $clientPort The client's port as string (or int)
      *
      * @return void
      */
@@ -907,7 +914,7 @@ class HttpRequest implements Request
     /**
      * Sets the webapps name related with the request
      *
-     * @param string $webappName Name of the webapp
+     * @param string $webappName The webapp's name
      *
      * @return void
      */
@@ -927,13 +934,13 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns the parameter with the passed name if available or NULL
+     * Returns the parameter with the passed name if available or null
      * if the parameter not exists.
      *
      * @param string  $name   The name of the parameter to return
      * @param integer $filter The filter to use
      *
-     * @return string
+     * @return string|null
      */
     public function getParameter($name, $filter = FILTER_SANITIZE_STRING)
     {
@@ -970,10 +977,8 @@ class HttpRequest implements Request
     /**
      * adds a part to the parts collection
      *
-     * @param Part   $part
-     *            a form part object
-     * @param string $name
-     *            A manually defined name
+     * @param Part   $part A form part object
+     * @param string $name A manually defined name
      *
      * @return void
      */
@@ -986,13 +991,12 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns TRUE if the request has a cookie header with the passed
-     * name, else FALSE.
+     * Returns true if the request has a cookie header with the passed
+     * name, else false.
      *
-     * @param string $cookieName
-     *            Name of the cookie header to be checked
+     * @param string $cookieName Name of the cookie header to be checked
      *
-     * @return boolean TRUE if the request has the cookie, else FALSE
+     * @return boolean true if the request has the cookie, else false
      */
     public function hasCookie($cookieName)
     {

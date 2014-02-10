@@ -1,14 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Container
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
+
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractContainer;
@@ -17,12 +20,14 @@ use TechDivision\ServletContainer\Exceptions\BadRequestException;
 use TechDivision\ServletContainer\Http\AccessLogger;
 
 /**
+ * Class Container
  *
- * @package   TechDivision\ServletContainer
- * @copyright Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license   http://opensource.org/licenses/osl-3.0.php
- *          Open Software License (OSL 3.0)
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
  * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
  */
 class Container extends AbstractContainer
 {
@@ -38,13 +43,15 @@ class Container extends AbstractContainer
      * Initializes the container with the initial context, the unique container ID
      * and the deployed applications.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext $initialContext
-     *            The initial context instance
-     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode $containerNode
-     *            The container's UUID
+     * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial context
+     *                                                                                               instance
+     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The container's
+     *                                                                                               UUID
+     * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application
+     *                                                                                               instance
      *
-     * @todo Application deployment only works this way because of Thread compatibilty
      * @return void
+     * @todo Application deployment only works this way because of Thread compatibilty
      */
     public function __construct($initialContext, $containerNode, $applications)
     {
@@ -66,7 +73,7 @@ class Container extends AbstractContainer
      * Tries to find and return the application for the passed request.
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request to find and return
-     *      the application instance for
+     *                                                                          the application instance for
      *
      * @return \TechDivision\ServletContainer\Application The application instance
      * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found
@@ -119,7 +126,7 @@ class Container extends AbstractContainer
      * specific data.
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request instance to be prepared
-     *      with the container specific data
+     *                                                                          with the container specific data
      *
      * @return void
      */
@@ -131,15 +138,11 @@ class Container extends AbstractContainer
         );
         $servletRequest->setServerVar(
             'SERVER_SOFTWARE',
-            $this->getContainerNode()
-                ->getHost()
-                ->getServerSoftware()
+            $this->getContainerNode()->getHost()->getServerSoftware()
         );
         $servletRequest->setServerVar(
             'SERVER_ADMIN',
-            $this->getContainerNode()
-                ->getHost()
-                ->getServerAdmin()
+            $this->getContainerNode()->getHost()->getServerAdmin()
         );
     }
 }
