@@ -71,10 +71,10 @@ class HttpResponse implements Response
     {
         $this->initHeaders();
     }
-    
+
     /**
      * Prepares the headers.
-     * 
+     *
      * @return void
      */
     public function initHeaders()
@@ -109,7 +109,7 @@ class HttpResponse implements Response
     /**
      *
      * @param string $header
-     * @param string $value
+     * @param string|int $value
      */
     public function addHeader($header, $value)
     {
@@ -119,8 +119,7 @@ class HttpResponse implements Response
     /**
      * Returns header info by given key
      *
-     * @param
-     *            $key
+     * @param string $key
      */
     public function getHeader($key)
     {
@@ -239,7 +238,7 @@ class HttpResponse implements Response
 
     /**
      *
-     * @param Cookie $cookie
+     * @param \TechDivision\ServletContainer\Http\Cookie $cookie
      * @return void
      */
     public function addCookie(Cookie $cookie)
@@ -268,8 +267,7 @@ class HttpResponse implements Response
     /**
      * Sets accepted encodings data
      *
-     * @param
-     *            $acceptedEncodings
+     * @param array $acceptedEncodings
      */
     public function setAcceptedEncodings($acceptedEncodings)
     {
@@ -293,18 +291,18 @@ class HttpResponse implements Response
      */
     public function prepareHeaders()
     {
-        
+
         // grap headers and set to response object
         foreach (appserver_get_headers(true) as $i => $h) {
 
             // set headers defined in sapi headers
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
-                
+
                 // load header key and value
                 $key = trim($h[0]);
                 $value = trim($h[1]);
-                    
+
                 // if not, add the header
                 $this->addHeader($key, $value);
 

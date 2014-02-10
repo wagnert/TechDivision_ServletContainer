@@ -26,56 +26,56 @@ interface Request
 
     /**
      * POST request method string.
-     * 
+     *
      * @var string
      */
     const POST = 'POST';
 
     /**
      * GET request method string.
-     * 
+     *
      * @var string
      */
     const GET = 'GET';
 
     /**
      * HEAD request method string.
-     * 
+     *
      * @var string
      */
     const HEAD = 'HEAD';
 
     /**
      * PUT request method string.
-     * 
+     *
      * @var string
      */
     const PUT = 'PUT';
 
     /**
      * DELETE request method string.
-     * 
+     *
      * @var string
      */
     const DELETE = 'DELETE';
 
     /**
      * OPTIONS request method string.
-     * 
+     *
      * @var string
      */
     const OPTIONS = 'OPTIONS';
 
     /**
      * TRACE request method string.
-     * 
+     *
      * @var string
      */
     const TRACE = 'TRACE';
 
     /**
      * CONNECT request method string.
-     * 
+     *
      * @var string
      */
     const CONNECT = 'CONNECT';
@@ -83,7 +83,7 @@ interface Request
     /**
      * Parse request content
      *
-     * @param string $content            
+     * @param string $content
      * @return void
      */
     public function parse($content);
@@ -91,9 +91,8 @@ interface Request
     /**
      * validate actual InputStream
      *
-     * @param string $buffer
-     *            InputStream
-     * @return void
+     * @param string $buffer InputStream
+     * @return \TechDivision\ServletContainer\Interfaces\Request
      */
     public function initFromRawHeader($buffer);
 }

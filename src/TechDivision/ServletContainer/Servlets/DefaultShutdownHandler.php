@@ -29,22 +29,22 @@ class DefaultShutdownHandler implements ShutdownHandler
 
     /**
      * The Http client that handles the request
-     * @var unknown
+     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
      */
     public $client;
 
     /**
      * The Http response instance.
-     * @var \TechDivision\ServletContainer\Http\HttpResponse
+     * @var \TechDivision\ServletContainer\Interfaces\Response
      */
     public $response;
 
     /**
      * Constructor
      *
-     * @param HttpClient $client            
-     * @param \TechDivision\ServletContainer\Http\HttpResponse $response The Http response instance
-     * @return void            
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response The Http response instance
+     * @return void
      */
     public function __construct($client, Response $response)
     {

@@ -237,9 +237,11 @@ class ServletLocator implements ResourceLocatorInterface
     /**
      * search for a matching url pattern
      *
-     * @param $context
-     * @param $path
-     * @return array
+     * @param \Symfony\Component\Routing\RequestContext $context
+     * @param string $path
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet
+     *
+     * @return null
      */
     protected function secureUrlMatcher($context, $path, $servlet)
     {
