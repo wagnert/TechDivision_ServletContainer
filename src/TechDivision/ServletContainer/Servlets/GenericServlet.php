@@ -25,15 +25,16 @@ use TechDivision\ServletContainer\AuthenticationManager;
 /**
  * Abstract servlet implementation.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
+ * @package        TechDivision\ServletContainer
+ * @copyright      Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
+ * @license        http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
- * @author      Markus Stockbauer <ms@techdivision.com>
- * @author      Tim Wagner <tw@techdivision.com>
- * @author      Johann Zelger <jz@techdivision.com>
+ * @author         Markus Stockbauer <ms@techdivision.com>
+ * @author         Tim Wagner <tw@techdivision.com>
+ * @author         Johann Zelger <jz@techdivision.com>
  */
-abstract class GenericServlet implements Servlet {
+abstract class GenericServlet implements Servlet
+{
 
     /**
      * The unique servlet name.
@@ -123,6 +124,7 @@ abstract class GenericServlet implements Servlet {
      * Injects a queryparser
      *
      * @param QueryParser $queryParser
+     *
      * @return void
      */
     public function injectQueryParser(QueryParser $queryParser)
@@ -173,7 +175,9 @@ abstract class GenericServlet implements Servlet {
     /**
      * Sets the authentication required flag.
      *
-     * @param $authenticationRequired
+     * @param bool $authenticationRequired Is there a required authentication?
+     *
+     * @return void
      */
     public function setAuthenticationRequired($authenticationRequired)
     {
@@ -187,7 +191,15 @@ abstract class GenericServlet implements Servlet {
      */
     public function getAuthenticationRequired()
     {
-        return $this->authenticationRequired;
+        // This might not be set by default, so we will return false as our default
+        if (!isset($this->authenticationRequired)) {
+
+            return false;
+
+        } else {
+
+            return $this->authenticationRequired;
+        }
     }
 
     /**
@@ -231,10 +243,10 @@ abstract class GenericServlet implements Servlet {
 
                 // return the string representation of the response content to the client
                 $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-            
+
                 $client->shutdown();
                 $client->close();
-                
+
             } catch (\Exception $e) {
                 $client->close();
             }
