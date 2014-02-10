@@ -17,6 +17,7 @@ namespace TechDivision\ServletContainer;
 use TechDivision\ApplicationServer\AbstractContainer;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Exceptions\BadRequestException;
+use TechDivision\ServletContainer\Http\AccessLogger;
 
 /**
  * Class Container
@@ -34,7 +35,7 @@ class Container extends AbstractContainer
     /**
      * Holds access logger instance
      *
-     * @var AccessLogger
+     * @var \TechDivision\ServletContainer\Http\AccessLogger
      */
     protected $accessLogger;
 
@@ -42,9 +43,12 @@ class Container extends AbstractContainer
      * Initializes the container with the initial context, the unique container ID
      * and the deployed applications.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial context instance
-     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The container's UUID
-     * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application instance
+     * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial context
+     *                                                                                               instance
+     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The container's
+     *                                                                                               UUID
+     * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application
+     *                                                                                               instance
      *
      * @return void
      * @todo Application deployment only works this way because of Thread compatibilty
@@ -54,11 +58,11 @@ class Container extends AbstractContainer
         parent::__construct($initialContext, $containerNode, $applications);
         $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
     }
-    
+
     /**
      * The access logger implementation that writes the Apache compatible log files.
-     * 
-     * @return \TechDivision\ServletContainer\AccessLogger The access logger implementation
+     *
+     * @return \TechDivision\ServletContainer\Http\AccessLogger The access logger implementation
      */
     public function getAccessLogger()
     {
@@ -68,47 +72,51 @@ class Container extends AbstractContainer
     /**
      * Tries to find and return the application for the passed request.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request to find and return the application instance for
+     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request to find and return
+     *                                                                          the application instance for
      *
      * @return \TechDivision\ServletContainer\Application The application instance
-     * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found for the passed application name
+     * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found
+     *      for the passed application name
      */
     public function findApplication(Request $servletRequest)
     {
-        
+
         // load the server name
         $serverName = $servletRequest->getServerName();
-        
+
         // prepare the server variables for this container
         $this->prepareServerVars($servletRequest);
-        
+
         // load the array with the applications
         $applications = $this->getApplications();
-        
+
         // iterate over the applications and check if one of the VHosts match the request
         foreach ($applications as $application) {
             if ($application->isVhostOf($serverName)) {
                 // set the DOCUMENT_ROOT to /opt/appserver/webapps/<WEBAPP-NAME>
                 $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
                 $servletRequest->setWebappName($application->getName());
+
                 return $application;
             }
         }
-        
+
         // load path information
         $pathInfo = $servletRequest->getPathInfo();
-        
+
         // strip the leading slash and explode the application name
         list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
-        
+
         // if not, check if the request matches a folder
         if (array_key_exists($applicationName, $applications)) {
             // set the DOCUMENT_ROOT to /opt/appserver/webapps
             $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getWebappPath());
             $servletRequest->setWebappName($applications[$applicationName]->getName());
+
             return $applications[$applicationName];
         }
-        
+
         // if not throw an exception
         throw new BadRequestException("Can\'t find application for '$applicationName'");
     }
@@ -117,7 +125,8 @@ class Container extends AbstractContainer
      * Prepare's the request with the server vars $_SERVER from the container's
      * specific data.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request instance to be prepared with the container specific data
+     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request instance to be prepared
+     *                                                                          with the container specific data
      *
      * @return void
      */

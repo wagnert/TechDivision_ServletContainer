@@ -17,7 +17,7 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\AuthenticationtManager;
+use TechDivision\ServletContainer\AuthenticationManager;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
@@ -25,7 +25,6 @@ use TechDivision\ServletContainer\Interfaces\ShutdownHandler;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Socket\HttpClient;
-use TechDivision\ServletContainer\AuthenticationManager;
 
 /**
  * Abstract servlet implementation.
@@ -88,7 +87,8 @@ abstract class GenericServlet implements Servlet
     /**
      * Initializes the servlet with the passed configuration.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to initialize the servlet with
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to
+     *                                                                        initialize the servlet with
      *
      * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
      * @return void
@@ -155,7 +155,8 @@ abstract class GenericServlet implements Servlet
     /**
      * Injects the authentication manager.
      *
-     * @param \TechDivision\ServletContainer\AuthenticationManager $authenticationManager An authentication manager instance
+     * @param \TechDivision\ServletContainer\AuthenticationManager $authenticationManager An authentication
+     *                                                                                    manager instance
      *
      * @return void
      */
@@ -215,7 +216,15 @@ abstract class GenericServlet implements Servlet
      */
     public function getAuthenticationRequired()
     {
-        return $this->authenticationRequired;
+        // This might not be set by default, so we will return false as our default
+        if (!isset($this->authenticationRequired)) {
+
+            return false;
+
+        } else {
+
+            return $this->authenticationRequired;
+        }
     }
 
     /**
@@ -231,8 +240,10 @@ abstract class GenericServlet implements Servlet
     /**
      * Will be invoked by the PHP when the servlets destruct method or exit() or die() has been invoked.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that handles the request
-     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to the client
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that
+     *                                                                                handles the request
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to
+     *                                                                                the client
      *
      * @return void
      */
@@ -264,10 +275,10 @@ abstract class GenericServlet implements Servlet
 
                 // return the string representation of the response content to the client
                 $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-            
+
                 $client->shutdown();
                 $client->close();
-                
+
             } catch (\Exception $e) {
                 $client->close();
             }

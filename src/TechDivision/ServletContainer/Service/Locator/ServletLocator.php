@@ -182,14 +182,15 @@ class ServletLocator implements ResourceLocatorInterface
      * @param Request $request The request instance to return the servlet for
      *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
-     * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found for the passed request
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found
+     *     for the passed request
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
      */
     public function locate(Request $request)
     {
         // build the file-path of the request
         $path = $request->getPathInfo();
-        
+
         // check if the application is loaded by a VHost
         $applicationName = $this->getApplication()->getName();
         if (! $this->getApplication()->isVhostOf($request->getServerName())) {
@@ -212,13 +213,13 @@ class ServletLocator implements ResourceLocatorInterface
         } elseif (! is_array($servletCache)) {
             $servletCache = array();
         }
-        
+
         // print_r($this->getRoutes());
         $matcher = new UrlMatcher($this->getRoutes(), $context);
-        
+
         // traverse the path to find matching servlet
         do {
-            
+
             try {
                 $servlet = $matcher->match($path);
                 break;
@@ -226,7 +227,7 @@ class ServletLocator implements ResourceLocatorInterface
                 $path = substr($path, 0, strrpos($path, '/'));
             }
         } while (strpos($path, '/') !== false);
-        
+
         // check at least one servlet has been found
         if (is_array($servlet) === false || sizeof($servlet) === 0) {
             throw new ServletNotFoundException("Can't find servlet for requested path $path");
@@ -253,7 +254,7 @@ class ServletLocator implements ResourceLocatorInterface
      * @param string                                            $path    The path to resolve
      * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
      *
-     * @return array
+     * @return null
      */
     protected function secureUrlMatcher($context, $path, $servlet)
     {

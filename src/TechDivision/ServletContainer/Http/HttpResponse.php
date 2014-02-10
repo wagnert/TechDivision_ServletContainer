@@ -78,10 +78,10 @@ class HttpResponse implements Response
     {
         $this->initHeaders();
     }
-    
+
     /**
      * Prepares the headers.
-     * 
+     *
      * @return void
      */
     public function initHeaders()
@@ -120,8 +120,8 @@ class HttpResponse implements Response
     /**
      * Add's a header to array
      *
-     * @param string $header The header label e.g. Accept or Content-Length
-     * @param string $value  The header value
+     * @param string     $header The header label e.g. Accept or Content-Length
+     * @param string|int $value  The header value
      *
      * @return void
      */
@@ -314,18 +314,18 @@ class HttpResponse implements Response
      */
     public function prepareHeaders()
     {
-        
+
         // grap headers and set to response object
         foreach (appserver_get_headers(true) as $i => $h) {
 
             // set headers defined in sapi headers
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
-                
+
                 // load header key and value
                 $key = trim($h[0]);
                 $value = trim($h[1]);
-                    
+
                 // if not, add the header
                 $this->addHeader($key, $value);
 

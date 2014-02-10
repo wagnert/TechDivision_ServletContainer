@@ -37,7 +37,8 @@ class DefaultShutdownHandler implements ShutdownHandler
     /**
      * The Http client that handles the request
      *
-     * @var HttpClientInterface
+     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
+     *
      */
     public $client;
 
@@ -45,6 +46,7 @@ class DefaultShutdownHandler implements ShutdownHandler
      * The Http response instance.
      *
      * @var \TechDivision\ServletContainer\Http\HttpResponse
+     *
      */
     public $response;
 
