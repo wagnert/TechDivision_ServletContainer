@@ -51,7 +51,7 @@ class RequestHandler extends AbstractContextThread
      * 
      * @var integer
      */
-    const RECEIVE_TIMEOUT = 75;
+    const RECEIVE_TIMEOUT = 5;
 
     /**
      * Holds the container instance.
