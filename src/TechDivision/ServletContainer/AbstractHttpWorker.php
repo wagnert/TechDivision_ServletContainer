@@ -44,6 +44,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
     public function main()
     {
         try {
+            
             // the counter with the number of requests to handle
             $handleRequests = AbstractHttpWorker::HANDLE_REQUESTS;
 
