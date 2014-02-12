@@ -39,6 +39,13 @@ namespace TechDivision\ServletContainer\Http;
  */
 class Cookie
 {
+    
+    /**
+     * Domain name for 'localhost'
+     * 
+     * @var string
+     */
+    const LOCALHOST = 'localhost';
 
     /**
      * A token as per RFC 2616, Section 2.2
@@ -128,6 +135,8 @@ class Cookie
      */
     public function __construct($name, $value = null, $expires = 0, $maximumAge = null, $domain = null, $path = '/', $secure = false, $httpOnly = true)
     {
+        
+        // check if valid data is passed
         if (preg_match(self::PATTERN_TOKEN, $name) !== 1) {
             throw new \InvalidArgumentException('The parameter "name" passed to the Cookie constructor must be a valid token as per RFC 2616, Section 2.2.', 1345101977);
         }
@@ -147,11 +156,20 @@ class Cookie
             throw new \InvalidArgumentException('The parameter "path" passed to the Cookie constructor must be a valid path as per RFC 6265, Section 4.1.1.', 1345123078);
         }
         
+        /*
+         * If the domain is 'localhost' do NOT set it
+         * 
+         * Fix for Chrome issue https://code.google.com/p/chromium/issues/detail?id=56211
+         */
+        if ($domain !== Cookie::LOCALHOST) {
+            $this->domain = $domain;
+        }
+        
+        // set the other cookie values
         $this->name = $name;
         $this->value = $value;
         $this->expiresTimestamp = $expires;
         $this->maximumAge = $maximumAge;
-        $this->domain = $domain;
         $this->path = $path;
         $this->secure = ($secure == true);
         $this->httpOnly = ($httpOnly == true);
