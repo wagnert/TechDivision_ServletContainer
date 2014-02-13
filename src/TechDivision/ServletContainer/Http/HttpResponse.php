@@ -47,6 +47,10 @@ class HttpResponse implements Response
 
     const HEADER_NAME_CONTENT_TYPE = 'Content-Type';
 
+    const HEADER_NAME_CACHE_CONTROL = 'Cache-Control';
+
+    const HEADER_NAME_PRAGMA = 'Pragma';
+
     /**
      *
      * @var string
@@ -91,7 +95,9 @@ class HttpResponse implements Response
             self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
             self::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
             self::HEADER_NAME_CONNECTION => "keep-alive",
-            self::HEADER_NAME_CONTENT_TYPE => "text/html"
+            self::HEADER_NAME_CONTENT_TYPE => "text/html",
+            self::HEADER_NAME_CACHE_CONTROL => "max-age=0, no-cache, no-store",
+            self::HEADER_NAME_PRAGMA => "no-cache",
         ));
     }
 
