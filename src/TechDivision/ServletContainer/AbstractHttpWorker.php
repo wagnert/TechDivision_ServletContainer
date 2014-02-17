@@ -15,6 +15,7 @@
 namespace TechDivision\ServletContainer;
 
 use TechDivision\ApplicationServer\AbstractWorker;
+use TechDivision\ServletContainer\Session\PersistentSessionManager;
 
 /**
  * The worker implementation that handles the request.

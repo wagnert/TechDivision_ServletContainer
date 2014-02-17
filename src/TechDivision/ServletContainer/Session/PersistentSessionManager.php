@@ -60,8 +60,8 @@ class PersistentSessionManager implements SessionManager
      * Create's a new session with the passed session ID and session name if give.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $request     The request instance
-     * @param string                                            $sessionId   The session ID used to create the session
-     * @param string                                            $sessionName The unique session name to use
+     * @param string|null                                       $sessionId   The session ID used to create the session
+     * @param string|null                                       $sessionName The unique session name to use
      *
      * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
      * @todo integrate cookie path handling 
