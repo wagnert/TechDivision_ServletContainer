@@ -63,7 +63,7 @@ class HttpQueryParser implements QueryParser
      * It is not necessary to use in_array() because the content type can be 
      * extended by encoding, e. g. application/x-www-form-urlencoded; UTF-8.
      *
-     * @param string $contentType The content's type
+     * @param string|null $contentType The content's type
      *
      * @return boolean TRUE if the content has to be parsed, else FALSE
      */

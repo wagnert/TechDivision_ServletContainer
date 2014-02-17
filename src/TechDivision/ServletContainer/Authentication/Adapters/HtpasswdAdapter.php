@@ -34,20 +34,26 @@ class HtpasswdAdapter extends AuthenticationAdapter
 {
 
     /**
-     * @var string $htpasswd The content of the htpasswd file.
+     * The content of the htpasswd file.
+     * 
+     * @var string
      */
     protected $htpasswd;
 
     /**
-     * @var string $filename The filename of the htpasswd file.
+     * The filename of the htpasswd file.
+     * 
+     * @var string
      */
     protected $filename;
 
     /**
-     * Construct
+     * Construct to initialize the adapter.
      *
      * @param array                                             $options The options
      * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     * 
+     * @return void
      */
     public function __construct($options, Servlet $servlet)
     {
@@ -150,7 +156,7 @@ class HtpasswdAdapter extends AuthenticationAdapter
      * @param string $clearTextPassword The password plaintext
      * @param string $hashedPassword    The password hashed
      *
-     * @return bool
+     * @return boolean
      */
     protected function checkCrypt($clearTextPassword, $hashedPassword)
     {
@@ -167,13 +173,14 @@ class HtpasswdAdapter extends AuthenticationAdapter
      * @param string $clearTextPassword The password plaintext
      * @param string $hashedPassword    The password hashed
      *
-     * @return bool
+     * @return boolean
      */
     protected function checkSha1($clearTextPassword, $hashedPassword)
     {
         if (base64_encode(sha1($clearTextPassword, true)) == $hashedPassword) {
             return true;
         }
+        return false;
     }
 
     /**
@@ -187,12 +194,12 @@ class HtpasswdAdapter extends AuthenticationAdapter
     }
 
     /**
-     * generates a apr1-md5 (apache compatible) password hash
+     * Generates a apr1-md5 (apache compatible) password hash
      *
      * @param string $plainpasswd The password in plaintext
      * @param string $salt        The salt
      *
-     * @return string
+     * @return string The salted password hash
      */
     protected function generateCryptApr1Md5($plainpasswd, $salt = null)
     {

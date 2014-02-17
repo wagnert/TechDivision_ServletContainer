@@ -588,9 +588,9 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns query string
+     * Returns query string of the actual request.
      *
-     * @return string
+     * @return string|null The query string of the actual request
      */
     public function getQueryString()
     {
@@ -1008,7 +1008,7 @@ class HttpRequest implements Request
      *
      * @param string $cookieName The name of the cookie to return
      *
-     * @return string The cookie value
+     * @return mixed The cookie value
      */
     public function getCookie($cookieName)
     {

@@ -180,9 +180,9 @@ class ServletSession
      * the Session Manager or through dependency injection (use SessionInterface!).
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request $request               The request instance
-     * @param string                                            $sessionIdentifier     The public session identifier which is also used in the session cookie
-     * @param integer                                           $lastActivityTimestamp Unix timestamp of the last known activity for this session
-     * @param array                                             $tags                  A list of tags set for this session
+     * @param string|null                                       $sessionIdentifier     The public session identifier which is also used in the session cookie
+     * @param integer|null                                      $lastActivityTimestamp Unix timestamp of the last known activity for this session
+     * @param array|null                                        $tags                  A list of tags set for this session
      *
      * @throws \InvalidArgumentException
      */
