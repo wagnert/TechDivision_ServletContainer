@@ -118,7 +118,7 @@ class HttpClient extends Client implements HttpClientInterface
         $buffer = null;
         
         // read a chunk from the socket
-        while(strpos($buffer, $this->getNewLine()) === false) {
+        while (strpos($buffer, $this->getNewLine()) === false) {
             $buffer .= $this->read($this->getLineLength());
         }
 
