@@ -113,51 +113,44 @@ class HttpClient extends Client implements HttpClientInterface
      */
     public function receive()
     {
-        
+
         // initialize the buffer
         $buffer = null;
         
         // read a chunk from the socket
-        while ($buffer .= $this->read($this->getLineLength())) {
-            if (false !== strpos($buffer, $this->getNewLine())) {
-                break;
-            }
+        while (strpos($buffer, $this->getNewLine()) === false) {
+            $buffer .= $this->read($this->getLineLength());
         }
-            
+
         // if the socket has been closed by peer
-        if ($buffer === '' || $buffer === false) {
+        if ($buffer === '' || $buffer === null) {
             $this->close();
             throw new ConnectionClosedByPeerException('Connection reset by peer');
         }
-        
+
         // separate header from body chunk
         list ($rawHeader) = explode($this->getNewLine(), $buffer);
         $body = str_replace($rawHeader . $this->getNewLine(), '', $buffer);
-        
+
         // initialize the request from the raw headers
         $requestInstance = $this->getHttpRequest();
         $requestInstance->initFromRawHeader($rawHeader);
-        
+
         // check if body-length not reached content-length already
         if (($contentLength = $requestInstance->getHeader('Content-Length')) && ($contentLength > strlen($body))) {
             // read a chunk from the socket till content length is reached
-            while ($line = $this->read($this->getLineLength())) {
+            while (strlen($body) < (int) $contentLength) {
                 // append body
-                $body .= $line;
-                
-                // if length is reached break here
-                if (strlen($body) == (int) $contentLength) {
-                    break;
-                }
+                $body .= $this->read($this->getLineLength());
             }
         }
-        
+
         // inject part instance
         $requestInstance->injectHttpPart($this->getHttpPart());
-        
+
         // parse body with request instance
         $requestInstance->parse($body);
-        
+
         // initialize client IP + port
         $requestInstance->setClientIp($this->getAddress());
         $requestInstance->setClientPort($this->getPort());

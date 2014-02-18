@@ -131,20 +131,20 @@ class RequestHandler extends AbstractContextThread
             $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
             
             do { // let socket open as long as max request or socket timeout is not reached
-                
+
                 // receive request object from client
                 $request = $client->receive();
-                
+
                 // initialize response, set the actual date and add accepted encoding methods
                 $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
                 $response = $request->getResponse();
                 $response->initHeaders();
                 $response->setAcceptedEncodings($request->getAcceptedEncodings());
                 $response->addHeader(HttpResponse::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
-                
+
                 // load the Connection Header (keep-alive/close)
                 $connection = strtolower($request->getHeader('Connection'));
-                
+
                 // check protocol version
                 if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
                     
@@ -167,13 +167,13 @@ class RequestHandler extends AbstractContextThread
                 
                 // log the request
                 $this->getAccessLogger()->log($request, $response);
-                
+
                 // load the application to handle the request
                 $application = $this->findApplication($request);
-                
+
                 // try to locate a servlet which could service the current request
                 $servlet = $application->locate($request);
-                
+
                 // inject shutdown handler
                 $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
                     $client,
