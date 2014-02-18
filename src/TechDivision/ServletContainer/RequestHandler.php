@@ -138,7 +138,7 @@ class RequestHandler extends AbstractContextThread
                 
                 // load the Connection Header (keep-alive/close)
                 $connection = strtolower($request->getHeader(Header::HEADER_NAME_CONNECTION));
-                		
+                
                 // check protocol version
                 if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
                     
