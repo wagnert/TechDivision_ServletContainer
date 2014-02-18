@@ -17,6 +17,7 @@
  */
 namespace TechDivision\ServletContainer\Servlets;
 
+use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
@@ -65,10 +66,8 @@ class PhpServlet extends StaticResourceServlet
      */
     public function addHeaders(Response $res)
     {
-        $res->addHeader('X-Powered-By', get_class($this));
-        $res->addHeader('Expires', '19 Nov 1981 08:52:00 GMT');
-        $res->addHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-        $res->addHeader('Pragma', 'no-cache');
+        $res->addHeader(Header::HEADER_NAME_X_POWERED_BY, get_class($this));
+        $res->addHeader(Header::HEADER_NAME_EXPIRES, '19 Nov 1981 08:52:00 GMT');
     }
     
     /**
@@ -94,7 +93,7 @@ class PhpServlet extends StaticResourceServlet
     {
         
         // check if a XHttpRequest has to be handled
-        if (($xRequestedWith = $req->getHeader('X-Requested-With')) != null) {
+        if (($xRequestedWith = $req->getHeader(Header::HEADER_NAME_X_REQUESTED_WITH)) != null) {
             $req->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
         }
         
@@ -172,7 +171,7 @@ class PhpServlet extends StaticResourceServlet
     protected function initCookieGlobals(Request $req)
     {
         $cookie = array();
-        foreach (explode('; ', $req->getHeader('Cookie')) as $cookieLine) {
+        foreach (explode('; ', $req->getHeader(Header::HEADER_NAME_COOKIE)) as $cookieLine) {
             list ($key, $value) = explode('=', $cookieLine);
             $cookie[$key] = $value;
         }
@@ -285,7 +284,7 @@ class PhpServlet extends StaticResourceServlet
         ob_start();
         
         // load the file
-        require_once $file->getPathname();
+        require $file->getPathname();
         
         // store the file's contents in the response
         $res->setContent(ob_get_clean());

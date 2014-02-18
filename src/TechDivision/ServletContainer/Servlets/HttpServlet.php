@@ -16,6 +16,7 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
+use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Servlets\GenericServlet;
@@ -165,7 +166,7 @@ abstract class HttpServlet extends GenericServlet
     {
         
         // pre-initialize response
-        $res->addHeader('Server', $req->getServerVar('SERVER_SOFTWARE'));
+        $res->addHeader(Header::HEADER_NAME_SERVER, $req->getServerVar('SERVER_SOFTWARE'));
 
         // check if servlet needs authentication and return if authentication is not provided.
         if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($req, $res, $this)) {
@@ -183,8 +184,8 @@ abstract class HttpServlet extends GenericServlet
             // check if webapp was called without ending slash
             if (substr_count($pathInfo, '/') == 1) {
                 // redirect to path with ending slash
-                $res->addHeader("location", $pathInfo . '/');
-                $res->addHeader("status", 'HTTP/1.1 301 OK');
+                $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
+                $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
                 $res->setContent(PHP_EOL);
                 return;
             }

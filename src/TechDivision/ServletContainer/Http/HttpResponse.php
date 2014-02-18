@@ -35,23 +35,6 @@ class HttpResponse implements Response
 {
 
     /**
-     * Header names
-     *
-     * @var string
-     */
-    const HEADER_NAME_STATUS = 'status';
-
-    const HEADER_NAME_DATE = 'Date';
-
-    const HEADER_NAME_CONNECTION = 'Connection';
-
-    const HEADER_NAME_CONTENT_TYPE = 'Content-Type';
-
-    const HEADER_NAME_CACHE_CONTROL = 'Cache-Control';
-
-    const HEADER_NAME_PRAGMA = 'Pragma';
-
-    /**
      *
      * @var string
      */
@@ -91,14 +74,16 @@ class HttpResponse implements Response
     public function initHeaders()
     {
         // prepare the headers
-        $this->setHeaders(array(
-            self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
-            self::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
-            self::HEADER_NAME_CONNECTION => "keep-alive",
-            self::HEADER_NAME_CONTENT_TYPE => "text/html",
-            self::HEADER_NAME_CACHE_CONTROL => "max-age=0, no-cache, no-store",
-            self::HEADER_NAME_PRAGMA => "no-cache",
-        ));
+        $this->setHeaders(
+            array(
+                Header::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
+                Header::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
+                Header::HEADER_NAME_CONNECTION => 'keep-alive',
+                Header::HEADER_NAME_CONTENT_TYPE => 'text/html',
+                Header::HEADER_NAME_CACHE_CONTROL => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0',
+                Header::HEADER_NAME_PRAGMA => 'no-cache'
+            )
+        );
     }
 
     /**
@@ -157,7 +142,7 @@ class HttpResponse implements Response
      */
     public function getCode()
     {
-        list ($version, $code) = explode(" ", $this->getHeader('status'));
+        list ($version, $code) = explode(" ", $this->getHeader(Header::HEADER_NAME_STATUS));
         return $code;
     }
 
@@ -168,7 +153,7 @@ class HttpResponse implements Response
      */
     public function getVersion()
     {
-        list ($version, $code) = explode(" ", $this->getHeader('status'));
+        list ($version, $code) = explode(" ", $this->getHeader(Header::HEADER_NAME_STATUS));
         return $version;
     }
 
@@ -183,7 +168,7 @@ class HttpResponse implements Response
 
         foreach ($this->getHeaders() as $header => $value) {
 
-            if ($header === self::HEADER_NAME_STATUS) {
+            if ($header === Header::HEADER_NAME_STATUS) {
                 $headers .= $value . "\r\n";
             } else {
                 $headers .= $header . ': ' . $value . "\r\n";
@@ -191,7 +176,7 @@ class HttpResponse implements Response
         }
 
         foreach ($this->cookies as $cookie) {
-            $headers .= "Set-Cookie: $cookie\r\n";
+            $headers .= Header::HEADER_NAME_SET_COOKIE . ": $cookie\r\n";
         }
 
         return $headers;
@@ -221,7 +206,7 @@ class HttpResponse implements Response
             // check if gzip is possible
             if ($acceptedEncoding == 'gzip') {
                 // set correct header encoding information
-                $this->addHeader('Content-Encoding', 'gzip');
+                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'gzip');
                 // return content encoded by gzip
                 return $this->setContent(
                     gzencode($this->getContent())
@@ -229,7 +214,7 @@ class HttpResponse implements Response
                 // check if deflate is possible
             } elseif ($acceptedEncoding == 'deflate') {
                 // set correct header encoding information
-                $this->addHeader('Content-Encoding', 'deflate');
+                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'deflate');
                 // return content deflate
                 return $this->setContent(
                     gzdeflate($this->getContent())
@@ -336,8 +321,8 @@ class HttpResponse implements Response
                 $this->addHeader($key, $value);
 
                 // set status header to 301 if location is given
-                if ($key == 'Location') {
-                    $this->addHeader('status', 'HTTP/1.1 301');
+                if ($key == Header::HEADER_NAME_LOCATION) {
+                    $this->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301');
                 }
             }
         }
@@ -346,6 +331,6 @@ class HttpResponse implements Response
         $contentLength = strlen($this->getContent());
 
         // prepare the dynamic headers
-        $this->addHeader("Content-Length", $contentLength);
+        $this->addHeader(Header::HEADER_NAME_CONTENT_LENGTH, $contentLength);
     }
 }

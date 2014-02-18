@@ -15,6 +15,7 @@
 
 namespace TechDivision\ServletContainer\Http;
 
+use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 
@@ -97,9 +98,9 @@ class AccessLogger
                     $request->getUri(),
                     $request->getVersion(),
                     $response->getCode(),
-                    $response->getHeader('Content-Length'),
-                    $request->getHeader('Referer') ? $request->getHeader('Referer') : '-',
-                    $request->getHeader('User-Agent') ? $request->getHeader('User-Agent') : '-'
+                    $response->getHeader(Header::HEADER_NAME_CONTENT_LENGTH),
+                    $request->getHeader(Header::HEADER_NAME_REFERER) ? $request->getHeader(Header::HEADER_NAME_REFERER) : '-',
+                    $request->getHeader(Header::HEADER_NAME_USER_AGENT) ? $request->getHeader(Header::HEADER_NAME_USER_AGENT) : '-'
                 ),
                 3,
                 self::LOG_FILEPATH
@@ -120,7 +121,7 @@ class AccessLogger
                     $request->getUri(),
                     $request->getVersion(),
                     $response->getCode(),
-                    $response->getHeader('Content-Length')
+                    $response->getHeader(Header::HEADER_NAME_CONTENT_LENGTH)
                 ),
                 3,
                 self::LOG_FILEPATH

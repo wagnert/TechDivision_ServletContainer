@@ -15,6 +15,8 @@
 
 namespace TechDivision\ServletContainer\Authentication;
 
+use TechDivision\ServletContainer\Http\Header;
+
 /**
  * Abstract class for authentication adapters.
  *
@@ -44,7 +46,7 @@ class DigestAuthentication extends AbstractAuthentication
         $options = $config['options'];
 
         // if client provided authentication data
-        if ($authorizationData = $req->getHeader('Authorization')) {
+        if ($authorizationData = $req->getHeader(Header::HEADER_NAME_AUTHORIZATION)) {
             // check if Authentication is DIGEST
             if (substr($authorizationData, 0, 6) == self::AUTHENTICATION_METHOD_DIGEST) {
 
@@ -70,12 +72,8 @@ class DigestAuthentication extends AbstractAuthentication
         }
 
         // either authentication data was not provided or authentication failed
-        $res->addHeader("status", 'HTTP/1.1 401 Authentication required');
-        $res->addHeader(
-            "WWW-Authenticate",
-            self::AUTHENTICATION_METHOD_DIGEST . ' ' . 'realm="' . $realm .
-            '",qop="auth",nonce="' . uniqid() . '",opaque="' . md5($realm) .'"'
-        );
+        $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 401 Authentication required');
+        $res->addHeader(Header::HEADER_NAME_WWW_AUTHENTICATE, self::AUTHENTICATION_METHOD_DIGEST . ' ' . 'realm="' . $realm . '",qop="auth",nonce="' . uniqid() . '",opaque="' . md5($realm) .'"');
         $res->setContent("<html><head><title>401 Authorization Required</title></head><body><h1>401 Authorization Required</h1><p>This server could not verify that you are authorized to access the document requested. Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required. Confused</p></body></html>");
         return false;
     }

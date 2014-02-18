@@ -16,6 +16,7 @@
 
 namespace TechDivision\ServletContainer\Stream;
 
+use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\Stream\Client;
@@ -137,7 +138,7 @@ class HttpClient extends Client implements HttpClientInterface
         $requestInstance->initFromRawHeader($rawHeader);
 
         // check if body-length not reached content-length already
-        if (($contentLength = $requestInstance->getHeader('Content-Length')) && ($contentLength > strlen($body))) {
+        if (($contentLength = $requestInstance->getHeader(Header::HEADER_NAME_CONTENT_LENGTH)) && ($contentLength > strlen($body))) {
             // read a chunk from the socket till content length is reached
             while (strlen($body) < (int) $contentLength) {
                 // append body
