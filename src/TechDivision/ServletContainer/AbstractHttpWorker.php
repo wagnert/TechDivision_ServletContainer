@@ -78,12 +78,12 @@ abstract class AbstractHttpWorker extends AbstractWorker
             
                 // accept client connection and process the request
                 if ($clientSocket = $serverSocket->accept()) {
-            
+
                     // initialize the HTTP request/response
                     $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
                     $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
                     $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
-            
+
                     // inject response und session manager
                     $request->injectResponse($response);
                     $request->injectSessionManager($sessionManager);
@@ -96,7 +96,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
             
                     // load the client resource
                     $resource = $clientSocket->getResource();
-            
+
                     // initialize the params for thread handling the request
                     $params = array(
                         $this->initialContext,
