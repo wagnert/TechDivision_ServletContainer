@@ -41,136 +41,135 @@ class HttpRequest implements Request
 {
 
     /**
-     * Separator between Header and Content (e.g.
-     * POST-Request)
+     * Separator between Header and Content (e. g. POST-Request).
      *
      * @var string
      */
     protected $headerContentSeparator = "\r\n\r\n";
 
     /**
-     * Request header data
+     * Request header data.
      *
      * @var array
      */
     protected $headers = array();
 
     /**
-     * Path info
+     * Path info.
      *
      * @var string
      */
     protected $pathInfo;
 
     /**
-     * Server name as called by client
+     * Server name as called by client.
      *
      * @var string
      */
     protected $serverName;
 
     /**
-     * The address of the server
+     * The address of the server.
      *
      * @var string $serverAddress
      */
     protected $serverAddress;
 
     /**
-     * Server port called by client
+     * Server port called by client.
      *
      * @var string
      */
     protected $serverPort;
 
     /**
-     * Clients name/ip
+     * Clients name/IP.
      *
      * @var string
      */
     protected $clientIp;
 
     /**
-     * Clients port
+     * Clients port.
      *
      * @var string
      */
     protected $clientPort;
 
     /**
-     * Holds the response instance
+     * Holds the response instance.
      *
-     * @var Response
+     * @var \TechDivision\ServletContainer\Interfaces\Response
      */
     protected $response;
 
     /**
-     * The accepted encodings data
+     * The accepted encodings data.
      *
      * @var array
      */
     protected $acceptedEncodings = array();
 
     /**
-     * The request method
+     * The request method.
      *
      * @var string
      */
     protected $method;
 
     /**
-     * The request body
+     * The request body.
      *
      * @var string
      */
     protected $content;
 
     /**
-     * Uri called by client
+     * Uri called by client.
      *
      * @var string
      */
     protected $uri;
 
     /**
-     * Protocol version
+     * Protocol version.
      *
      * @var string
      */
     protected $version;
 
     /**
-     * Query string with params
+     * Query string with params.
      *
      * @var string
      */
     protected $queryString;
 
     /**
-     * Name of the webapp related by the request
+     * Name of the webapp related by the request.
      *
      * @var string
      */
     protected $webappName;
 
     /**
-     * Server data
+     * Server data.
      *
      * @var array
      */
     protected $server = array();
 
     /**
-     * Session Manager instance
+     * Session Manager instance.
      *
-     * @var PersistentSessionManager
+     * @var \TechDivision\ServletContainer\Session\SessionManager
      */
     protected $sessionManager;
 
     /**
-     * Holds the query parser
+     * Holds the query parser.
      *
-     * @var QueryParser $queryParser
+     * @var \TechDivision\ServletContainer\Interfaces\QueryParser
      */
     protected $queryParser;
 
@@ -182,21 +181,21 @@ class HttpRequest implements Request
     protected $parameterMap = array();
 
     /**
-     * Holds collection of parts from multipart form data
+     * Holds collection of parts from multipart form data.
      *
-     * @var array A Collection of HttpPart Objects
+     * @var array A collection of HttpPart objects
      */
     protected $parts = array();
 
     /**
-     * Holds the part factory instance
+     * Holds the part factory instance.
      *
-     * @var HttpPart
+     * @var \TechDivision\ServletContainer\Interfaces\Part
      */
     protected $part;
 
     /**
-     * Array that contain's the cookies passed with
+     * Array that contain's the cookies passed with.
      * the request.
      *
      * @var array
@@ -279,7 +278,7 @@ class HttpRequest implements Request
         $this->setHeaders($this->parseHeaders($buffer));
 
         // parsing for servername and port
-        list ($serverName, $serverPort) = explode(":", $this->getHeader('Host'));
+        list ($serverName, $serverPort) = explode(":", $this->getHeader(Header::HEADER_NAME_HOST));
 
         // set server address, name and server port
         $this->setServerAddress(gethostbyname($serverName));
@@ -297,7 +296,7 @@ class HttpRequest implements Request
         $this->injectQueryParser(new HttpQueryParser());
 
         // set accepted encoding data
-        $this->acceptedEncodings = explode(',', $this->getHeader('Accept-Encoding'));
+        $this->acceptedEncodings = explode(',', $this->getHeader(Header::HEADER_NAME_ACCEPT_ENCODING));
 
         return $this;
     }
@@ -313,7 +312,7 @@ class HttpRequest implements Request
     {
 
         // grab multipart boundary from content type header
-        preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
+        preg_match('/boundary=(.*)$/', $this->getHeader(Header::HEADER_NAME_CONTENT_TYPE), $matches);
         // get boundary
         $boundary = $matches[1];
         // split content by boundary
@@ -368,7 +367,7 @@ class HttpRequest implements Request
     public function hasMultipartFormData()
     {
         // grab out boundary info
-        preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
+        preg_match('/boundary=(.*)$/', $this->getHeader(Header::HEADER_NAME_CONTENT_TYPE), $matches);
 
         return (count($matches) > 0);
     }
@@ -392,7 +391,7 @@ class HttpRequest implements Request
         }
 
         // check if request has to be parsed depending on Content-Type header
-        if ($this->getQueryParser()->isParsingRelevant($this->getHeader('Content-Type'))) {
+        if ($this->getQueryParser()->isParsingRelevant($this->getHeader(Header::HEADER_NAME_CONTENT_TYPE))) {
             if ($this->hasMultipartFormData()) {
                 $this->parseMultipartFormData($content);
             } else {
@@ -424,13 +423,13 @@ class HttpRequest implements Request
     public function initServerVars()
     {
         $this->server = array(
-            'HTTP_HOST' => $this->getHeader('Host'),
-            'HTTP_CONNECTION' => $this->getHeader('Connection'),
-            'HTTP_ACCEPT' => $this->getHeader('Accept'),
-            'HTTP_USER_AGENT' => $this->getHeader('User-Agent'),
-            'HTTP_ACCEPT_ENCODING' => $this->getHeader('Accept-Encoding'),
-            'HTTP_ACCEPT_LANGUAGE' => $this->getHeader('Accept-Language'),
-            'HTTP_REFERER' => $this->getHeader('Referer'),
+            'HTTP_HOST' => $this->getHeader(Header::HEADER_NAME_HOST),
+            'HTTP_CONNECTION' => $this->getHeader(Header::HEADER_NAME_CONNECTION),
+            'HTTP_ACCEPT' => $this->getHeader(Header::HEADER_NAME_ACCEPT),
+            'HTTP_USER_AGENT' => $this->getHeader(Header::HEADER_NAME_USER_AGENT),
+            'HTTP_ACCEPT_ENCODING' => $this->getHeader(Header::HEADER_NAME_ACCEPT_ENCODING),
+            'HTTP_ACCEPT_LANGUAGE' => $this->getHeader(Header::HEADER_NAME_ACCEPT_LANGUAGE),
+            'HTTP_REFERER' => $this->getHeader(Header::HEADER_NAME_REFERER),
             'PATH' => '/opt/appserver/bin',
             'GATEWAY_INTERFACE' => 'CGI/1.1',
             'SERVER_SIGNATURE' => '',
@@ -448,7 +447,7 @@ class HttpRequest implements Request
             'REQUEST_TIME_FLOAT' => microtime(true)
         );
 
-        if ($cookie = $this->getHeader('Cookie')) {
+        if ($cookie = $this->getHeader(Header::HEADER_NAME_COOKIE)) {
             $this->server['HTTP_COOKIE'] = $cookie;
         }
     }
@@ -460,7 +459,7 @@ class HttpRequest implements Request
      */
     public function initCookies()
     {
-        $cookies = explode(';', $this->getHeader('Cookie'));
+        $cookies = explode(';', $this->getHeader(Header::HEADER_NAME_COOKIE));
         foreach ($cookies as $cookie) {
             if (!empty($cookie)) {
                 list ($cookieName, $cookieValue) = explode('=', trim($cookie));

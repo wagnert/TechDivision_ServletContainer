@@ -35,9 +35,9 @@ class DefaultShutdownHandler implements ShutdownHandler
 {
 
     /**
-     * The Http client that handles the request
+     * The Http client that handles the request.
      *
-     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client
+     * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface
      *
      */
     public $client;
@@ -45,7 +45,7 @@ class DefaultShutdownHandler implements ShutdownHandler
     /**
      * The Http response instance.
      *
-     * @var \TechDivision\ServletContainer\Http\HttpResponse
+     * @var \TechDivision\ServletContainer\Interfaces\Response
      *
      */
     public $response;
@@ -75,9 +75,10 @@ class DefaultShutdownHandler implements ShutdownHandler
     public function register(Servlet $servlet)
     {
         ob_start();
-        register_shutdown_function(array(
-            &$servlet,
-            "shutdown"
-        ), $this->client, $this->response);
+        register_shutdown_function(
+            array(&$servlet, 'shutdown'),
+            $this->client,
+            $this->response
+        );
     }
 }

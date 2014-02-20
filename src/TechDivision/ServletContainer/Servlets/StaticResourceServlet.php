@@ -16,6 +16,7 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
+use TechDivision\ServletContainer\Http\Header;
 use Symfony\Component\Security\Acl\Exception\Exception;
 use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
 use TechDivision\ServletContainer\Utilities\MimeTypeDictionary;
@@ -106,27 +107,32 @@ class StaticResourceServlet extends HttpServlet
             }
             
             // set mimetypes to header
-            $res->addHeader('Content-Type', $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION)));
+            $res->addHeader(Header::HEADER_NAME_CONTENT_TYPE, $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION)));
             
             // set last modified date from file
-            $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
+            $res->addHeader(Header::HEADER_NAME_LAST_MODIFIED, gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
             
             // set expires date
-            $res->addHeader('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
+            $res->addHeader(Header::HEADER_NAME_EXPIRES, gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
             
             // check if If-Modified-Since header info is set
-            if ($req->getHeader('If-Modified-Since')) {
+            if ($req->getHeader(Header::HEADER_NAME_IF_MODIFIED_SINCE)) {
                 // check if file is modified since header given header date
-                if (strtotime($req->getHeader('If-Modified-Since')) >= $file->getMTime()) {
+                if (strtotime($req->getHeader(Header::HEADER_NAME_IF_MODIFIED_SINCE)) >= $file->getMTime()) {
                     // send 304 Not Modified Header information without content
-                    $res->addHeader('status', 'HTTP/1.1 304 Not Modified');
+                    $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 304 Not Modified');
                     $res->getContent(PHP_EOL);
                     return;
                 }
             }
+
+            // remove the headers to prevent response from beeing cached
+            $res->removeHeader(Header::HEADER_NAME_CACHE_CONTROL);
+            $res->removeHeader(Header::HEADER_NAME_PRAGMA);
             
             // store the file's contents in the response
             $res->setContent(file_get_contents($file->getRealPath()));
+            
         } catch (\FoundDirInsteadOfFileException $fdiofe) {
             
             // load the information about the requested path
@@ -134,17 +140,17 @@ class StaticResourceServlet extends HttpServlet
             
             // if we found a folder AND ending slash is missing, redirect to same folder but with slash appended
             if (substr($pathInfo, - 1) !== '/') {
-                
-                $res->addHeader("location", $pathInfo . '/');
-                $res->addHeader("status", 'HTTP/1.1 301 OK');
+                $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
+                $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
                 $res->setContent(PHP_EOL);
             }
+            
         } catch (\Exception $e) {
             
             // load the information about the requested path
             $pathInfo = $req->getPathInfo();
             
-            $res->addHeader("status", 'HTTP/1.1 404 OK');
+            $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 OK');
             $res->setContent(sprintf('<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL %s was not found on this server.</p></body></html>', $pathInfo));
         }
     }

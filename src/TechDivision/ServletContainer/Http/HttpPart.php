@@ -16,6 +16,7 @@
 namespace TechDivision\ServletContainer\Http;
 
 use TechDivision\ServletContainer\Interfaces\Part;
+use TechDivision\ServletContainer\Http\Header;
 
 /**
  * A http part implementation.
@@ -30,12 +31,6 @@ use TechDivision\ServletContainer\Interfaces\Part;
  */
 class HttpPart implements Part
 {
-    /**
-     * Defines header name constances
-     * 
-     * @var unknown
-     */
-    const HEADER_NAME_CONTENT_TYPE = 'Content-Type';
 
     /**
      * Holds input stream file pointer
@@ -134,7 +129,7 @@ class HttpPart implements Part
     */
     public function getContentType()
     {
-        return $this->getHeader(self::HEADER_NAME_CONTENT_TYPE);
+        return $this->getHeader(Header::HEADER_NAME_CONTENT_TYPE);
     }
 
     /**

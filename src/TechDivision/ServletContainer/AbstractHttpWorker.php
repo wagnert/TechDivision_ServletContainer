@@ -36,6 +36,13 @@ abstract class AbstractHttpWorker extends AbstractWorker
      * @var integer
      */
     const HANDLE_REQUESTS = 100;
+    
+    /**
+     * The timeout before the Keep-Alive functionality closes the socket connection.
+     * 
+     * @var integer
+     */
+    const RECEIVE_TIMEOUT = 5;
 
     /**
      * The main function which will be called by doing start()
@@ -100,6 +107,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
                     $request->start(PTHREADS_INHERIT_ALL | PTHREADS_ALLOW_HEADERS);
                 }
             }
+            
         } catch (\Exception $e) { // catch the exception if thrown, e. g. when socket can't be accepted
             $this->getInitialContext()->getSystemLogger()->critical($e->__toString());
         }

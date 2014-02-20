@@ -14,7 +14,10 @@
 
 namespace TechDivision\ServletContainer;
 
+use TechDivision\SocketException;
+use TechDivision\StreamException;
 use TechDivision\ApplicationServer\AbstractContextThread;
+use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Http\AccessLogger;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
@@ -22,8 +25,6 @@ use TechDivision\ServletContainer\Socket\HttpClient;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
-use TechDivision\SocketException;
-use TechDivision\StreamException;
 use TechDivision\ServletContainer\Exceptions\BadRequestException;
 
 /**
@@ -45,13 +46,6 @@ class RequestHandler extends AbstractContextThread
      * @var integer
      */
     const AVAILABLE_REQUESTS = 5;
-    
-    /**
-     * The timeout before the Keep-Alive functionality closes the socket connection.
-     * 
-     * @var integer
-     */
-    const RECEIVE_TIMEOUT = 5;
 
     /**
      * Holds the container instance.
@@ -128,7 +122,7 @@ class RequestHandler extends AbstractContextThread
             // set the client socket resource and timeout
             $client = $this->getClient();
             $client->setResource($resource = $this->getResource());
-            $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
+            $client->setReceiveTimeout($receiveTimeout = AbstractHttpWorker::RECEIVE_TIMEOUT);
             
             do { // let socket open as long as max request or socket timeout is not reached
 
@@ -140,11 +134,11 @@ class RequestHandler extends AbstractContextThread
                 $response = $request->getResponse();
                 $response->initHeaders();
                 $response->setAcceptedEncodings($request->getAcceptedEncodings());
-                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
-
+                $response->addHeader(Header::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
+                
                 // load the Connection Header (keep-alive/close)
-                $connection = strtolower($request->getHeader('Connection'));
-
+                $connection = strtolower($request->getHeader(Header::HEADER_NAME_CONNECTION));
+                
                 // check protocol version
                 if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
                     
@@ -158,7 +152,7 @@ class RequestHandler extends AbstractContextThread
                         $ttl = ($startTime + $receiveTimeout) - time();
                         
                         // add the apropriate response header
-                        $response->addHeader('Keep-Alive', "max=$availableRequests, timeout=$ttl, thread={$this->getThreadId()}");
+                        $response->addHeader(Header::HEADER_NAME_KEEP_ALIVE, "max=$availableRequests, timeout=$ttl, thread={$this->getThreadId()}");
                     }
                     
                 } else { // set request counter and TTL to 0
@@ -185,14 +179,25 @@ class RequestHandler extends AbstractContextThread
 
                 // let the servlet process the request send it back to the client
                 $servlet->service($request, $response);
-                $this->send($client, $response);
                 
                 // check if this is the last request
                 if ($availableRequests < 1) {
+                    
+                    // add the Connection: close header
+                    $response->addHeader(Header::HEADER_NAME_CONNECTION, 'close');
+                    
+                    // set the flag to close the connection
                     $connectionOpen = false;
                 }
                 
+                // send the data back to the client
+                $this->send($client, $response);
+                
             } while ($connectionOpen);
+
+            // shutdown + close the client connection
+            $client->shutdown();
+            $client->close();
             
         } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
             $this->getInitialContext()->getSystemLogger()->debug($ccbpe);
@@ -206,7 +211,7 @@ class RequestHandler extends AbstractContextThread
             if (is_resource($resource)) {
                 // prepare stacktrace and send it back
                 $response->setContent('<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL ' . $request->getUri() . ' was not found on this server.</p></body></html>');
-                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
+                $response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
                 $this->send($client, $response);
                 // shutdown + close the client connection
                 $client->shutdown();
@@ -218,7 +223,7 @@ class RequestHandler extends AbstractContextThread
             if (is_resource($resource)) {
                 // prepare stacktrace and send it back
                 $response->setContent('<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>505 Internal Server Error</title></head><body><h1>Internal Server Error</h1><p>' . $e->__toString() . '</p></body></html>');
-                $response->addHeader(HttpResponse::HEADER_NAME_STATUS, 'HTTP/1.1 500 Internal Server Error');
+                $response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 500 Internal Server Error');
                 $this->send($client, $response);
                 // shutdown + close the client connection
                 $client->shutdown();

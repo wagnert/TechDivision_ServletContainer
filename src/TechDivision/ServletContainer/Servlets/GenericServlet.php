@@ -218,11 +218,8 @@ abstract class GenericServlet implements Servlet
     {
         // This might not be set by default, so we will return false as our default
         if (!isset($this->authenticationRequired)) {
-
             return false;
-
         } else {
-
             return $this->authenticationRequired;
         }
     }
@@ -240,10 +237,8 @@ abstract class GenericServlet implements Servlet
     /**
      * Will be invoked by the PHP when the servlets destruct method or exit() or die() has been invoked.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that
-     *                                                                                handles the request
-     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to
-     *                                                                                the client
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that handles the request
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to the client
      *
      * @return void
      */
