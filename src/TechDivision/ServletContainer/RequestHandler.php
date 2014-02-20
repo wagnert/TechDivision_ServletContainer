@@ -46,6 +46,13 @@ class RequestHandler extends AbstractContextThread
      * @var integer
      */
     const AVAILABLE_REQUESTS = 5;
+    
+    /**
+     * The timeout before the Keep-Alive functionality closes the socket connection.
+     * 
+     * @var integer
+     */
+    const RECEIVE_TIMEOUT = 5;
 
     /**
      * Holds the container instance.
@@ -122,13 +129,13 @@ class RequestHandler extends AbstractContextThread
             // set the client socket resource and timeout
             $client = $this->getClient();
             $client->setResource($resource = $this->getResource());
-            $client->setReceiveTimeout($receiveTimeout = AbstractHttpWorker::RECEIVE_TIMEOUT);
+            $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
             
             do { // let socket open as long as max request or socket timeout is not reached
-
+                
                 // receive request object from client
                 $request = $client->receive();
-
+                
                 // initialize response, set the actual date and add accepted encoding methods
                 $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
                 $response = $request->getResponse();
@@ -161,13 +168,13 @@ class RequestHandler extends AbstractContextThread
                 
                 // log the request
                 $this->getAccessLogger()->log($request, $response);
-
+                
                 // load the application to handle the request
                 $application = $this->findApplication($request);
-
+                
                 // try to locate a servlet which could service the current request
                 $servlet = $application->locate($request);
-
+                
                 // inject shutdown handler
                 $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
                     $client,

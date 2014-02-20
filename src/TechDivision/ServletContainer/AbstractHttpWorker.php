@@ -36,13 +36,6 @@ abstract class AbstractHttpWorker extends AbstractWorker
      * @var integer
      */
     const HANDLE_REQUESTS = 100;
-    
-    /**
-     * The timeout before the Keep-Alive functionality closes the socket connection.
-     * 
-     * @var integer
-     */
-    const RECEIVE_TIMEOUT = 5;
 
     /**
      * The main function which will be called by doing start()
@@ -55,7 +48,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
             
             // the counter with the number of requests to handle
             $handleRequests = AbstractHttpWorker::HANDLE_REQUESTS;
-
+            
             // initialize the session manager itself
             $sessionManager = $this->newInstance(
                 'TechDivision\ServletContainer\Session\PersistentSessionManager',
@@ -64,9 +57,34 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 )
             );
             
+            // array with the preinitialized clients
+            $clients = array();
+            
+            // preinitialize the clients
+            for ($z < 0; $z < $handleRequests; $z++) {
+                
+                 // initialize the HTTP request/response
+                $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
+                $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
+                $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
+                
+                // inject response und session manager
+                $request->injectResponse($response);
+                $request->injectSessionManager($sessionManager);
+                
+                // initialize a new HTTP client
+                $client = $this->initialContext->newInstance($this->getHttpClientClass());
+                $client->injectHttpRequest($request);
+                $client->injectHttpPart($httpPart);
+                $client->setNewLine("\r\n\r\n");
+                
+                // add the initialize client to the array
+                $clients[] = $client;
+            }
+            
             // handle requests and then QUIT (to free client sockets and memory)
             $i = 0;
-            while ($i ++ < $handleRequests) {
+            while ($i++ < $handleRequests) {
             
                 // reinitialize the server socket
                 $serverSocket = $this->initialContext->newInstance($this->getResourceClass(), array(
@@ -75,22 +93,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
             
                 // accept client connection and process the request
                 if ($clientSocket = $serverSocket->accept()) {
-
-                    // initialize the HTTP request/response
-                    $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
-                    $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
-                    $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
-
-                    // inject response und session manager
-                    $request->injectResponse($response);
-                    $request->injectSessionManager($sessionManager);
-            
-                    // initialize a new HTTP client
-                    $client = $this->initialContext->newInstance($this->getHttpClientClass());
-                    $client->injectHttpRequest($request);
-                    $client->injectHttpPart($httpPart);
-                    $client->setNewLine("\r\n\r\n");
-            
+                    
                     // load the client resource
                     $resource = $clientSocket->getResource();
 
@@ -98,7 +101,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
                     $params = array(
                         $this->initialContext,
                         $this->container,
-                        $client,
+                        $clients[$i],
                         $resource
                     );
             
