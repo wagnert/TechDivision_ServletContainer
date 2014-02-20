@@ -36,13 +36,6 @@ abstract class AbstractHttpWorker extends AbstractWorker
      * @var integer
      */
     const HANDLE_REQUESTS = 100;
-    
-    /**
-     * The timeout before the Keep-Alive functionality closes the socket connection.
-     * 
-     * @var integer
-     */
-    const RECEIVE_TIMEOUT = 5;
 
     /**
      * The main function which will be called by doing start()

@@ -46,6 +46,13 @@ class RequestHandler extends AbstractContextThread
      * @var integer
      */
     const AVAILABLE_REQUESTS = 5;
+    
+    /**
+     * The timeout before the Keep-Alive functionality closes the socket connection.
+     * 
+     * @var integer
+     */
+    const RECEIVE_TIMEOUT = 5;
 
     /**
      * Holds the container instance.
@@ -122,7 +129,7 @@ class RequestHandler extends AbstractContextThread
             // set the client socket resource and timeout
             $client = $this->getClient();
             $client->setResource($resource = $this->getResource());
-            $client->setReceiveTimeout($receiveTimeout = AbstractHttpWorker::RECEIVE_TIMEOUT);
+            $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
             
             do { // let socket open as long as max request or socket timeout is not reached
                 
