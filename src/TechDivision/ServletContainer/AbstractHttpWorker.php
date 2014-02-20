@@ -72,9 +72,6 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 $serverSocket = $this->initialContext->newInstance($this->getResourceClass(), array(
                     $this->resource
                 ));
-
-                // @todo Check if is necessary to set a receive timeout for the server socket also
-                // $serverSocket->setReceiveTimeout(AbstractHttpWorker::RECEIVE_TIMEOUT);
             
                 // accept client connection and process the request
                 if ($clientSocket = $serverSocket->accept()) {
