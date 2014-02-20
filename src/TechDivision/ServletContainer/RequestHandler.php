@@ -179,14 +179,25 @@ class RequestHandler extends AbstractContextThread
 
                 // let the servlet process the request send it back to the client
                 $servlet->service($request, $response);
-                $this->send($client, $response);
                 
                 // check if this is the last request
                 if ($availableRequests < 1) {
+                    
+                    // add the Connection: close header
+                    $response->addHeader(Header::HEADER_NAME_CONNECTION, 'close');
+                    
+                    // set the flag to close the connection
                     $connectionOpen = false;
                 }
                 
+                // send the data back to the client
+                $this->send($client, $response);
+                
             } while ($connectionOpen);
+
+            // shutdown + close the client connection
+            $client->shutdown();
+            $client->close();
             
         } catch (ConnectionClosedByPeerException $ccbpe) { // socket closed by client/browser
             $this->getInitialContext()->getSystemLogger()->debug($ccbpe);
