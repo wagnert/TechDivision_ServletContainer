@@ -91,7 +91,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
             
                 // reinitialize the server socket
                 $serverSocket = $this->initialContext->newInstance(
-                    $this->getResourceClass(), 
+                    $this->getResourceClass(),
                     array(
                         $this->resource
                     )
@@ -102,7 +102,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
             
                     // initialize the request
                     $requests[$i] = $this->initialContext->newInstance(
-                        $this->threadType, 
+                        $this->threadType,
                         array(
                             $this->initialContext,
                             $this->container,
