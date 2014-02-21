@@ -44,6 +44,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
      */
     public function main()
     {
+        
         try {
             
             // the counter with the number of requests to handle
@@ -57,8 +58,10 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 )
             );
             
-            // array with the preinitialized clients
+            // declare the arrays with the preinitialized clients, requests + client sockets
             $clients = array();
+            $requests = array();
+            $clientSockets = array();
             
             // preinitialize the clients
             for ($z < 0; $z < $handleRequests; $z++) {
@@ -87,27 +90,29 @@ abstract class AbstractHttpWorker extends AbstractWorker
             while ($i++ < $handleRequests) {
             
                 // reinitialize the server socket
-                $serverSocket = $this->initialContext->newInstance($this->getResourceClass(), array(
-                    $this->resource
-                ));
+                $serverSocket = $this->initialContext->newInstance(
+                    $this->getResourceClass(), 
+                    array(
+                        $this->resource
+                    )
+                );
             
                 // accept client connection and process the request
-                if ($clientSocket = $serverSocket->accept()) {
-                    
-                    // load the client resource
-                    $resource = $clientSocket->getResource();
-
-                    // initialize the params for thread handling the request
-                    $params = array(
-                        $this->initialContext,
-                        $this->container,
-                        $clients[$i],
-                        $resource
-                    );
+                if ($clientSockets[$i] = $serverSocket->accept()) {
             
-                    // process the request
-                    $request = $this->initialContext->newInstance($this->threadType, $params);
-                    $request->start(PTHREADS_INHERIT_ALL | PTHREADS_ALLOW_HEADERS);
+                    // initialize the request
+                    $requests[$i] = $this->initialContext->newInstance(
+                        $this->threadType, 
+                        array(
+                            $this->initialContext,
+                            $this->container,
+                            $clients[$i],
+                            $clientSockets[$i]->getResource()
+                        )
+                    );
+                    
+                    // process the request itself
+                    $requests[$i]->start(PTHREADS_INHERIT_ALL | PTHREADS_ALLOW_HEADERS);
                 }
             }
             
