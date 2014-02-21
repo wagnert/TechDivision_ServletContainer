@@ -116,15 +116,27 @@ class HttpClient extends Client implements HttpClientInterface
     {
 
         // initialize the buffer
-        $buffer = null;
+        $buffer = false;
         
         // read a chunk from the socket
-        while (strpos($buffer, $this->getNewLine()) === false) {
-            $buffer .= $this->read($this->getLineLength());
+        while ($line = $this->read($this->getLineLength())) {
+            
+            // if receive timeout occured
+            if (strlen($line) === 0) {
+                break;
+            }
+        
+            // append line to buffer
+            $buffer .= $line;
+        
+            // check if data transmission has finished
+            if (false !== strpos($buffer, $this->getNewLine())) {
+                break;
+            }
         }
 
         // if the socket has been closed by peer
-        if ($buffer === '' || $buffer === null) {
+        if ($buffer === '' || $buffer === false) {
             $this->close();
             throw new ConnectionClosedByPeerException('Connection reset by peer');
         }
