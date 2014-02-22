@@ -216,8 +216,6 @@ class ServletManager
                         )
                     );
             }
-            
-            error_log(var_export($this->servletMappings, true));
         }
     }
 

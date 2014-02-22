@@ -172,13 +172,16 @@ abstract class HttpServlet extends GenericServlet
         if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($req, $res, $this)) {
             return;
         }
-            
+
         // load the information about the requested path
         $pathInfo = $req->getPathInfo();
         $documentRoot = $req->getServerVar('DOCUMENT_ROOT');
         
+        // create a file info object to check if a directory is requested
+        $fileInfo = new \SplFileInfo($documentRoot . $pathInfo);
+        
         // check if a directory/webapp was been called without ending slash
-        if (is_dir($documentRoot . $pathInfo) && strrpos($pathInfo, '/') !== strlen($pathInfo) - 1) {
+        if ($fileInfo->isDir() && strrpos($pathInfo, '/') !== strlen($pathInfo) - 1) {
             
             // redirect to path with ending slash
             $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
