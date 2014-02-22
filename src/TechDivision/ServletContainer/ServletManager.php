@@ -21,6 +21,7 @@ use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
 use TechDivision\ServletContainer\Exceptions\InvalidApplicationArchiveException;
 use TechDivision\ServletContainer\Servlets\ServletConfiguration;
 use TechDivision\ServletContainer\Exceptions\InvalidServletMappingException;
+use TechDivision\ServletContainer\Utilities\MimeTypeDictionary;
 
 /**
  * The servlet manager handles the servlets registered for the application.
@@ -37,6 +38,13 @@ use TechDivision\ServletContainer\Exceptions\InvalidServletMappingException;
 class ServletManager
 {
 
+    /**
+     * Defines the default servlet name for servlet registration.
+     * 
+     * @var string
+     */
+    const DEFAULT_SERVLET_NAME = 'StaticResourceServlet';
+    
     /**
      * The application instance.
      *
@@ -108,7 +116,7 @@ class ServletManager
         if (is_dir($folder = $this->getWebappPath())) {
             
             // it's no valid application without at least the web.xml file
-            if (! file_exists($web = $folder . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'web.xml')) {
+            if (!file_exists($web = $folder . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'web.xml')) {
                 throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $folder));
             }
             
@@ -118,12 +126,10 @@ class ServletManager
             // load the application config
             $config = new \SimpleXMLElement(file_get_contents($web));
             
-            // parse for security configs
-            $securityConfigs = array();
+            // intialize the security configuration by parseing the security nodes
             foreach ($config->xpath('/web-app/security') as $securityParam) {
-                $securityConfigs[] = json_decode(json_encode($securityParam), 1);
+                $this->securedUrlConfigs[] = json_decode(json_encode($securityParam), 1);
             }
-            $this->setSecuredUrlConfigs($securityConfigs);
             
             // initialize the context by parsing the context-param nodes
             foreach ($config->xpath('/web-app/context-param') as $contextParam) {
@@ -142,16 +148,19 @@ class ServletManager
                 // try to resolve the mapped servlet class
                 $className = (string) $servlet->{'servlet-class'};
                 if (! count($className)) {
-                    throw new InvalidApplicationArchiveException(sprintf('No servlet class defined for servlet %s', $servlet->{'servlet-class'}));
+                    throw new InvalidApplicationArchiveException(
+                        sprintf('No servlet class defined for servlet %s', $servlet->{'servlet-class'})
+                    );
                 }
                 
                 // instantiate the servlet
                 $instance = $this->getApplication()->newInstance($className);
                 
                 // initialize the servlet configuration
-                $servletConfig = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
-                    $this
-                ));
+                $servletConfig = $this->getApplication()->newInstance(
+                    'TechDivision\ServletContainer\Servlets\ServletConfiguration', 
+                    array($this)
+                );
                 
                 // set the unique servlet name
                 $servletConfig->setServletName($servletName);
@@ -180,42 +189,74 @@ class ServletManager
                 $urlPattern = (string) $mapping->{'url-pattern'};
                 $servletName = (string) $mapping->{'servlet-name'};
                 
-                // make sure that the URL pattern always starts with a leading slash
-                $urlPattern = ltrim($urlPattern, '/');
-                
                 // the servlet is added to the dictionary using the complete request path as the key
-                if (! array_key_exists($servletName, $this->servlets)) {
-                    throw new InvalidServletMappingException(sprintf("Can't find servlet %s for url-pattern %s", $servletName, $urlPattern));
+                if (array_key_exists($servletName, $this->servlets) === false) {
+                    throw new InvalidServletMappingException(
+                        sprintf(
+                            "Can't find servlet %s for url-pattern %s",
+                            $servletName,
+                            $urlPattern
+                        )
+                    );
                 }
                 
-                // append the url-pattern - servlet mapping to the array
-                $this->servletMappings['/' . $urlPattern] = (string) $mapping->{'servlet-name'};
+                // prepend the url-pattern - servlet mapping to the servlet mappings
+                $this->servletMappings[$urlPattern] = $servletName;
                 
                 // log a message that the servlet has successfully been registered
                 $this->getApplication()
                     ->getInitialContext()
                     ->getSystemLogger()
-                    ->debug(sprintf('Successfully registered servlet %s for url-pattern %s in application %s', $servletName, $urlPattern, $this->getApplication()->getName()));
+                    ->debug(
+                        sprintf(
+                            'Successfully registered servlet %s for url-pattern %s in application %s',
+                            $servletName, 
+                            $urlPattern,
+                            $this->getApplication()->getName()
+                        )
+                    );
             }
+            
+            error_log(var_export($this->servletMappings, true));
         }
     }
 
     /**
-     * Registers the default servlet for the passed webapp.
+     * Registers the default servlet with all available mimetypes.
      *
      * @return void
      */
     protected function addDefaultServlet()
     {
-        $defaultServletName = 'StaticResourceServlet';
-        $defaultServlet = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\StaticResourceServlet');
-        $config = $this->getApplication()->newInstance('TechDivision\ServletContainer\Servlets\ServletConfiguration', array(
-            $this
-        ));
+        
+        // initialize the default servlet name
+        $defaultServletName = ServletManager::DEFAULT_SERVLET_NAME;
+        
+        // create an instance of the default servlet
+        $defaultServlet = $this->getApplication()->newInstance(
+            'TechDivision\ServletContainer\Servlets\StaticResourceServlet'
+        );
+        
+        // create an instance of the servlet configuration
+        $config = $this->getApplication()->newInstance(
+            'TechDivision\ServletContainer\Servlets\ServletConfiguration',
+            array($this)
+        );
+        
+        // initialize the default servlet
         $config->setServletName($defaultServletName);
         $defaultServlet->init($config);
         $this->addServlet($defaultServletName, $defaultServlet);
-        $this->servletMappings['/'] = $defaultServletName;
+        
+        // initialize the mime type dictionary
+        $mimeTypeDictionary = $this->getApplication()->newInstance(
+            'TechDivision\ServletContainer\Utilities\MimeTypeDictionary'
+        );
+        
+        // register all mime types to be delivered with the default servlet
+        foreach ($mimeTypeDictionary as $key => $mimeType) {
+            $this->servletMappings["*.$key"] = $defaultServletName;
+        }
     }
 
     /**
@@ -357,17 +398,5 @@ class ServletManager
     public function getSecuredUrlConfigs()
     {
         return $this->securedUrlConfigs;
-    }
-
-    /**
-     * Sets the webapps security context configuerations.
-     *
-     * @param array $securedUrlConfigs The security context configurations
-     *
-     * @return void
-     */
-    public function setSecuredUrlConfigs($securedUrlConfigs)
-    {
-        $this->securedUrlConfigs = $securedUrlConfigs;
     }
 }

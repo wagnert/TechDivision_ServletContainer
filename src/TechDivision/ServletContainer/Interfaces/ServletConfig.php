@@ -28,4 +28,11 @@ namespace TechDivision\ServletContainer\Interfaces;
  */
 interface ServletConfig
 {
+
+    /**
+     * Return's the servlet's name from the web.xml configuration file.
+     *
+     * @return string The servlet name
+     */
+    public function getServletName();
 }

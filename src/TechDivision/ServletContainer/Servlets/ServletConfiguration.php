@@ -130,6 +130,7 @@ class ServletConfiguration implements ServletConfig
      * Return's the servlet's name from the web.xml configuration file.
      * 
      * @return string The servlet name
+     * @see \TechDivision\ServletContainer\Interfaces\ServletConfig::getServletName()
      */
     public function getServletName()
     {

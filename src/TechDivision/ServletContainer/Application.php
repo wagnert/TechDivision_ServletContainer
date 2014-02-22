@@ -18,6 +18,7 @@ use TechDivision\ApplicationServer\AbstractApplication;
 use TechDivision\ServletContainer\ServletManager;
 use TechDivision\ServletContainer\Service\Locator\ServletLocator;
 use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ApplicationServer\Configuration;
 use TechDivision\ApplicationServer\Vhost;
 
@@ -51,9 +52,17 @@ class Application extends AbstractApplication
 
     /**
      * Array with available VHost configurations.
+     * 
      * @array
      */
     protected $vhosts = array();
+    
+    /**
+     * The servlet cache that maps a request to the servlet that has to handle it.
+     * 
+     * @var array
+     */
+    protected $servletCache = array();
 
     /**
      * Has been automatically invoked by the container after the application
@@ -168,6 +177,60 @@ class Application extends AbstractApplication
      */
     public function locate(Request $request)
     {
-        return $this->getServletLocator()->locate($request);
+
+        // check if the application is loaded by a vhost
+        $path = $this->normalizePathInfo($request);
+        
+        // try to locate the servlet
+        $servlet = $this->getServletLocator()->locate($request);
+        
+        // secure the servlet if necessary
+        $this->secureServlet($servlet, $path);
+        
+        // return the servlet instance
+        return $servlet;
+    }
+    
+    /**
+     * Normalizes the path info found in the passed request depending
+     * if the request has been invoked on a vhost.
+     * 
+     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request info with the path info to be normalized
+     * 
+     * @return string The normalized path info
+     */
+    public function normalizePathInfo(Request $request)
+    {
+        
+        // check if the application is loaded by a vhost
+        if ($this->isVhostOf($request->getServerName()) === false) {
+            // return the normalized path info based on the application name
+            return '/' . ltrim(str_replace("/{$this->getName()}", "/", $request->getPathInfo()), '/');
+        }
+
+        // return the unprepared path info
+        return $request->getPathInfo();
+    }
+
+    /**
+     * Check if the requested path matches a secured url pattern and
+     * secure the servlet with the configured authentication method.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
+     * @param string                                            $path    The path to resolve
+     *
+     * @return void
+     */
+    protected function secureServlet(Servlet $servlet, $path)
+    {
+        // iterate over all servlets and return the matching one
+        foreach ($this->getServletManager()->getSecuredUrlConfigs() as $securedUrlConfig) {
+            list ($urlPattern, $auth) = array_values($securedUrlConfig);
+            if (fnmatch($urlPattern, $path)) {
+                $servlet->injectSecuredUrlConfig($auth);
+                $servlet->setAuthenticationRequired(true);
+                break;
+            }
+        }
     }
 }
