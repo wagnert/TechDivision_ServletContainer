@@ -114,18 +114,12 @@ class StaticResourceLocator extends AbstractResourceLocator
      */
     public function getFilePath(Request $request)
     {
+        
         // load the document root
         $documentRoot = $request->getServerVar('DOCUMENT_ROOT');
         
-         // if the application has not been called over a vhost configuration append application folder name
-        if ($this->getApplication()->isVhostOf($request->getServerName()) === false) {
-            $count = 1;
-            $documentRoot = str_replace(DIRECTORY_SEPARATOR . $this->getApplication()->getName(), "", $documentRoot, $count);
-        }
-        
-        // prepare the static file name to load
+        // prepare and return the static file name to load
         $relativeFilePath = str_replace('/', DIRECTORY_SEPARATOR, parse_url($request->getUri(), PHP_URL_PATH));
-        $absoluteFilePath = $documentRoot . DIRECTORY_SEPARATOR . $relativeFilePath;
-        return $absoluteFilePath;
+        return $documentRoot . $relativeFilePath;
     }
 }

@@ -1,5 +1,20 @@
 <?php
 
+/**
+ * TechDivision\ServletContainer\fnmatch
+ *
+ * PHP version 5
+ *
+ * @category  Appserver
+ * @package   TechDivision_ServletContainer
+ * @author    Markus Stockbauer <ms@techdivision.com>
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @author    Johann Zelger <jz@techdivision.com>
+ * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
+ */
+
 $urls = array(
     '/index.php',
     '/test/index.php',
@@ -48,9 +63,10 @@ $urls = array(
 );
 
 $servlets = array(
-    '/magento-1.8.1.0/js/*/*.js' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet',
-    '/magento-1.8.1.0/media/*/*.(gif|png|jpg|svg)' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet', // doesn't work
-    '/magento-1.8.1.0/index.php/*' => '\TechDivision\ServletContainer\Servlets\Legacy\MagentoServlet',
+    '/js/*/*.js' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet',
+    '/js/*/*.js' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet',
+    '/media/*/*.(gif|png|jpg|svg)' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet', // doesn't work
+    '/index.php/*' => '\TechDivision\ServletContainer\Servlets\Legacy\MagentoServlet',
     '*.(js|css|gif|png|jpg|jpeg)' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet', // doesn't work
     '*.jpg' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet',
     '*.png' => '\TechDivision\ServletContainer\Servlets\StaticResourceServlet',

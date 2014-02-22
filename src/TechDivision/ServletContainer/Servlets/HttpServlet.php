@@ -172,23 +172,20 @@ abstract class HttpServlet extends GenericServlet
         if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($req, $res, $this)) {
             return;
         }
-
-        // check if there is no vhost call going on
-        if (! $this->getServletConfig()
-            ->getApplication()
-            ->isVhostOf($req->getServerName())) {
             
-            // load the information about the requested path
-            $pathInfo = $req->getPathInfo();
+        // load the information about the requested path
+        $pathInfo = $req->getPathInfo();
+        $documentRoot = $req->getServerVar('DOCUMENT_ROOT');
+        
+        // check if a directory/webapp was been called without ending slash
+        if (is_dir($documentRoot . $pathInfo) && strrpos($pathInfo, '/') !== strlen($pathInfo) - 1) {
             
-            // check if webapp was called without ending slash
-            if (substr_count($pathInfo, '/') == 1) {
-                // redirect to path with ending slash
-                $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
-                $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
-                $res->setContent(PHP_EOL);
-                return;
-            }
+            // redirect to path with ending slash
+            $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
+            $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
+            $res->setContent(PHP_EOL);
+            
+            return;
         }
         
         // check the request method to invoke the appropriate method

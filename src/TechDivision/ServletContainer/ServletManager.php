@@ -158,7 +158,7 @@ class ServletManager
                 
                 // initialize the servlet configuration
                 $servletConfig = $this->getApplication()->newInstance(
-                    'TechDivision\ServletContainer\Servlets\ServletConfiguration', 
+                    'TechDivision\ServletContainer\Servlets\ServletConfiguration',
                     array($this)
                 );
                 
@@ -210,7 +210,7 @@ class ServletManager
                     ->debug(
                         sprintf(
                             'Successfully registered servlet %s for url-pattern %s in application %s',
-                            $servletName, 
+                            $servletName,
                             $urlPattern,
                             $this->getApplication()->getName()
                         )

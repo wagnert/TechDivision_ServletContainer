@@ -110,11 +110,15 @@ class Container extends AbstractContainer
 
         // if not, check if the request matches a folder
         if (array_key_exists($applicationName, $applications)) {
+            
+            // load the application
+            $application = $applications[$applicationName];
+            
             // set the DOCUMENT_ROOT to /opt/appserver/webapps
-            $servletRequest->setServerVar('DOCUMENT_ROOT', $applications[$applicationName]->getWebappPath());
-            $servletRequest->setWebappName($applications[$applicationName]->getName());
+            $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getBaseDirectory($application->getAppBase()));
+            $servletRequest->setWebappName($application->getName());
 
-            return $applications[$applicationName];
+            return $application;
         }
 
         // if not throw an exception
