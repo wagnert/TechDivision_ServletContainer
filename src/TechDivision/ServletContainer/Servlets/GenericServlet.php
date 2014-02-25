@@ -1,17 +1,23 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\GenericServlet
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Servlets;
 
+use TechDivision\ServletContainer\AuthenticationManager;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
@@ -23,19 +29,29 @@ use TechDivision\ServletContainer\Socket\HttpClient;
 /**
  * Abstract servlet implementation.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2010 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Markus Stockbauer <ms@techdivision.com>
- * @author      Tim Wagner <tw@techdivision.com>
- * @author      Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Tim Wagner <tw@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-abstract class GenericServlet implements Servlet {
+abstract class GenericServlet implements Servlet
+{
+
+    /**
+     * The unique servlet name.
+     *
+     * @var string
+     */
+    protected $name;
 
     /**
      * The servlet configuration.
-     * 
+     *
      * @var \TechDivision\ServletContainer\Interfaces\ServletConfig
      */
     protected $config;
@@ -48,7 +64,34 @@ abstract class GenericServlet implements Servlet {
     protected $queryParser;
 
     /**
-     * @see \TechDivision\ServletContainer\Interfaces\Servlet::init(ServletConfig $config)
+     * Holds the authentication manager
+     *
+     * @var AuthenticationManager
+     */
+    protected $authenticationManager;
+
+    /**
+     * Holds the flag if authentication is required for specific servlet.
+     *
+     * @var bool
+     */
+    protected $authenticationRequired;
+
+    /**
+     * Holds the configured security configuration.
+     *
+     * @var
+     */
+    protected $securedUrlConfig;
+
+    /**
+     * Initializes the servlet with the passed configuration.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to
+     *                                                                        initialize the servlet with
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
+     * @return void
      */
     public function init(ServletConfig $config)
     {
@@ -56,7 +99,9 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
-     * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletConfig()
+     * Return's the servlet's configuration.
+     *
+     * @return \TechDivision\ServletContainer\Interfaces\ServletConfig The servlet's configuration
      */
     public function getServletConfig()
     {
@@ -64,7 +109,19 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
-     * @see \TechDivision\ServletContainer\Interfaces\Servlet::getServletInfo()
+     * Returns the servlet manager instance (context)
+     *
+     * @return \TechDivision\ServletContainer\ServletManager The servlet manager instance
+     */
+    public function getServletManager()
+    {
+        return $this->getServletConfig()->getServletManager();
+    }
+
+    /**
+     * Returns an array with the server variables.
+     *
+     * @return array The server variables
      */
     public function getServletInfo()
     {
@@ -75,6 +132,8 @@ abstract class GenericServlet implements Servlet {
      * Injects the shutdown handler.
      *
      * @param \TechDivision\ServletContainer\Interfaces\ShutdownHandler $shutdownHandler The shutdown handler
+     *
+     * @return void
      */
     public function injectShutdownHandler(ShutdownHandler $shutdownHandler)
     {
@@ -84,14 +143,40 @@ abstract class GenericServlet implements Servlet {
     /**
      * Injects a queryparser
      *
-     * @param QueryParser $queryParser
+     * @param \TechDivision\ServletContainer\Interfaces\QueryParser $queryParser A query parser instance
+     *
      * @return void
      */
     public function injectQueryParser(QueryParser $queryParser)
     {
         $this->queryParser = $queryParser;
     }
-    
+
+    /**
+     * Injects the authentication manager.
+     *
+     * @param \TechDivision\ServletContainer\AuthenticationManager $authenticationManager An authentication
+     *                                                                                    manager instance
+     *
+     * @return void
+     */
+    public function injectAuthenticationManager(AuthenticationManager $authenticationManager)
+    {
+        $this->authenticationManager = $authenticationManager;
+    }
+
+    /**
+     * Injects the security configuration.
+     *
+     * @param array $configuration The configuration array
+     *
+     * @return void
+     */
+    public function injectSecuredUrlConfig($configuration)
+    {
+        $this->securedUrlConfig = $configuration;
+    }
+
     /**
      * Returns the injected query parser object
      *
@@ -103,7 +188,59 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
-     * @see \TechDivision\ServletContainer\Interfaces\Servlet::shutdown(HttpClientInterface $client, Response $response)
+     * Returns the injected authentication manager.
+     *
+     * @return \TechDivision\ServletContainer\AuthenticationManager
+     */
+    public function getAuthenticationManager()
+    {
+        return $this->authenticationManager;
+    }
+
+    /**
+     * Sets the authentication required flag.
+     *
+     * @param bool $authenticationRequired The flag if authentication is required
+     *
+     * @return void
+     */
+    public function setAuthenticationRequired($authenticationRequired)
+    {
+        $this->authenticationRequired = $authenticationRequired;
+    }
+
+    /**
+     * Returns the authentication required flag.
+     *
+     * @return bool
+     */
+    public function getAuthenticationRequired()
+    {
+        // This might not be set by default, so we will return false as our default
+        if (!isset($this->authenticationRequired)) {
+            return false;
+        } else {
+            return $this->authenticationRequired;
+        }
+    }
+
+    /**
+     * Returns the security configuration.
+     *
+     * @return array
+     */
+    public function getSecuredUrlConfig()
+    {
+        return $this->securedUrlConfig;
+    }
+
+    /**
+     * Will be invoked by the PHP when the servlets destruct method or exit() or die() has been invoked.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that handles the request
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to the client
+     *
+     * @return void
      */
     public function shutdown(HttpClientInterface $client, Response $response)
     {
@@ -122,16 +259,21 @@ abstract class GenericServlet implements Servlet {
             // set content to response
             $response->setContent($content);
 
+            // prepare the content to be ready for sending to client
+            $response->prepareContent();
+
             // prepare the headers
             $response->prepareHeaders();
 
-            // return the string representation of the response content to the client
-            $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
-
             // try to shutdown client socket
             try {
+
+                // return the string representation of the response content to the client
+                $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
+
                 $client->shutdown();
                 $client->close();
+
             } catch (\Exception $e) {
                 $client->close();
             }
@@ -141,7 +283,9 @@ abstract class GenericServlet implements Servlet {
     }
 
     /**
-     * @see \TechDivision\ServletContainer\Interfaces\Servlet::destroy()
+     * Destroys the object on shutdown
+     *
+     * @return void
      */
     public function destroy()
     {

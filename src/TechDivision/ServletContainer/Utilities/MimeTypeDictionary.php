@@ -1,13 +1,16 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Utilities\MimeTypeDictionary
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Utilities
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Utilities;
@@ -17,11 +20,13 @@ use TechDivision\ServletContainer\Interfaces\Dictionary;
 /**
  * A servlet response implementation.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Utilities
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 class MimeTypeDictionary extends \ArrayObject implements Dictionary
@@ -36,7 +41,7 @@ class MimeTypeDictionary extends \ArrayObject implements Dictionary
     /**
      * Constructor
      */
-    function __construct()
+    public function __construct()
     {
         parent::__construct($this->data);
     }
@@ -44,7 +49,8 @@ class MimeTypeDictionary extends \ArrayObject implements Dictionary
     /**
      * Returns value by given key from dictionary data.
      *
-     * @param string $key
+     * @param string $key The key to find
+     *
      * @return string
      */
     public function find($key)
@@ -56,7 +62,7 @@ class MimeTypeDictionary extends \ArrayObject implements Dictionary
     }
 
     /**
-     * mimetype data
+     * mimetype data array
      *
      * @var array
      */
@@ -1058,5 +1064,4 @@ class MimeTypeDictionary extends \ArrayObject implements Dictionary
         'zirz' => 'application/vnd.zul',
         'zmm' => 'application/vnd.handheld-entertainment+xml'
     );
-
 }

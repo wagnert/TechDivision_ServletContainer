@@ -1,17 +1,22 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\StaticResourceServlet
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Servlets;
 
+use TechDivision\ServletContainer\Http\Header;
 use Symfony\Component\Security\Acl\Exception\Exception;
 use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
 use TechDivision\ServletContainer\Utilities\MimeTypeDictionary;
@@ -25,14 +30,17 @@ use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 /**
  * A servlet implementation to handle static file requests.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Markus Stockbauer <ms@techdivision.com>
- * @author      Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Servlets
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-class StaticResourceServlet extends HttpServlet {
+class StaticResourceServlet extends HttpServlet
+{
 
     /**
      * Hold dictionary for mimetypes
@@ -42,94 +50,108 @@ class StaticResourceServlet extends HttpServlet {
     protected $mimeTypeDictionary;
 
     /**
-     * @param ServletConfig $config
-     * @throws ServletException;
-     * @return mixed
+     * The resource locator necessary to load static resources.
+     *
+     * @var \TechDivision\ServletContainer\Servlets\StaticResourceServlet
      */
-    public function init(ServletConfig $config) {
+    protected $locator;
+
+    /**
+     * Initializes the servlet with the passed configuration.
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to initialize the servlet with
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
+     * @return void
+     */
+    public function init(ServletConfig $config)
+    {
         parent::init($config);
-        // init mimetype dictionary
+        $this->locator = new StaticResourceLocator($this);
         $this->mimeTypeDictionary = new MimeTypeDictionary();
+    }
+
+    /**
+     * Implements http method POST
+     *
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
+     * @return void
+     */
+    public function doPost(Request $req, Response $res)
+    {
+        $this->doGet($req, $res);
     }
 
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param Request $req The servlet request
-     * @param Response $res The servlet response
+     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
+     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
-    public function doGet(Request $req, Response $res) {
-
+    public function doGet(Request $req, Response $res)
+    {
         try {
-
-
-            // instanciate the resource locator
-            $locator = new StaticResourceLocator($this);
-
+            
             // let the locator retrieve the file
-            $file = $locator->locate($req);
-
+            $file = $this->locator->locate($req);
+            
             // do not directly serve php files
             if (strpos($file->getFilename(), '.php') !== false) {
-                throw new PermissionDeniedException(sprintf(
-                    '403 - You do not have permission to access %s', $file->getFilename()));
+                throw new PermissionDeniedException(sprintf('403 - You do not have permission to access %s', $file->getFilename()));
             }
-
-
+            
             // set mimetypes to header
-            $res->addHeader('Content-Type',
-                $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION))
-            );
-
-
+            $res->addHeader(Header::HEADER_NAME_CONTENT_TYPE, $this->mimeTypeDictionary->find(pathinfo($file->getFilename(), PATHINFO_EXTENSION)));
+            
             // set last modified date from file
-            $res->addHeader('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
-
+            $res->addHeader(Header::HEADER_NAME_LAST_MODIFIED, gmdate('D, d M Y H:i:s \G\M\T', $file->getMTime()));
+            
             // set expires date
-            $res->addHeader('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
-
-
+            $res->addHeader(Header::HEADER_NAME_EXPIRES, gmdate('D, d M Y H:i:s \G\M\T', time() + 3600));
+            
             // check if If-Modified-Since header info is set
-            if ($req->getHeader('If-Modified-Since')) {
+            if ($req->getHeader(Header::HEADER_NAME_IF_MODIFIED_SINCE)) {
                 // check if file is modified since header given header date
-                if (strtotime($req->getHeader('If-Modified-Since'))>=$file->getMTime()) {
+                if (strtotime($req->getHeader(Header::HEADER_NAME_IF_MODIFIED_SINCE)) >= $file->getMTime()) {
                     // send 304 Not Modified Header information without content
-                    $res->addHeader('status', 'HTTP/1.1 304 Not Modified');
+                    $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 304 Not Modified');
                     $res->getContent(PHP_EOL);
                     return;
                 }
             }
 
-
+            // remove the headers to prevent response from beeing cached
+            $res->removeHeader(Header::HEADER_NAME_CACHE_CONTROL);
+            $res->removeHeader(Header::HEADER_NAME_PRAGMA);
+            
             // store the file's contents in the response
-            $res->setContent(
-                file_get_contents($file->getRealPath())
-            );
-
-
-        } catch(\FoundDirInsteadOfFileException $fdiofe) {
-
+            $res->setContent(file_get_contents($file->getRealPath()));
+            
+        } catch (\FoundDirInsteadOfFileException $fdiofe) {
+            
             // load the information about the requested path
             $pathInfo = $req->getPathInfo();
-
+            
             // if we found a folder AND ending slash is missing, redirect to same folder but with slash appended
-            if (substr($pathInfo, -1) !== '/') {
-
-                $res->addHeader("location", $pathInfo . '/');
-                $res->addHeader("status", 'HTTP/1.1 301 OK');
+            if (substr($pathInfo, - 1) !== '/') {
+                $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
+                $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
                 $res->setContent(PHP_EOL);
             }
-
-        } catch(\Exception $e) {
-
+            
+        } catch (\Exception $e) {
+            
             // load the information about the requested path
             $pathInfo = $req->getPathInfo();
-
-            $res->addHeader("status", 'HTTP/1.1 404 OK');
+            
+            $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 OK');
             $res->setContent(sprintf('<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL %s was not found on this server.</p></body></html>', $pathInfo));
         }
     }
-
 }

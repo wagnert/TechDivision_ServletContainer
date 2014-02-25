@@ -1,13 +1,16 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Interfaces\QueryParser
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Interfaces
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Interfaces;
@@ -15,11 +18,13 @@ namespace TechDivision\ServletContainer\Interfaces;
 /**
  * A query parser interface
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Interfaces
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 interface QueryParser
 {
@@ -34,6 +39,8 @@ interface QueryParser
     /**
      * Parses the given queryStr and returns result array
      *
+     * @param string $queryStr The query string
+     *
      * @return array The parsed result as array
      */
     public function parseStr($queryStr);
@@ -43,7 +50,8 @@ interface QueryParser
      *
      * @param string $param The param to be parsed
      * @param string $value The value to be set
+     *
+     * @return void
      */
     public function parseKeyValue($param, $value);
-
 }

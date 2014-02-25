@@ -1,13 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Http\HttpResponse
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Http;
@@ -18,41 +22,38 @@ use TechDivision\ServletContainer\Http\Cookie;
 /**
  * A servlet response implementation.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Markus Stockbauer <ms@techdivision.com>
- * @author      Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Markus Stockbauer <ms@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
-class HttpResponse implements Response {
+class HttpResponse implements Response
+{
 
     /**
-     * Header names
      *
-     * @var string
-     */
-    const HEADER_NAME_STATUS = 'status';
-    const HEADER_NAME_DATE = 'Date';
-    const HEADER_NAME_CONNECTION = 'Connection';
-    const HEADER_NAME_CONTENT_TYPE = 'Content-Type';
-
-    /**
      * @var string
      */
     protected $content;
 
     /**
+     *
      * @var array
      */
     protected $headers = array();
 
     /**
+     *
      * @var array
      */
     protected $cookies = array();
 
     /**
+     *
      * @var array
      */
     protected $acceptedEncodings = array();
@@ -62,19 +63,35 @@ class HttpResponse implements Response {
      */
     public function __construct()
     {
+        $this->initHeaders();
+    }
+
+    /**
+     * Prepares the headers.
+     *
+     * @return void
+     */
+    public function initHeaders()
+    {
         // prepare the headers
         $this->setHeaders(
             array(
-                self::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
-                self::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                self::HEADER_NAME_CONNECTION => "keep-alive",
-                self::HEADER_NAME_CONTENT_TYPE => "text/html",
+                Header::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
+                Header::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
+                Header::HEADER_NAME_CONNECTION => 'keep-alive',
+                Header::HEADER_NAME_CONTENT_TYPE => 'text/html',
+                Header::HEADER_NAME_CACHE_CONTROL => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0',
+                Header::HEADER_NAME_PRAGMA => 'no-cache'
             )
         );
     }
 
     /**
-     * @param array $headers
+     * Set's the headers
+     *
+     * @param array $headers The headers array
+     *
+     * @return void
      */
     public function setHeaders(array $headers)
     {
@@ -82,6 +99,8 @@ class HttpResponse implements Response {
     }
 
     /**
+     * Return's the headers array
+     *
      * @return array
      */
     public function getHeaders()
@@ -90,8 +109,12 @@ class HttpResponse implements Response {
     }
 
     /**
-     * @param string $header
-     * @param string $value
+     * Add's a header to array
+     *
+     * @param string     $header The header label e.g. Accept or Content-Length
+     * @param string|int $value  The header value
+     *
+     * @return void
      */
     public function addHeader($header, $value)
     {
@@ -101,7 +124,9 @@ class HttpResponse implements Response {
     /**
      * Returns header info by given key
      *
-     * @param $key
+     * @param string $key The headers key to return
+     *
+     * @return string|null
      */
     public function getHeader($key)
     {
@@ -117,7 +142,7 @@ class HttpResponse implements Response {
      */
     public function getCode()
     {
-        list($version, $code) = explode(" ", $this->getHeader('status'));
+        list ($version, $code) = explode(" ", $this->getHeader(Header::HEADER_NAME_STATUS));
         return $code;
     }
 
@@ -128,11 +153,13 @@ class HttpResponse implements Response {
      */
     public function getVersion()
     {
-        list($version, $code) = explode(" ", $this->getHeader('status'));
+        list ($version, $code) = explode(" ", $this->getHeader(Header::HEADER_NAME_STATUS));
         return $version;
     }
 
     /**
+     * Return's the headers as string
+     *
      * @return string
      */
     public function getHeadersAsString()
@@ -141,7 +168,7 @@ class HttpResponse implements Response {
 
         foreach ($this->getHeaders() as $header => $value) {
 
-            if ($header === self::HEADER_NAME_STATUS) {
+            if ($header === Header::HEADER_NAME_STATUS) {
                 $headers .= $value . "\r\n";
             } else {
                 $headers .= $header . ': ' . $value . "\r\n";
@@ -149,7 +176,7 @@ class HttpResponse implements Response {
         }
 
         foreach ($this->cookies as $cookie) {
-            $headers .= "Set-Cookie: $cookie\r\n";
+            $headers .= Header::HEADER_NAME_SET_COOKIE . ": $cookie\r\n";
         }
 
         return $headers;
@@ -158,7 +185,8 @@ class HttpResponse implements Response {
     /**
      * Removes one single header from the headers array.
      *
-     * @param string $header
+     * @param string $header The header to remove
+     *
      * @return void
      */
     public function removeHeader($header)
@@ -167,49 +195,93 @@ class HttpResponse implements Response {
     }
 
     /**
-     * @return string
+     * Prepares the content to be ready for sending to the client
+     *
+     * @return void
      */
-    public function getContent() {
+    public function prepareContent()
+    {
         // check if encoding is available
         foreach ($this->getAcceptedEncodings() as $acceptedEncoding) {
             // check if gzip is possible
             if ($acceptedEncoding == 'gzip') {
                 // set correct header encoding information
-                $this->addHeader('Content-Encoding', 'gzip');
+                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'gzip');
                 // return content encoded by gzip
-                return gzencode($this->content);
-            // check if deflate is possible
+                return $this->setContent(
+                    gzencode($this->getContent())
+                );
+                // check if deflate is possible
             } elseif ($acceptedEncoding == 'deflate') {
                 // set correct header encoding information
-                $this->addHeader('Content-Encoding', 'deflate');
+                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'deflate');
                 // return content deflate
-                return gzdeflate($this->content);
+                return $this->setContent(
+                    gzdeflate($this->getContent())
+                );
             }
         }
-        // return content as default
+    }
+
+    /**
+     * Returns the content string
+     *
+     * @return string
+     */
+    public function getContent()
+    {
+        // return content
         return $this->content;
     }
 
     /**
-     * @param string $content
+     * Set's the content
+     *
+     * @param string $content The content to set
+     *
      * @return void
      */
-    public function setContent($content) {
+    public function setContent($content)
+    {
         $this->content = $content;
     }
 
     /**
-     * @param Cookie $cookie
+     * Add's a cookie
+     *
+     * @param \TechDivision\ServletContainer\Http\Cookie $cookie The cookie instance to add
+     *
      * @return void
      */
-    public function addCookie(Cookie $cookie) {
+    public function addCookie(Cookie $cookie)
+    {
         $this->cookies[] = $cookie;
     }
 
     /**
-     * Sets accepted encodings data
+     * Returns TRUE if the response already has a cookie with the passed
+     * name, else FALSE.
      *
-     * @param $acceptedEncodings
+     * @param string $cookieName Name of the cookie to be checked
+     *
+     * @return boolean TRUE if the response already has the cookie, else FALSE
+     */
+    public function hasCookie($cookieName)
+    {
+        foreach ($this->cookies as $cookie) {
+            if ($cookie->getName() === $cookieName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Set's accepted encodings data
+     *
+     * @param array $acceptedEncodings The accepted codings as array
+     *
+     * @return void
      */
     public function setAcceptedEncodings($acceptedEncodings)
     {
@@ -217,7 +289,7 @@ class HttpResponse implements Response {
     }
 
     /**
-     * Returns accepted encodings data
+     * Return's accepted encodings data
      *
      * @return array
      */
@@ -233,24 +305,24 @@ class HttpResponse implements Response {
      */
     public function prepareHeaders()
     {
+
         // grap headers and set to response object
-        foreach (appserver_get_headers() as $i => $h) {
-            
-            // skip default session delete header 
-            if (strpos($h,"Set-Cookie: PHPSESSID=deleted;")!==false) {
-                continue;   
-            }
-            
-            // set headers defined in sapi headers   
+        foreach (appserver_get_headers(true) as $i => $h) {
+
+            // set headers defined in sapi headers
             $h = explode(':', $h, 2);
             if (isset($h[1])) {
+
+                // load header key and value
                 $key = trim($h[0]);
                 $value = trim($h[1]);
+
+                // if not, add the header
                 $this->addHeader($key, $value);
-                
+
                 // set status header to 301 if location is given
-                if ($key == 'Location') {
-                    $this->addHeader('status', 'HTTP/1.1 301');
+                if ($key == Header::HEADER_NAME_LOCATION) {
+                    $this->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301');
                 }
             }
         }
@@ -259,7 +331,6 @@ class HttpResponse implements Response {
         $contentLength = strlen($this->getContent());
 
         // prepare the dynamic headers
-        $this->addHeader("Content-Length", $contentLength);
+        $this->addHeader(Header::HEADER_NAME_CONTENT_LENGTH, $contentLength);
     }
-
 }

@@ -1,13 +1,17 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Http\HttpRequest
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Http;
@@ -22,150 +26,152 @@ use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 
 /**
- * A web request implementation.
+ * A http server request implementation.
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Johann Zelger <jz@techdivision.com>
- *              Philipp Dittert <p.dittert@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @author     Philipp Dittert <p.dittert@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HttpRequest implements Request
 {
 
     /**
-     * Separator between Header and Content (e.g. POST-Request)
+     * Separator between Header and Content (e. g. POST-Request).
      *
      * @var string
      */
     protected $headerContentSeparator = "\r\n\r\n";
 
     /**
-     * Request header data
+     * Request header data.
      *
      * @var array
      */
     protected $headers = array();
 
     /**
-     * Path info
+     * Path info.
      *
      * @var string
      */
     protected $pathInfo;
 
     /**
-     * Server name as called by client
+     * Server name as called by client.
      *
      * @var string
      */
     protected $serverName;
 
     /**
-     * Server port called by client
+     * The address of the server.
+     *
+     * @var string $serverAddress
+     */
+    protected $serverAddress;
+
+    /**
+     * Server port called by client.
      *
      * @var string
      */
     protected $serverPort;
 
     /**
-     * Clients name/ip
+     * Clients name/IP.
      *
      * @var string
      */
     protected $clientIp;
 
     /**
-     * Clients port
+     * Clients port.
      *
      * @var string
      */
     protected $clientPort;
 
     /**
-     * Holds the response instance
+     * Holds the response instance.
      *
-     * @var Response
+     * @var \TechDivision\ServletContainer\Interfaces\Response
      */
     protected $response;
 
     /**
-     * The accepted encodings data
+     * The accepted encodings data.
      *
      * @var array
      */
     protected $acceptedEncodings = array();
 
     /**
-     * The request method
+     * The request method.
      *
      * @var string
      */
     protected $method;
 
     /**
-     * The request body
+     * The request body.
      *
      * @var string
      */
     protected $content;
 
     /**
-     * Uri called by client
+     * Uri called by client.
      *
      * @var string
      */
     protected $uri;
 
     /**
-     * Protocol version
+     * Protocol version.
      *
      * @var string
      */
     protected $version;
 
     /**
-     * Query string with params
+     * Query string with params.
      *
      * @var string
      */
     protected $queryString;
 
     /**
-     * Name of the webapp related by the request
+     * Name of the webapp related by the request.
      *
      * @var string
      */
     protected $webappName;
 
     /**
-     * Server data
+     * Server data.
      *
      * @var array
      */
     protected $server = array();
 
     /**
-     * Session Manager instance
+     * Session Manager instance.
      *
-     * @var PersistentSessionManager
+     * @var \TechDivision\ServletContainer\Session\SessionManager
      */
     protected $sessionManager;
 
     /**
-     * Holds the query parser
+     * Holds the query parser.
      *
-     * @var unknown QueryParser
+     * @var \TechDivision\ServletContainer\Interfaces\QueryParser
      */
     protected $queryParser;
-
-    /**
-     * The Session
-     *
-     * @var ServletSession
-     */
-    protected $session;
 
     /**
      * An array that contains all request parameters.
@@ -175,46 +181,70 @@ class HttpRequest implements Request
     protected $parameterMap = array();
 
     /**
-     * Holds collection of parts from multipart form data
+     * Holds collection of parts from multipart form data.
      *
-     * @var array A Collection of HttpPart Objects
+     * @var array A collection of HttpPart objects
      */
     protected $parts = array();
 
     /**
-     * Holds the part factory instance
+     * Holds the part factory instance.
      *
-     * @var HttpPart
+     * @var \TechDivision\ServletContainer\Interfaces\Part
      */
     protected $part;
+
+    /**
+     * Array that contain's the cookies passed with.
+     * the request.
+     *
+     * @var array
+     */
+    protected $cookies = array();
 
     /**
      * Inject the session manager into the request instance.
      *
      * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager The session manager instance
+     *
      * @return void
      */
-    public function injectSessionManager(SessionManager $sessionManager) {
+    public function injectSessionManager(SessionManager $sessionManager)
+    {
         $this->sessionManager = $sessionManager;
+    }
+
+    /**
+     * Return's the session manager from the request instance.
+     *
+     * @return \TechDivision\ServletContainer\Session\SessionManager The session manager instance
+     */
+    public function getSessionManager()
+    {
+        return $this->sessionManager;
     }
 
     /**
      * Inject the query parser
      *
-     * @param QueryParser $queryParser
+     * @param QueryParser $queryParser The query parser implementation to use for
+     *
      * @return void
      */
-    public function injectQueryParser(QueryParser $queryParser) {
-    	$this->queryParser = $queryParser;
+    public function injectQueryParser(QueryParser $queryParser)
+    {
+        $this->queryParser = $queryParser;
     }
 
     /**
      * Inject a part factory
      *
-     * @param Part $part a Part implementation with factory function
+     * @param Part $part A Part implementation with factory function
+     *
      * @return void
      */
-    public function injectHttpPart(Part $part) {
+    public function injectHttpPart(Part $part)
+    {
         $this->part = $part;
     }
 
@@ -232,60 +262,57 @@ class HttpRequest implements Request
      * validate actual InputStream
      *
      * @param string $buffer InputStream
-     * @return void
+     *
+     * @return \TechDivision\ServletContainer\Http\HttpRequest
+     *
      */
     public function initFromRawHeader($buffer)
     {
         // parse method uri and http version
-        list($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
+        list ($method, $uri, $version) = explode(" ", trim(strtok($buffer, "\n")));
 
+        // initialize the basic values
         $this->setMethod($method);
-        $requestInstance = $this->getRequestMethodInstance();
-
-        $requestInstance->setMethod($method);
-        $requestInstance->setUri($uri);
-        $requestInstance->setVersion($version);
-        $requestInstance->setHeaders($this->parseHeaders($buffer));
+        $this->setUri($uri);
+        $this->setVersion($version);
+        $this->setHeaders($this->parseHeaders($buffer));
 
         // parsing for servername and port
-        list ($serverName, $serverPort) = explode(":", $requestInstance->getHeader('Host'));
+        list ($serverName, $serverPort) = explode(":", $this->getHeader(Header::HEADER_NAME_HOST));
 
-        // set server name and server port
-        $requestInstance->setServerName($serverName);
-        $requestInstance->setServerPort($serverPort);
+        // set server address, name and server port
+        $this->setServerAddress(gethostbyname($serverName));
+        $this->setServerName($serverName);
+        $this->setServerPort($serverPort);
 
         // parse path info
-        $requestInstance->parsePathInfo($requestInstance->getUri());
+        $this->parsePathInfo($this->getUri());
 
-        // set intial server vars
-        $requestInstance->initServerVars();
+        // set intial server vars and cookies
+        $this->initServerVars();
+        $this->initCookies();
 
-        // check if php script is called to set script and php info
-        if (pathinfo($requestInstance->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
-            $requestInstance->setServerVar('SCRIPT_FILENAME', $requestInstance->getServerVar('DOCUMENT_ROOT') . $requestInstance->getPathInfo());
-            $requestInstance->setServerVar('SCRIPT_NAME', $requestInstance->getPathInfo());
-            $requestInstance->setServerVar('PHP_SELF', $requestInstance->getPathInfo());
-        }
-
-        $requestInstance->injectQueryParser(new HttpQueryParser());
+        // inject the query parser
+        $this->injectQueryParser(new HttpQueryParser());
 
         // set accepted encoding data
-        $this->acceptedEncodings = explode(',', $requestInstance->getHeader('Accept-Encoding'));
+        $this->acceptedEncodings = explode(',', $this->getHeader(Header::HEADER_NAME_ACCEPT_ENCODING));
 
-        return $requestInstance;
+        return $this;
     }
 
     /**
      * Parse multipart form data
      *
-     * @param string $content
+     * @param string $content The content to parse
+     *
      * @return void
      */
     public function parseMultipartFormData($content)
     {
 
         // grab multipart boundary from content type header
-        preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
+        preg_match('/boundary=(.*)$/', $this->getHeader(Header::HEADER_NAME_CONTENT_TYPE), $matches);
         // get boundary
         $boundary = $matches[1];
         // split content by boundary
@@ -293,15 +320,14 @@ class HttpRequest implements Request
         // get rid of last -- element
         array_pop($blocks);
         // loop data blocks
-        foreach ($blocks as $id => $block)
-        {
+        foreach ($blocks as $id => $block) {
             // of block is empty continue with next one
             if (empty($block)) {
                 continue;
             }
 
             // check if filename is given
-            if (strpos($block, '; filename="') !== FALSE) {
+            if (strpos($block, '; filename="') !== false) {
                 // init new part instance
                 $part = $this->getHttpPartInstance();
                 // seperate headers from body
@@ -321,10 +347,10 @@ class HttpRequest implements Request
                 // set given filename
                 $part->setFilename($matches[2]);
                 // put content to part
-                $part->putContent(preg_replace('/.'.PHP_EOL.'$/', '', $partBody));
+                $part->putContent(preg_replace('/.' . PHP_EOL . '$/', '', $partBody));
                 // add the part instance to request
                 $this->addPart($part);
-            // parse all other fields as normal key value pairs
+                // parse all other fields as normal key value pairs
             } else {
                 // match "name" and optional value in between newline sequences
                 preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
@@ -341,84 +367,48 @@ class HttpRequest implements Request
     public function hasMultipartFormData()
     {
         // grab out boundary info
-        preg_match('/boundary=(.*)$/', $this->getHeader('Content-Type'), $matches);
+        preg_match('/boundary=(.*)$/', $this->getHeader(Header::HEADER_NAME_CONTENT_TYPE), $matches);
+
         return (count($matches) > 0);
     }
 
     /**
      * Parse request content and sets parameter map and parts
      *
-     * @param string $content
+     * @param string $content The content to parse
+     *
      * @return void
      */
     public function parse($content)
     {
         // set content to req instance
-    	$this->setContent($content);
-    	// set and parse params within url if exist
-    	if ($queryString = parse_url($this->getUri(), PHP_URL_QUERY)) {
-    		$this->setQueryString($queryString);
-    		$this->getQueryParser()->parseStr($queryString);
-    	}
-    	// check if multipart form data is given
-    	if ($this->hasMultipartFormData()) {
-            $this->parseMultipartFormData($content);
-    	} else {
-    	    // content type is probably regular form-encoded
-    	    $this->getQueryParser()->parseStr(urldecode($content));
-    	}
-    	// finally set parameter map
-    	$this->setParameterMap($this->getQueryParser()->getResult());
-    }
+        $this->setContent($content);
 
-    /**
-     * Request instance factory
-     *
-     * @throws InvalidHeaderException
-     * @return Request
-     */
-    public function getRequestMethodInstance()
-    {
-        // select fitting validator
-        switch ($method = $this->getMethod()) {
-            case "GET":
-                $request = new GetRequest();
-                break;
-            case "POST":
-                $request = new PostRequest();
-                break;
-            case "HEAD":
-                $request = new HeadRequest();
-                break;
-            case "CONNECT":
-                $request = new ConnectRequest();
-                break;
-            case "DELETE":
-                $request = new DeleteRequest();
-                break;
-            case "OPTIONS":
-                $request = new OptionsRequest();
-                break;
-            case "PUT":
-                $request = new PutRequest();
-                break;
-            case "TRACE":
-                $request = new TraceRequest();
-                break;
-            default:
-                throw new InvalidHeaderException("Found invalid request method '$method'");
-                break;
+        // set and parse params within url if exist
+        if ($queryString = parse_url($this->getUri(), PHP_URL_QUERY)) {
+            $this->setQueryString($queryString);
+            $this->getQueryParser()->parseStr($queryString);
         }
-        // set parsed headers to request method type
-        $request->setHeaders($this->getHeaders());
-        return $request;
+
+        // check if request has to be parsed depending on Content-Type header
+        if ($this->getQueryParser()->isParsingRelevant($this->getHeader(Header::HEADER_NAME_CONTENT_TYPE))) {
+            if ($this->hasMultipartFormData()) {
+                $this->parseMultipartFormData($content);
+            } else {
+                $this->getQueryParser()->parseStr(urldecode($content));
+            }
+        }
+
+        // finally set parameter map
+        $this->setParameterMap($this->getQueryParser()->getResult());
     }
 
     /**
      * Parsing URI for PathInfo
      *
-     * @param string $uri
-     * @return string
+     * @param string $uri The uri to parse
+     *
+     * @return void
      */
     public function parsePathInfo($uri)
     {
@@ -428,23 +418,24 @@ class HttpRequest implements Request
     /**
      * init basic Server Vars
      *
-     *@return void
+     * @return void
      */
     public function initServerVars()
     {
         $this->server = array(
-            'HTTP_HOST' => $this->getHeader('Host'),
-            'HTTP_CONNECTION' => $this->getHeader('Connection'),
-            'HTTP_ACCEPT' => $this->getHeader('Accept'),
-            'HTTP_USER_AGENT' => $this->getHeader('User-Agent:'),
-            'HTTP_ACCEPT_ENCODING' => $this->getHeader('Accept-Encoding'),
-            'HTTP_ACCEPT_LANGUAGE' => $this->getHeader('Accept-Language'),
-            'HTTP_REFERER' => $this->getHeader('Referer'),
+            'HTTP_HOST' => $this->getHeader(Header::HEADER_NAME_HOST),
+            'HTTP_CONNECTION' => $this->getHeader(Header::HEADER_NAME_CONNECTION),
+            'HTTP_ACCEPT' => $this->getHeader(Header::HEADER_NAME_ACCEPT),
+            'HTTP_USER_AGENT' => $this->getHeader(Header::HEADER_NAME_USER_AGENT),
+            'HTTP_ACCEPT_ENCODING' => $this->getHeader(Header::HEADER_NAME_ACCEPT_ENCODING),
+            'HTTP_ACCEPT_LANGUAGE' => $this->getHeader(Header::HEADER_NAME_ACCEPT_LANGUAGE),
+            'HTTP_REFERER' => $this->getHeader(Header::HEADER_NAME_REFERER),
             'PATH' => '/opt/appserver/bin',
+            'GATEWAY_INTERFACE' => 'CGI/1.1',
             'SERVER_SIGNATURE' => '',
             'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
             'SERVER_NAME' => $this->getServerName(),
-            'SERVER_ADDR' => '127.0.0.1',
+            'SERVER_ADDR' => gethostbyname($this->getServerName()),
             'SERVER_PORT' => $this->getServerPort(),
             'REMOTE_ADDR' => '127.0.0.1',
             'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
@@ -453,10 +444,27 @@ class HttpRequest implements Request
             'REQUEST_METHOD' => $this->getMethod(),
             'REQUEST_URI' => $this->getUri(),
             'REQUEST_TIME' => time(),
+            'REQUEST_TIME_FLOAT' => microtime(true)
         );
 
-        if ($cookie = $this->getHeader('Cookie')) {
+        if ($cookie = $this->getHeader(Header::HEADER_NAME_COOKIE)) {
             $this->server['HTTP_COOKIE'] = $cookie;
+        }
+    }
+
+    /**
+     * Initializes the cookies found in the header.
+     *
+     * @return void
+     */
+    public function initCookies()
+    {
+        $cookies = explode(';', $this->getHeader(Header::HEADER_NAME_COOKIE));
+        foreach ($cookies as $cookie) {
+            if (!empty($cookie)) {
+                list ($cookieName, $cookieValue) = explode('=', trim($cookie));
+                $this->cookies[$cookieName] = new Cookie($cookieName, $cookieValue);
+            }
         }
     }
 
@@ -464,11 +472,12 @@ class HttpRequest implements Request
      * parsing header
      *
      * @param string $var RawHeader
+     *
      * @return array
      */
     protected function parseHeaders($var)
     {
-        $headers=array();
+        $headers = array();
         if (!function_exists('http_parse_headers')) {
             foreach (explode("\n", $var) as $i => $h) {
                 $h = explode(':', $h, 2);
@@ -479,6 +488,7 @@ class HttpRequest implements Request
         } else {
             $headers = http_parse_headers($var);
         }
+
         return $headers;
     }
 
@@ -486,12 +496,14 @@ class HttpRequest implements Request
      * validates the header
      *
      * @param string $buffer Inputstream from socket
-     * @return mixed
+     *
+     * @return boolean
      */
-    public function isHeaderCompleteAndValid($buffer) {
-
+    public function isHeaderCompleteAndValid($buffer)
+    {
         $this->initFromRawHeader($buffer);
-        return TRUE;
+
+        return true;
     }
 
     /**
@@ -501,13 +513,14 @@ class HttpRequest implements Request
      */
     public function isComplete()
     {
-        return TRUE;
+        return true;
     }
 
     /**
      * Set ParameterMap
      *
-     * @param array $parameterMap
+     * @param array $parameterMap The parameter map array
+     *
      * @return void
      */
     protected function setParameterMap($parameterMap)
@@ -528,22 +541,19 @@ class HttpRequest implements Request
     /**
      * Sets response object
      *
-     * @param Response $response
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response A response instance
+     *
      * @return void
      */
-    public function setResponse(Response $response)
+    public function injectResponse(Response $response)
     {
         $this->response = $response;
-        // add accepted encoding methods to response
-        $this->response->setAcceptedEncodings(
-            $this->getAcceptedEncodings()
-        );
     }
 
     /**
-     * Returns response object
+     * Returns the response instance.
      *
-     * @return Response
+     * @return \TechDivision\ServletContainer\Interfaces\Response The response instance
      */
     public function getResponse()
     {
@@ -553,20 +563,23 @@ class HttpRequest implements Request
     /**
      * Returns header info by given key
      *
-     * @param string $key
-     * @return string
+     * @param string $key The header key to get
+     *
+     * @return string|null
      */
     public function getHeader($key)
     {
-        if (array_key_exists($key, $this->headers)) {
-            return $this->headers[$key];
+        foreach ($this->headers as $headerName => $value) {
+            if (strcasecmp($key, $headerName) === 0) {
+                return $this->headers[$headerName];
+            }
         }
     }
 
     /**
      * Returns accepted encodings data
      *
-     * @var array
+     * @return array
      */
     public function getAcceptedEncodings()
     {
@@ -574,9 +587,9 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns query string
+     * Returns query string of the actual request.
      *
-     * @return string
+     * @return string|null The query string of the actual request
      */
     public function getQueryString()
     {
@@ -586,7 +599,8 @@ class HttpRequest implements Request
     /**
      * Sets query string
      *
-     * @param string $queryString
+     * @param string $queryString The query string to set
+     *
      * @return void
      */
     public function setQueryString($queryString)
@@ -609,11 +623,34 @@ class HttpRequest implements Request
      * Sets server name
      *
      * @param string $serverName Servername
-     * @return void
+     *
+     * @return string
      */
     protected function setServerName($serverName)
     {
         return $this->serverName = $serverName;
+    }
+
+    /**
+     * Returns the server's IP v4 address
+     *
+     * @return string
+     */
+    public function getServerAddress()
+    {
+        return $this->serverAddress;
+    }
+
+    /**
+     * Sets server's IP v4 address
+     *
+     * @param string $serverAddress The server's IP address
+     *
+     * @return string
+     */
+    protected function setServerAddress($serverAddress)
+    {
+        return $this->serverAddress = $serverAddress;
     }
 
     /**
@@ -630,7 +667,8 @@ class HttpRequest implements Request
      * Sets server port
      *
      * @param string $serverPort Serverport
-     * @return void
+     *
+     * @return string
      */
     protected function setServerPort($serverPort)
     {
@@ -651,7 +689,8 @@ class HttpRequest implements Request
      * Sets path info
      *
      * @param string $pathInfo Pathinfo
-     * @return void
+     *
+     * @return string
      */
     protected function setPathInfo($pathInfo)
     {
@@ -671,7 +710,8 @@ class HttpRequest implements Request
     /**
      * Set headers data
      *
-     * @param array $headers
+     * @param array $headers The headers array to set
+     *
      * @return void
      */
     protected function setHeaders($headers)
@@ -682,12 +722,13 @@ class HttpRequest implements Request
     /**
      * Sets the body content
      *
-     * @param string $content
+     * @param string $content The content to set
+     *
      * @return void
      */
     public function setContent($content)
     {
-    	$this->content = $content;
+        $this->content = $content;
     }
 
     /**
@@ -714,6 +755,7 @@ class HttpRequest implements Request
      * Set request method
      *
      * @param string $method Request-Method
+     *
      * @return void
      */
     protected function setMethod($method)
@@ -734,7 +776,8 @@ class HttpRequest implements Request
     /**
      * Set request uri
      *
-     * @param string $uri URI
+     * @param string $uri The uri to set
+     *
      * @return void
      */
     public function setUri($uri)
@@ -755,7 +798,8 @@ class HttpRequest implements Request
     /**
      * Set protocol version
      *
-     * @param string $version protocol version
+     * @param string $version The http protocol version
+     *
      * @return void
      */
     public function setVersion($version)
@@ -766,16 +810,13 @@ class HttpRequest implements Request
     /**
      * Returns the session for this request.
      *
-     * @return ServletSession
+     * @param string $sessionName The name of the session to return/create
+     *
+     * @return \TechDivision\ServletContainer\Session\ServletSession The session instance
      */
-    public function getSession()
+    public function getSession($sessionName = ServletSession::SESSION_NAME)
     {
-
-        if ($this->session == null) {
-            $this->session = $this->sessionManager->getSessionForRequest($this);
-        }
-
-        return $this->session;
+        return $this->sessionManager->getSessionForRequest($this, $sessionName);
     }
 
     /**
@@ -785,7 +826,7 @@ class HttpRequest implements Request
      */
     public function getQueryParser()
     {
-    	return $this->queryParser;
+        return $this->queryParser;
     }
 
     /**
@@ -801,8 +842,10 @@ class HttpRequest implements Request
     /**
      * Set specific server var data
      *
-     * @param string $key
-     * @param string $value
+     * @param string $key   The server var key
+     * @param string $value The value for given server var key
+     *
+     * @return void
      */
     public function setServerVar($key, $value)
     {
@@ -812,8 +855,9 @@ class HttpRequest implements Request
     /**
      * Returns specific server var data
      *
-     * @param $key
-     * @return mixed
+     * @param string $key The key to get
+     *
+     * @return null|string
      */
     public function getServerVar($key)
     {
@@ -825,7 +869,8 @@ class HttpRequest implements Request
     /**
      * Sets clients ip address
      *
-     * @param mixed $clientIp
+     * @param string $clientIp The client's ip address as string
+     *
      * @return void
      */
     public function setClientIp($clientIp)
@@ -846,7 +891,8 @@ class HttpRequest implements Request
     /**
      * Sets clients port
      *
-     * @param string $clientPort
+     * @param int|string $clientPort The client's port as string (or int)
+     *
      * @return void
      */
     public function setClientPort($clientPort)
@@ -857,7 +903,7 @@ class HttpRequest implements Request
     /**
      * Returns clients port
      *
-     * @return string
+     * @return int
      */
     public function getClientPort()
     {
@@ -867,7 +913,9 @@ class HttpRequest implements Request
     /**
      * Sets the webapps name related with the request
      *
-     * @param string $webappName
+     * @param string $webappName The webapp's name
+     *
+     * @return void
      */
     public function setWebappName($webappName)
     {
@@ -885,12 +933,13 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns the parameter with the passed name if available or NULL
+     * Returns the parameter with the passed name if available or null
      * if the parameter not exists.
      *
-     * @param string $name The name of the parameter to return
+     * @param string  $name   The name of the parameter to return
      * @param integer $filter The filter to use
-     * @return string
+     *
+     * @return string|null
      */
     public function getParameter($name, $filter = FILTER_SANITIZE_STRING)
     {
@@ -904,13 +953,14 @@ class HttpRequest implements Request
      * Returns a part object by given name
      *
      * @param string $name The name of the form part
-     * @return HttpPart
+     *
+     * @return \TechDivision\ServletContainer\Http\HttpPart
      */
     public function getPart($name)
     {
-    	if (array_key_exists($name, $this->parts)) {
-    		return $this->parts[$name];
-    	}
+        if (array_key_exists($name, $this->parts)) {
+            return $this->parts[$name];
+        }
     }
 
     /**
@@ -920,21 +970,49 @@ class HttpRequest implements Request
      */
     public function getParts()
     {
-    	return $this->parts;
+        return $this->parts;
     }
 
     /**
      * adds a part to the parts collection
      *
-     * @param Part $part a form part object
+     * @param Part   $part A form part object
      * @param string $name A manually defined name
+     *
      * @return void
      */
     public function addPart(Part $part, $name = null)
     {
-    	if (is_null($name)) {
-    		$name = $part->getName();
-    	}
-    	$this->parts[$name] = $part;
+        if (is_null($name)) {
+            $name = $part->getName();
+        }
+        $this->parts[$name] = $part;
+    }
+
+    /**
+     * Returns true if the request has a cookie header with the passed
+     * name, else false.
+     *
+     * @param string $cookieName Name of the cookie header to be checked
+     *
+     * @return boolean true if the request has the cookie, else false
+     */
+    public function hasCookie($cookieName)
+    {
+        return array_key_exists($cookieName, $this->cookies);
+    }
+
+    /**
+     * Returns the value of the cookie with the passed name.
+     *
+     * @param string $cookieName The name of the cookie to return
+     *
+     * @return mixed The cookie value
+     */
+    public function getCookie($cookieName)
+    {
+        if ($this->hasCookie($cookieName)) {
+            return $this->cookies[$cookieName];
+        }
     }
 }

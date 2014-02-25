@@ -1,13 +1,16 @@
 <?php
-
 /**
  * TechDivision\ServletContainer\Http\HttpQueryParser
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Http;
@@ -17,11 +20,13 @@ use TechDivision\ServletContainer\Interfaces\QueryParser;
 /**
  * A http query parser to parse post and get params to array from query string
  *
- * @package     TechDivision\ServletContainer
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Johann Zelger <jz@techdivision.com>
+ * @category   Appserver
+ * @package    TechDivision_ServletContainer
+ * @subpackage Http
+ * @author     Johann Zelger <jz@techdivision.com>
+ * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link       http://www.appserver.io
  */
 class HttpQueryParser implements QueryParser
 {
@@ -39,16 +44,50 @@ class HttpQueryParser implements QueryParser
      * @var array
      */
     protected $indexCounter = array();
+    
+    /**
+     * The array with content types where the content has to be parsed.
+     * 
+     * @var array
+     */
+    protected $parsingRelevantContentTypes = array(
+        'application/x-www-form-urlencoded',
+        'multipart/form-data'
+    );
+
+    /**
+     * Returns TRUE if the request is a multipart from data request with
+     * content type <code>application/x-www-form-urlencoded</code> or 
+     * <code>multipart/form-data</code>.
+     * 
+     * It is not necessary to use in_array() because the content type can be 
+     * extended by encoding, e. g. application/x-www-form-urlencoded; UTF-8.
+     *
+     * @param string|null $contentType The content's type
+     *
+     * @return boolean TRUE if the content has to be parsed, else FALSE
+     */
+    public function isParsingRelevant($contentType)
+    {
+        foreach ($this->parsingRelevantContentTypes as $relevantContentType) {
+            if (strstr($contentType, $relevantContentType) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Internal recursive array merge functionality, due to the array_merge_recursive core php function
      * handles array indices on its own, so its not possible to set it manually while merging.
      *
-     * @param array $array The existing array to merge another array in.
-     * @param array $array_i The array should be merged into a existing one.
+     * @param array &$array   The existing array reference to merge another array in.
+     * @param array &$array_i The array reference which should be merged into a existing one.
+     *
      * @return void
      */
-    protected function merge(&$array, &$array_i) {
+    protected function merge(&$array, &$array_i)
+    {
         // for each element of the array (key => value)
         foreach ($array_i as $k => $v) {
             // if the value itself is an array
@@ -73,6 +112,7 @@ class HttpQueryParser implements QueryParser
      * Prepares query string and returns it
      *
      * @param string $queryStr The unprepared query string
+     *
      * @return string The prepared query string
      */
     public function prepareQueryStr($queryStr)
@@ -99,6 +139,8 @@ class HttpQueryParser implements QueryParser
 
     /**
      * Parses the given queryStr and returns result array
+     *
+     * @param string $queryStr The query string given by request
      *
      * @return array The parsed result as array
      */
@@ -127,6 +169,8 @@ class HttpQueryParser implements QueryParser
      *
      * @param string $param The param to be parsed
      * @param string $value The value to be set
+     *
+     * @return void
      */
     public function parseKeyValue($param, $value)
     {
@@ -198,5 +242,4 @@ class HttpQueryParser implements QueryParser
     {
         $this->result = array();
     }
-
 }
