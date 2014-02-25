@@ -25,6 +25,7 @@ use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
+use TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException;
 
 /**
  * This servlet emulates an Apache webserver request by initializing the 
@@ -44,11 +45,11 @@ class PhpServlet extends StaticResourceServlet
 {
     
     /**
-     * Default directory index file.
+     * Array with allowed index files.
      * 
-     * @var string
+     * @var array
      */
-    protected $directoryIndex = 'index.php';
+    protected $directoryIndex = array('index.php', 'index.phtml');
 
     /**
      * The resource locator necessary to load static resources.
@@ -71,15 +72,13 @@ class PhpServlet extends StaticResourceServlet
     }
     
     /**
-     * Returns the directory index file that defaults to index.php.
-     * 
-     * @param string $directoryToPrepend Directory to prepend to the default directory index file
+     * Returns array with the possible index files.
      *
-     * @return string The directory index file prepended with the passed directory
+     * @return array The array with the possible index files
      */
-    protected function getDirectoryIndex($directoryToPrepend = DIRECTORY_SEPARATOR)
+    protected function getDirectoryIndex()
     {
-        return $directoryToPrepend . $this->directoryIndex;
+        return $this->directoryIndex;
     }
 
     /**
@@ -97,12 +96,8 @@ class PhpServlet extends StaticResourceServlet
             $req->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
         }
         
-        // check if php script is called to set script and php info
-        if (pathinfo($req->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
-            $scriptName = $req->getPathInfo();
-        } else {
-            $scriptName = $this->getDirectoryIndex();
-        }
+        // load the path info as script name 
+        $scriptName = $req->getPathInfo();
         
         // set the script file information
         $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $scriptName);
@@ -216,7 +211,7 @@ class PhpServlet extends StaticResourceServlet
     protected function initGetGlobals(Request $req)
     {
         // check post type and set params to globals
-        if ($req->getMethod() == 'POST') {
+        if ($req->getMethod() == Request::POST) {
             parse_str($req->getQueryString(), $parameterMap);
         } else {
             $parameterMap = $req->getParameterMap();
@@ -246,8 +241,10 @@ class PhpServlet extends StaticResourceServlet
      */
     protected function initGlobals(Request $req)
     {
+        
         // prepare the request before initializing the globals
         $this->prepareGlobals($req);
+        
         // initialize the globals
         $_SERVER = $this->initServerGlobals($req);
         $_REQUEST = $this->initRequestGlobals($req);
@@ -262,19 +259,28 @@ class PhpServlet extends StaticResourceServlet
      *
      * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
      * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
-     *
-     * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
+     * 
      * @return void
      */
     public function doGet(Request $req, Response $res)
     {
-        // let the locator retrieve the file
-        $file = $this->locator->locate($req);
         
-        // do not directly serve php files
-        if (strpos($file->getFilename(), '.php') === false) {
-            throw new PermissionDeniedException(sprintf('403 - You do not have permission to access %s', $file->getFilename()));
-        }
+        // temporary save the original URI
+        $originalUri = $req->getUri();
+        
+        do { // iterate over the possible index files if a directory has been passed as URI
+            
+            try {
+                
+                // try to locate the file
+                $file = $this->locator->locate($req);
+                break;
+                
+            } catch (\Exception $e) { // append the next available directory index file to the URI
+                $req->setUri($originalUri . $indexFile);
+            }
+            
+        } while ($indexFile = next($this->getDirectoryIndex()));
 
         // initialize the globals $_SERVER, $_REQUEST, $_POST, $_GET, $_COOKIE, $_FILES and set the headers
         $this->initGlobals($req);

@@ -172,7 +172,7 @@ abstract class HttpServlet extends GenericServlet
         if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($req, $res, $this)) {
             return;
         }
-
+        
         // load the information about the requested path
         $pathInfo = $req->getPathInfo();
         $documentRoot = $req->getServerVar('DOCUMENT_ROOT');
@@ -218,7 +218,9 @@ abstract class HttpServlet extends GenericServlet
                 $this->doTrace($req, $res);
                 break;
             default:
-                throw new MethodNotImplementedException(sprintf('%s is not implemented yet.', $req->getMethod()));
+                throw new MethodNotImplementedException(
+                    sprintf('%s is not implemented yet.', $req->getMethod())
+                );
         }
     }
 }

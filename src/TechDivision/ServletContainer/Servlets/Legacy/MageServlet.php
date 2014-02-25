@@ -49,10 +49,10 @@ class MageServlet extends PhpServlet
         
         // if the application has not been called over a vhost configuration append application folder name
         if ($this->getServletConfig()->getApplication()->isVhostOf($req->getServerName()) === true) {
-            $directoryIndex = $this->getDirectoryIndex();
+            $directoryIndex = 'index.php';
         } else {
             $directoryToPrepend = DIRECTORY_SEPARATOR . $this->getServletConfig()->getApplication()->getName() . DIRECTORY_SEPARATOR;
-            $directoryIndex = $this->getDirectoryIndex($directoryToPrepend);
+            $directoryIndex = $directoryToPrepend . 'index.php';
         }
         
         // initialize the server variables
@@ -128,9 +128,9 @@ class MageServlet extends PhpServlet
             appserver_set_headers_sent(false);
             ob_start();
             
-            // run and reset Magento
-            \Mage::run();
+            // reset and run Magento
             \Mage::reset();
+            \Mage::run();
             
             // write the session back after the request
             session_write_close();
