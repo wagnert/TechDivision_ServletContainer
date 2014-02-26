@@ -39,6 +39,11 @@ class Container extends AbstractContainer
      */
     protected $accessLogger;
     
+    /**
+     * The array with the request patterns.
+     * 
+     * @var array
+     */
     protected $patterns;
     
     /**
