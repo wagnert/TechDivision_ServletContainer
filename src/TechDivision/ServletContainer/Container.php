@@ -38,7 +38,9 @@ class Container extends AbstractContainer
      * @var \TechDivision\ServletContainer\Http\AccessLogger
      */
     protected $accessLogger;
-
+    
+    protected $patterns;
+    
     /**
      * Initializes the container with the initial context, the unique container ID
      * and the deployed applications.
@@ -55,8 +57,48 @@ class Container extends AbstractContainer
      */
     public function __construct($initialContext, $containerNode, $applications)
     {
+        
+        // call parent constructor
         parent::__construct($initialContext, $containerNode, $applications);
+        
+        // initialize the logger
         $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
+        
+        // initialize the array with the request patterns
+        $this->patterns = array();
+        
+        /* 
+         * Build an array with patterns as key and an array with application name
+         * and document root as value. This helps to improve speed when matching
+         * an request to find the application to handle it.
+         * 
+         * The array looks something like this:
+         * 
+         * /(www.appserver.io)\/(.*)/  => array(site, /opt/appserver/webapps/site)
+         * /(appserver.io)\/(.*)/      => array(site, /opt/appserver/webapps/site)
+         * /(appserver.local)\/(.*)/   => array(site, /opt/appserver/webapps/site)
+         * /(neos.local)\/(.*)/        => array(neos, /opt/appserver/webapps/site)
+         * /(neos.appserver.io)\/(.*)/ => array(neos, /opt/appserver/webapps/site)
+         * /(.*)\/(neos)/              => array(neos, /opt/appserver/webapps)
+         * /(.*)\/(example)/           => array(example, /opt/appserver/webapps)
+         * /(.*)\/(magento-1.8.1.0)/   => array(magento-1.8.1.0, /opt/appserver/webapps)
+         */
+        
+        // prepare the application patterns to be matched against the request
+        foreach ($this->getApplications() as $applicationName => $application) {
+            
+            // prepend the vhost/alias to the patterns array
+            foreach ($application->getVhosts() as $vhost) {
+                $this->patterns = array('/(' . $vhost->getName() . ')\/(.*)/' => array($applicationName, $application->getWebappPath())) + $this->patterns; 
+                foreach ($vhost->getAliases() as $alias) {
+                    $this->patterns = array('/(' . $alias . ')\/(.*)/' => array($applicationName, $application->getWebappPath())) + $this->patterns;
+                }
+            }
+            
+            // append the wildcard patterns to the patterns array
+            $documentRoot = $application->getBaseDirectory($application->getAppBase());
+            $this->patterns = $this->patterns + array('/(.*)\/(' . $applicationName . ')/' => array($applicationName, $documentRoot));
+        }
     }
 
     /**
@@ -67,6 +109,17 @@ class Container extends AbstractContainer
     public function getAccessLogger()
     {
         return $this->accessLogger;
+    }
+    
+    /**
+     * Returns the request patterns to be matched against the
+     * incoming request.
+     * 
+     * @return array The array with the request patterns
+     */
+    public function getPatterns()
+    {
+        return $this->patterns;
     }
 
     /**
@@ -82,43 +135,30 @@ class Container extends AbstractContainer
     public function findApplication(Request $servletRequest)
     {
 
-        // load the server name
-        $serverName = $servletRequest->getServerName();
-
         // prepare the server variables for this container
         $this->prepareServerVars($servletRequest);
 
         // load the array with the applications
         $applications = $this->getApplications();
-
-        // iterate over the applications and check if one of the VHosts match the request
-        foreach ($applications as $application) {
-            if ($application->isVhostOf($serverName)) {
-                // set the DOCUMENT_ROOT to /opt/appserver/webapps/<WEBAPP-NAME>
-                $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getWebappPath());
-                $servletRequest->setWebappName($application->getName());
-
-                return $application;
+        
+        // prepare the URL to be matched
+        $url = $servletRequest->getServerName() . $servletRequest->getUri();
+        
+        foreach ($this->getPatterns() as $pattern => $applicationInfo) {
+            
+            // try to match a registered application with the passed request
+            if (preg_match($pattern, $url) === 1) {
+                
+                // extract application name and document root from the application info
+                list ($applicationName, $documentRoot) = $applicationInfo;
+            
+                // set the DOCUMENT_ROOT to /opt/appserver/webapps
+                $servletRequest->setServerVar('DOCUMENT_ROOT', $documentRoot);
+                $servletRequest->setWebappName($applicationName);
+                
+                // return the application instance
+                return $applications[$applicationName];
             }
-        }
-
-        // load path information
-        $pathInfo = $servletRequest->getPathInfo();
-
-        // strip the leading slash and explode the application name
-        list ($applicationName, $path) = explode('/', substr($pathInfo, 1));
-
-        // if not, check if the request matches a folder
-        if (array_key_exists($applicationName, $applications)) {
-            
-            // load the application
-            $application = $applications[$applicationName];
-            
-            // set the DOCUMENT_ROOT to /opt/appserver/webapps
-            $servletRequest->setServerVar('DOCUMENT_ROOT', $application->getBaseDirectory($application->getAppBase()));
-            $servletRequest->setWebappName($application->getName());
-
-            return $application;
         }
 
         // if not throw an exception

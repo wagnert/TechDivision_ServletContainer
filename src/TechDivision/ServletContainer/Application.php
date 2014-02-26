@@ -166,6 +166,22 @@ class Application extends AbstractApplication
     {
         return $this->servletLocator;
     }
+    
+    /**
+     * Checks if the application matches the passed request URI, if yes
+     * the application instance will be returned.
+     * 
+     * @param Request $request The request instance to match the application against
+     * 
+     * @return boolean TRUE if the application instance matches the passed request, else FALSE
+     */
+    public function matchRequest(Request $request)
+    {
+        // load the server name
+        $serverName = $request->getServerName();
+        
+        
+    }
 
     /**
      * Locates and returns the servlet instance that handles
