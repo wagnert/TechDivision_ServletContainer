@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Interfaces\LocatorInterface
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -15,7 +22,7 @@
 
 namespace TechDivision\ServletContainer\Interfaces;
 
-use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Http\ServletRequest;
 
 /**
  * Interface for all resource locators.
@@ -32,11 +39,11 @@ interface LocatorInterface
 {
 
     /**
-     * Locates the servlet by given request instance
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance
+     * Locates the servlet by given request instance.
+     * 
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return mixed
      */
-    public function locate(Request $request);
+    public function locate(ServletRequest $servletRequest);
 }

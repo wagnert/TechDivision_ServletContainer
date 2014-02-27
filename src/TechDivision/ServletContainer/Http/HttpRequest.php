@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Http\HttpRequest
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -215,16 +222,6 @@ class HttpRequest implements Request
     }
 
     /**
-     * Return's the session manager from the request instance.
-     *
-     * @return \TechDivision\ServletContainer\Session\SessionManager The session manager instance
-     */
-    public function getSessionManager()
-    {
-        return $this->sessionManager;
-    }
-
-    /**
      * Inject the query parser
      *
      * @param QueryParser $queryParser The query parser implementation to use for
@@ -249,13 +246,15 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns an part instance
+     * Sets response object
      *
-     * @return Part
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response A response instance
+     *
+     * @return void
      */
-    public function getHttpPartInstance()
+    public function injectResponse(Response $response)
     {
-        return $this->part->getInstance();
+        $this->response = $response;
     }
 
     /**
@@ -493,6 +492,19 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets query string
+     *
+     * @param string $queryString The query string to set
+     *
+     * @return void
+     */
+    public function setQueryString($queryString)
+    {
+        $this->queryString = $queryString;
+        $this->setServerVar('QUERY_STRING', $queryString);
+    }
+
+    /**
      * validates the header
      *
      * @param string $buffer Inputstream from socket
@@ -529,25 +541,13 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns an array with all request parameters.
+     * Returns an part instance
      *
-     * @return array The array with the request parameters
+     * @return Part
      */
-    public function getParameterMap()
+    public function getHttpPartInstance()
     {
-        return $this->parameterMap;
-    }
-
-    /**
-     * Sets response object
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response A response instance
-     *
-     * @return void
-     */
-    public function injectResponse(Response $response)
-    {
-        $this->response = $response;
+        return $this->part->getInstance();
     }
 
     /**
@@ -558,6 +558,16 @@ class HttpRequest implements Request
     public function getResponse()
     {
         return $this->response;
+    }
+
+    /**
+     * Returns an array with all request parameters.
+     *
+     * @return array The array with the request parameters
+     */
+    public function getParameterMap()
+    {
+        return $this->parameterMap;
     }
 
     /**
@@ -594,19 +604,6 @@ class HttpRequest implements Request
     public function getQueryString()
     {
         return $this->queryString;
-    }
-
-    /**
-     * Sets query string
-     *
-     * @param string $queryString The query string to set
-     *
-     * @return void
-     */
-    public function setQueryString($queryString)
-    {
-        $this->queryString = $queryString;
-        $this->setServerVar('QUERY_STRING', $queryString);
     }
 
     /**

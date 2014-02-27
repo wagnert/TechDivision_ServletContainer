@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Interfaces\Servlet
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -16,8 +23,8 @@
 namespace TechDivision\ServletContainer\Interfaces;
 
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Socket\HttpClient;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 
@@ -62,14 +69,13 @@ interface Servlet
     /**
      * Delegates to http method specific functions like doPost() for POST e.g.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response sent back to the client
-     *
-     * @throws \TechDivision\ServletContainer\Exceptions\ServletException
-     * @throws \TechDivision\ServletContainer\Exceptions\IOException
-     * @return mixed
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response sent back to the client
+     * 
+     * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not available
      */
-    public function service(Request $req, Response $res);
+    public function service(ServletRequest $servletRequest, ServletResponse $servletResponse);
 
     /**
      * Returns an array with the server variables.
@@ -81,15 +87,15 @@ interface Servlet
     /**
      * Will be invoked by the PHP when the servlets destruct method or exit() or die() has been invoked.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that handles the request
-     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to the client
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client          The Http client that handles the request
+     * @param \TechDivision\ServletContainer\Http\ServletResponse           $servletResponse The response sent back to the client
      *
      * @return void
      */
-    public function shutdown(HttpClientInterface $client, Response $response);
+    public function shutdown(HttpClientInterface $client, ServletResponse $servletResponse);
 
     /**
-     * Destroys the object on shutdown
+     * Destroys the object on shutdown.
      *
      * @return void
      */

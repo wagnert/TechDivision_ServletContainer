@@ -1,6 +1,13 @@
 <?php
+
 /**
- * TechDivision\ServletContainer\GenericServlet
+ * TechDivision\ServletContainer\Servlets\GenericServlet
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -18,12 +25,12 @@
 namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\AuthenticationManager;
-use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Interfaces\ShutdownHandler;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Socket\HttpClient;
 
 /**
@@ -237,12 +244,12 @@ abstract class GenericServlet implements Servlet
     /**
      * Will be invoked by the PHP when the servlets destruct method or exit() or die() has been invoked.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client that handles the request
-     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response sent back to the client
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client          The Http client that handles the request
+     * @param \TechDivision\ServletContainer\Http\ServletResponse           $servletResponse The response sent back to the client
      *
      * @return void
      */
-    public function shutdown(HttpClientInterface $client, Response $response)
+    public function shutdown(HttpClientInterface $client, ServletResponse $servletResponse)
     {
 
         // check if the client has a connected socket
@@ -257,19 +264,19 @@ abstract class GenericServlet implements Servlet
             }
 
             // set content to response
-            $response->setContent($content);
+            $servletResponse->setContent($content);
 
             // prepare the content to be ready for sending to client
-            $response->prepareContent();
+            $servletResponse->prepareContent();
 
             // prepare the headers
-            $response->prepareHeaders();
+            $servletResponse->prepareHeaders();
 
             // try to shutdown client socket
             try {
 
                 // return the string representation of the response content to the client
-                $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
+                $client->send($servletResponse->getHeadersAsString() . "\r\n" . $servletResponse->getContent());
 
                 $client->shutdown();
                 $client->close();

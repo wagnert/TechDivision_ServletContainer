@@ -1,6 +1,13 @@
 <?php
+
 /**
- * TechDivision\ServletContainer\ServletManager
+ * TechDivision\ServletContainer\AuthenticationManager
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -14,13 +21,13 @@
 
 namespace TechDivision\ServletContainer;
 
-use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Servlet;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Authentication\AuthenticationAdapter;
 
 /**
- * The authentication manager handles request which need http authentication.
+ * The authentication manager handles request which need Http authentication.
  *
  * @category  Appserver
  * @package   TechDivision_ServletContainer
@@ -32,21 +39,23 @@ use TechDivision\ServletContainer\Authentication\AuthenticationAdapter;
 class AuthenticationManager
 {
 
-
     /**
      * Handles request in order to authenticate.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req     The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res     The response instance
-     * @param \TechDivision\ServletContainer\Interfaces\Servlet  $servlet The servlet to handle the request for
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet   $servlet         The servlet to handle the request for
      *
-     * @return bool
+     * @return boolean TRUE if the authentication has been successfull, else FALSE
      */
-    public function handleRequest(Request $req, Response $res, Servlet $servlet)
+    public function handleRequest(ServletRequest $servletRequest, ServletResponse $servletResponse, Servlet $servlet)
     {
+        
+        // load security configuration
         $securityConfig = $servlet->getSecuredUrlConfig();
         $configuredAuthType = $securityConfig['auth_type'];
 
+        // check the authentication type
         switch ($configuredAuthType) {
             case "Basic":
                 $authImplementation =  'TechDivision\ServletContainer\Authentication\BasicAuthentication';
@@ -58,12 +67,11 @@ class AuthenticationManager
                 throw new \Exception('AuthenticationType is unknown');
         }
 
-
+        // initialize the authentication manager
         $auth = $servlet->getServletManager()->getApplication()->newInstance($authImplementation);
+        $auth->init($servlet, $servletRequest, $servletResponse);
 
-        $auth->init($servlet, $req, $res);
-
+        // authenticate the request
         return $auth->authenticate();
-
     }
 }

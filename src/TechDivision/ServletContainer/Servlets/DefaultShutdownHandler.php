@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Servlets\DefaultShutdownHandler
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -15,10 +22,10 @@
 
 namespace TechDivision\ServletContainer\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Interfaces\ShutdownHandler;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
+use TechDivision\ServletContainer\Http\ServletResponse;
 
 /**
  * Default shutdown handler implementations.
@@ -43,25 +50,25 @@ class DefaultShutdownHandler implements ShutdownHandler
     public $client;
 
     /**
-     * The Http response instance.
+     * The Http servlet response instance.
      *
-     * @var \TechDivision\ServletContainer\Interfaces\Response
+     * @var \TechDivision\ServletContainer\Http\ServletResponse
      *
      */
-    public $response;
+    public $servletResponse;
 
     /**
      * Constructor
      *
-     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The Http client
-     * @param \TechDivision\ServletContainer\Http\HttpResponse              $response The Http response instance
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client          The Http client
+     * @param \TechDivision\ServletContainer\Http\ServletResponse           $servletResponse The Http response instance
      *
      * @return void
      */
-    public function __construct(HttpClientInterface $client, Response $response)
+    public function __construct(HttpClientInterface $client, ServletResponse $servletResponse)
     {
         $this->client = $client;
-        $this->response = $response;
+        $this->servletResponse = $servletResponse;
     }
 
     /**
@@ -78,7 +85,7 @@ class DefaultShutdownHandler implements ShutdownHandler
         register_shutdown_function(
             array(&$servlet, 'shutdown'),
             $this->client,
-            $this->response
+            $this->servletResponse
         );
     }
 }

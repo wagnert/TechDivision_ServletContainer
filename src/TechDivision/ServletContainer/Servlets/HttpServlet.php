@@ -1,6 +1,13 @@
 <?php
+
 /**
- * TechDivision\ServletContainer\HttpServlet
+ * TechDivision\ServletContainer\Servlets\HttpServlet
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -17,12 +24,11 @@
 namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\Http\Header;
-use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Servlets\GenericServlet;
 use TechDivision\ServletContainer\Exceptions\MethodNotImplementedException;
-use TechDivision\ServletContainer\Exceptions\ServletException;
-use TechDivision\ServletContainer\Exceptions\IOException;
 
 /**
  * Abstract Http servlet implementation.
@@ -40,142 +46,141 @@ abstract class HttpServlet extends GenericServlet
 {
 
     /**
-     * Implements http method CONNECT
+     * Implements Http CONNECT method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doConnect(Request $req, Response $res)
+    public function doConnect(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method DELETE
+     * Implements Http DELETE method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doDelete(Request $req, Response $res)
+    public function doDelete(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method GET
+     * Implements Http GET method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doGet(Request $req, Response $res)
+    public function doGet(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method HEAD
+     * Implements Http HEAD method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doHead(Request $req, Response $res)
+    public function doHead(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method OPTIONS
+     * Implements Http OPTIONS method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doOptions(Request $req, Response $res)
+    public function doOptions(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method POST
+     * Implements Http POST method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doPost(Request $req, Response $res)
+    public function doPost(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method PUT
+     * Implements Http PUT method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doPut(Request $req, Response $res)
+    public function doPut(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Implements http method TRACE
+     * Implements Http TRACE method.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
      * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not implemented
      */
-    public function doTrace(Request $req, Response $res)
+    public function doTrace(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         throw new MethodNotImplementedException(sprintf('Method %s is not implemented in this servlet.', __METHOD__));
     }
 
     /**
-     * Delegation method for specific http methods
+     * Delegation method for specific Http methods:
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The request instance
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The response instance
-     *
-     * @throws \TechDivision\ServletContainer\Exceptions\ServletException
-     * @throws \TechDivision\ServletContainer\Exceptions\IOException
-     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException
-     * @return mixed
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
+     * 
+     * @return void
+     * @throws \TechDivision\ServletContainer\Exceptions\MethodNotImplementedException Is thrown if the request method is not available
      */
-    public function service(Request $req, Response $res)
+    public function service(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         
         // pre-initialize response
-        $res->addHeader(Header::HEADER_NAME_SERVER, $req->getServerVar('SERVER_SOFTWARE'));
+        $servletResponse->addHeader(Header::HEADER_NAME_SERVER, $servletRequest->getServerVar('SERVER_SOFTWARE'));
+        $servletResponse->addHeader(Header::HEADER_NAME_X_POWERED_BY, get_class($this));
 
         // check if servlet needs authentication and return if authentication is not provided.
-        if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($req, $res, $this)) {
+        if ($this->getAuthenticationRequired() && !$this->getAuthenticationManager()->handleRequest($servletRequest, $servletResponse, $this)) {
             return;
         }
         
         // load the information about the requested path
-        $pathInfo = $req->getPathInfo();
-        $documentRoot = $req->getServerVar('DOCUMENT_ROOT');
+        $pathInfo = $servletRequest->getPathInfo();
+        $documentRoot = $servletRequest->getServerVar('DOCUMENT_ROOT');
         
         // create a file info object to check if a directory is requested
         $fileInfo = new \SplFileInfo($documentRoot . $pathInfo);
@@ -184,42 +189,42 @@ abstract class HttpServlet extends GenericServlet
         if ($fileInfo->isDir() && strrpos($pathInfo, '/') !== strlen($pathInfo) - 1) {
             
             // redirect to path with ending slash
-            $res->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
-            $res->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
-            $res->setContent(PHP_EOL);
+            $servletResponse->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
+            $servletResponse->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
+            $servletResponse->setContent(PHP_EOL);
             
             return;
         }
         
         // check the request method to invoke the appropriate method
-        switch ($req->getMethod()) {
+        switch ($servletRequest->getMethod()) {
             case Request::CONNECT:
-                $this->doConnect($req, $res);
+                $this->doConnect($servletRequest, $servletResponse);
                 break;
             case Request::DELETE:
-                $this->doDelete($req, $res);
+                $this->doDelete($servletRequest, $servletResponse);
                 break;
             case Request::GET:
-                $this->doGet($req, $res);
+                $this->doGet($servletRequest, $servletResponse);
                 break;
             case Request::HEAD:
-                $this->doHead($req, $res);
+                $this->doHead($servletRequest, $servletResponse);
                 break;
             case Request::OPTIONS:
-                $this->doOptions($req, $res);
+                $this->doOptions($servletRequest, $servletResponse);
                 break;
             case Request::POST:
-                $this->doPost($req, $res);
+                $this->doPost($servletRequest, $servletResponse);
                 break;
             case Request::PUT:
-                $this->doPut($req, $res);
+                $this->doPut($servletRequest, $servletResponse);
                 break;
             case Request::TRACE:
-                $this->doTrace($req, $res);
+                $this->doTrace($servletRequest, $servletResponse);
                 break;
             default:
                 throw new MethodNotImplementedException(
-                    sprintf('%s is not implemented yet.', $req->getMethod())
+                    sprintf('%s is not implemented yet.', $servletRequest->getMethod())
                 );
         }
     }

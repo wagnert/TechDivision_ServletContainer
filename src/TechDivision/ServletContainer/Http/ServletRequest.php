@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Interfaces\Request
+ * TechDivision\ServletContainer\Http\ServletRequest
  *
  * NOTICE OF LICENSE
  *
@@ -13,109 +13,84 @@
  *
  * @category   Appserver
  * @package    TechDivision_ServletContainer
- * @subpackage Interfaces
- * @author     Johann Zelger <jz@techdivision.com>
- * @author     Markus Stockbauer <ms@techdivision.com>
+ * @subpackage Http
+ * @author     Tim Wagner <tw@techdivision.com>
  * @copyright  2013 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 
-namespace TechDivision\ServletContainer\Interfaces;
+namespace TechDivision\ServletContainer\Http;
 
 /**
- * Interface for the servlet request.
+ * A servlet request implementation.
+ * 
+ * Here are some examples of the expected results:
+ * 
+ * http://127.0.0.1:8586/example/index/index.do 
+ *   => using of "Servlets/IndexServlet.php" 
+ *   getServerName():  127.0.0.1
+ *   getContextPath(): /example 
+ *   getServletPath(): /TechDivision/Example/Servlets/IndexServlet.php 
+ *   getPathInfo(): /index/index.do
+ * 
+ * http://example.local:8586/index/index.do 
+ *   => using of "Servlets/IndexServlet.php"
+ *   getServerName():  example.local 
+ *   getContextPath(): /example 
+ *   getServletPath(): /TechDivision/Example/Servlets/IndexServlet.php 
+ *   getPathInfo():    /index/index.do
+ * 
+ * http://localhost:8586/example/static/images/logo.png 
+ *   => using of "/TechDivision/ServletContainer/Servlets/StaticResourceServlet.php"
+ *   getServerName():  localhost
+ *   getContextPath(): /example 
+ *   getServletPath(): /TechDivision/ServletContainer/Servlets/StaticResourceServlet.php
+ *   getPathInfo():    /static/images/logo.png
+ * 
+ * http://example.local:8586/static/images/logo.png 
+ *   => using of "/TechDivision/ServletContainer/Servlets/StaticResourceServlet.php"
+ *   getServerName():  example.local
+ *   getContextPath(): /example 
+ *   getServletPath(): /TechDivision/ServletContainer/Servlets/StaticResourceServlet.php
+ *   getPathInfo():    /static/images/logo.png
  *
  * @category   Appserver
  * @package    TechDivision_ServletContainer
- * @subpackage Interfaces
- * @author     Johann Zelger <jz@techdivision.com>
- * @author     Markus Stockbauer <ms@techdivision.com>
+ * @subpackage Http
+ * @author     Tim Wagner <tw@techdivision.com>
  * @copyright  2013 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
-interface Request
+interface ServletRequest
 {
-
-    /**
-     * POST request method string.
-     *
-     * @var string
-     */
-    const POST = 'POST';
-
-    /**
-     * GET request method string.
-     *
-     * @var string
-     */
-    const GET = 'GET';
-
-    /**
-     * HEAD request method string.
-     *
-     * @var string
-     */
-    const HEAD = 'HEAD';
-
-    /**
-     * PUT request method string.
-     *
-     * @var string
-     */
-    const PUT = 'PUT';
-
-    /**
-     * DELETE request method string.
-     *
-     * @var string
-     */
-    const DELETE = 'DELETE';
-
-    /**
-     * OPTIONS request method string.
-     *
-     * @var string
-     */
-    const OPTIONS = 'OPTIONS';
-
-    /**
-     * TRACE request method string.
-     *
-     * @var string
-     */
-    const TRACE = 'TRACE';
-
-    /**
-     * CONNECT request method string.
-     *
-     * @var string
-     */
-    const CONNECT = 'CONNECT';
-
-    /**
-     * Parse request content
-     *
-     * @param string $content The raw request header
-     *
-     * @return void
-     */
-    public function parse($content);
-
-    /**
-     * validate actual InputStream
-     *
-     * @param string $buffer InputStream
-     *
-     * @return \TechDivision\ServletContainer\Interfaces\Request
-     */
-    public function initFromRawHeader($buffer);
     
     /**
-     * The server name passed with the request header.
+     * Returns the wrapped request object.
      * 
-     * @return string The server name of the actual request
+     * @return \TechDivision\ServletContainer\Interfaces\Request The wrapped request object
+     */
+    public function getRequest();
+    
+    /**
+     * Returns the application context name (application name) for the acutal request.
+     * 
+     * @return string The application context name
+     */
+    public function getContextPath();
+    
+    /**
+     * Returns the path to the servlet used to handle this request.
+     * 
+     * @return string The relative path to the servlet
+     */
+    public function getServletPath();
+    
+    /**
+     * Returns the host name passed with the request header.
+     * 
+     * @return string The host name of this request
      */
     public function getServerName();
     
@@ -165,9 +140,9 @@ interface Request
     public function getQueryString();
 
     /**
-     * Returns the server's IP v4 address
+     * Returns the servers IP v4 address.
      *
-     * @return string
+     * @return string The servers IP v4 address
      */
     public function getServerAddress();
 
@@ -179,37 +154,37 @@ interface Request
     public function getServerPort();
 
     /**
-     * Returns headers data
+     * Returns the array with all headers.
      *
-     * @return array
+     * @return array The headers as array
      */
     public function getHeaders();
 
     /**
-     * Return content
+     * Return request content. 
      *
-     * @return string $content
+     * @return string The request content
      */
     public function getContent();
 
     /**
-     * Returns request method
+     * Returns request method.
      *
-     * @return string
+     * @return string The request method
      */
     public function getMethod();
 
     /**
-     * Returns request uri
+     * Returns request URI.
      *
-     * @return string
+     * @return string The request URI
      */
     public function getUri();
 
     /**
-     * Returns protocol version
+     * Returns protocol version, HTTP/1.1 for example.
      *
-     * @return string
+     * @return string The protocol version
      */
     public function getVersion();
 
@@ -223,32 +198,32 @@ interface Request
     public function getSession($sessionName = ServletSession::SESSION_NAME);
 
     /**
-     * Returns server data
+     * Returns the array with the server variables.
      *
-     * @return array
+     * @return array The array with the server variables
      */
     public function getServerVars();
 
     /**
-     * Returns specific server var data
+     * Returns specific server var data.
      *
      * @param string $key The key to get
      *
-     * @return null|string
+     * @return null|string The value for the requested server variable
      */
     public function getServerVar($key);
 
     /**
-     * Returns clients ip address
+     * Returns the clients IP address to send the content back to.
      *
-     * @return mixed
+     * @return mixed The clients IP addrress
      */
     public function getClientIp();
 
     /**
-     * Returns clients port
+     * Returns the clients port to send the content back to.
      *
-     * @return int
+     * @return integer The clients port
      */
     public function getClientPort();
 
@@ -280,12 +255,12 @@ interface Request
     public function getParts();
 
     /**
-     * Returns true if the request has a cookie header with the passed
-     * name, else false.
+     * Returns TRUE if the request has a cookie header with the passed
+     * name, else FALSE.
      *
      * @param string $cookieName Name of the cookie header to be checked
      *
-     * @return boolean true if the request has the cookie, else false
+     * @return boolean TRUE if the request has the cookie, else FALSE
      */
     public function hasCookie($cookieName);
 
@@ -299,10 +274,10 @@ interface Request
     public function getCookie($cookieName);
 
     /**
-     * Set specific server var data.
+     * Set specific server variable data.
      *
-     * @param string $key   The server var key
-     * @param string $value The value for given server var key
+     * @param string $key   The server variable key
+     * @param string $value The value for given server variable key
      *
      * @return void
      */

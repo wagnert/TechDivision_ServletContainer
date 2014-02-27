@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Session\ServletSession
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -158,16 +165,18 @@ class ServletSession
     protected $started = false;
 
     /**
-     *
-     * @var \TechDivision\ServletContainer\Interfaces\Request
+     * The servlet request instance.
+     * 
+     * @var \TechDivision\ServletContainer\Http\ServletRequest
      */
-    protected $request;
+    protected $servletRequest;
 
     /**
-     *
-     * @var \TechDivision\ServletContainer\Interfaces\Response
+     * The servlet response instance.
+     * 
+     * @var \TechDivision\ServletContainer\Http\ServletResponse
      */
-    protected $response;
+    protected $servletResponse;
 
     /**
      * Constructs this session
@@ -179,21 +188,22 @@ class ServletSession
      * Session instances MUST NOT be created manually! They should be retrieved via
      * the Session Manager or through dependency injection (use SessionInterface!).
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request               The request instance
-     * @param string|null                                       $sessionIdentifier     The public session identifier which is also used in the session cookie
-     * @param integer|null                                      $lastActivityTimestamp Unix timestamp of the last known activity for this session
-     * @param array|null                                        $tags                  A list of tags set for this session
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest        The request instance
+     * @param string|null                                        $sessionIdentifier     The public session identifier which is also used in the session cookie
+     * @param integer|null                                       $lastActivityTimestamp Unix timestamp of the last known activity for this session
+     * @param array|null                                         $tags                  A list of tags set for this session
      *
      * @throws \InvalidArgumentException
      */
     public function __construct(
-        Request $request,
+        ServletRequest $servletRequest,
         $sessionIdentifier = null,
         $lastActivityTimestamp = null,
         array $tags = array()
     ) {
-        $this->request = $request;
-        $this->response = $request->getResponse();
+        
+        $this->servletRequest = $servletRequest;
+        $this->servletResponse = $servletRequest->getResponse();
 
         if ($sessionIdentifier !== null) {
             $this->sessionIdentifier = $sessionIdentifier;
@@ -291,7 +301,7 @@ class ServletSession
                 $this->sessionCookieSecure,
                 $this->sessionCookieHttpOnly
             );
-            $this->response->addCookie($this->sessionCookie);
+            $this->servletResponse->addCookie($this->sessionCookie);
 
             $this->lastActivityTimestamp = $this->now;
             $this->started = true;
@@ -321,7 +331,7 @@ class ServletSession
 
         $this->initializeHttpAndCookie();
 
-        if ($this->sessionCookie === null || $this->request === null || $this->started === true) {
+        if ($this->sessionCookie === null || $this->servletRequest === null || $this->started === true) {
             return false;
         }
 
@@ -346,7 +356,7 @@ class ServletSession
         if ($this->started === false && $this->canBeResumed()) {
 
             $this->sessionIdentifier = $this->sessionCookie->getValue();
-            $this->response->setCookie($this->sessionCookie);
+            $this->servletResponse->setCookie($this->sessionCookie);
             $this->started = true;
 
             $sessionObjects = $this->storage->get($this->sessionIdentifier . md5(__CLASS__));
@@ -586,8 +596,8 @@ class ServletSession
      */
     protected function initializeHttpAndCookie()
     {
-        if ($this->request->hasCookie($this->sessionCookieName)) {
-            $sessionIdentifier = $this->request->getCookie($this->sessionCookieName)->getValue();
+        if ($this->servletRequest->hasCookie($this->sessionCookieName)) {
+            $sessionIdentifier = $this->servletRequest->getCookie($this->sessionCookieName)->getValue();
             $this->sessionCookie = new Cookie(
                 $this->sessionCookieName,
                 $sessionIdentifier,
@@ -669,8 +679,8 @@ class ServletSession
         if ($this->started !== true) {
             throw new SessionNotStartedException('Tried to destroy a session which has not been started yet.');
         }
-        if ($this->response->hasCookie($this->sessionCookieName) === false) {
-            $this->response->addCookie($this->sessionCookie);
+        if ($this->servletResponse->hasCookie($this->sessionCookieName) === false) {
+            $this->servletResponse->addCookie($this->sessionCookie);
         }
         $this->sessionCookie->expire();
         $this->removeSessionInfoCacheEntry($this->sessionIdentifier);

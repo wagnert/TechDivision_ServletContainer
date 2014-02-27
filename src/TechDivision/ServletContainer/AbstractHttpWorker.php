@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Socket\AbstractHttpWorker
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -47,6 +54,11 @@ abstract class AbstractHttpWorker extends AbstractWorker
         
         try {
             
+            // prepare server and path information
+            $path = $this->getContainer()->getBaseDirectory(DIRECTORY_SEPARATOR . 'bin') . PATH_SEPARATOR . getenv('PATH');
+            $serverSoftware = $this->getContainer()->getContainerNode()->getHost()->getServerSoftware();
+            $serverAdmin = $this->getContainer()->getContainerNode()->getHost()->getServerAdmin();
+            
             // the counter with the number of requests to handle
             $handleRequests = AbstractHttpWorker::HANDLE_REQUESTS;
             
@@ -66,8 +78,15 @@ abstract class AbstractHttpWorker extends AbstractWorker
             // preinitialize the clients
             for ($z < 0; $z < $handleRequests; $z++) {
                 
-                 // initialize the HTTP request/response
+                 // initialize the Http request
                 $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
+                
+                // set server and path information
+                $request->setServerVar('PATH', $path);
+                $request->setServerVar('SERVER_SOFTWARE', $serverSoftware);
+                $request->setServerVar('SERVER_ADMIN', $serverAdmin);
+                
+                // initialize the Http response/part
                 $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');
                 $httpPart = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpPart');
                 
@@ -75,7 +94,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 $request->injectResponse($response);
                 $request->injectSessionManager($sessionManager);
                 
-                // initialize a new HTTP client
+                // initialize a new Http client
                 $client = $this->initialContext->newInstance($this->getHttpClientClass());
                 $client->injectHttpRequest($request);
                 $client->injectHttpPart($httpPart);

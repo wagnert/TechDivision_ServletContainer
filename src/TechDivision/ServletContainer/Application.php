@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Application
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -17,7 +24,7 @@ namespace TechDivision\ServletContainer;
 use TechDivision\ApplicationServer\AbstractApplication;
 use TechDivision\ServletContainer\ServletManager;
 use TechDivision\ServletContainer\Service\Locator\ServletLocator;
-use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Http\ServletRequest;
 use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ApplicationServer\Configuration;
 use TechDivision\ApplicationServer\Vhost;
@@ -166,66 +173,26 @@ class Application extends AbstractApplication
     {
         return $this->servletLocator;
     }
-    
-    /**
-     * Checks if the application matches the passed request URI, if yes
-     * the application instance will be returned.
-     * 
-     * @param Request $request The request instance to match the application against
-     * 
-     * @return boolean TRUE if the application instance matches the passed request, else FALSE
-     */
-    public function matchRequest(Request $request)
-    {
-        // load the server name
-        $serverName = $request->getServerName();
-        
-        
-    }
 
     /**
      * Locates and returns the servlet instance that handles
      * the request passed as parameter.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The servlet instance to handle the request
      */
-    public function locate(Request $request)
+    public function locate(ServletRequest $servletRequest)
     {
-
-        // check if the application is loaded by a vhost
-        $path = $this->normalizePathInfo($request);
         
         // try to locate the servlet
-        $servlet = $this->getServletLocator()->locate($request);
+        $servlet = $this->getServletLocator()->locate($servletRequest);
         
         // secure the servlet if necessary
-        $this->secureServlet($servlet, $path);
+        $this->secureServlet($servlet, $servletRequest->getPathInfo());
         
         // return the servlet instance
         return $servlet;
-    }
-    
-    /**
-     * Normalizes the path info found in the passed request depending
-     * if the request has been invoked on a vhost.
-     * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request info with the path info to be normalized
-     * 
-     * @return string The normalized path info
-     */
-    public function normalizePathInfo(Request $request)
-    {
-        
-        // check if the application is loaded by a vhost
-        if ($this->isVhostOf($request->getServerName()) === false) {
-            // return the normalized path info based on the application name
-            return '/' . ltrim(str_replace("/{$this->getName()}", "/", $request->getPathInfo()), '/');
-        }
-
-        // return the unprepared path info
-        return $request->getPathInfo();
     }
 
     /**

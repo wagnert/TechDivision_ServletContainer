@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Session\PersistentSessionManager
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -15,8 +22,7 @@
 
 namespace TechDivision\ServletContainer\Session;
 
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Http\ServletRequest;
 
 /**
  * A session manager implementation.
@@ -59,32 +65,32 @@ class PersistentSessionManager implements SessionManager
     /**
      * Create's a new session with the passed session ID and session name if give.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request     The request instance
-     * @param string|null                                       $sessionId   The session ID used to create the session
-     * @param string|null                                       $sessionName The unique session name to use
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
+     * @param string|null                                        $sessionId      The session ID used to create the session
+     * @param string|null                                        $sessionName    The unique session name to use
      *
      * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
      * @todo integrate cookie path handling 
      */
-    public function createSession(Request $request, $sessionId, $sessionName = ServletSession::SESSION_NAME)
+    public function createSession(ServletRequest $servletRequest, $sessionId, $sessionName = ServletSession::SESSION_NAME)
     {
         
         // prepare the cookie path
         $cookiePath = '/';
         
         /*
-        if (strstr($request->getServerVar('DOCUMENT_ROOT'), $webappName = $request->getWebappName())) {
+        if (strstr($servletRequest->getServerVar('DOCUMENT_ROOT'), $webappName = $servletRequest->getWebappName())) {
             $cookiePath = $webappName;
         }
         */
         
         // initialize and return the session instance
-        $sessionParams = array($request, $sessionId, time());
+        $sessionParams = array($servletRequest, $sessionId, time());
 
         // initialize the session settings
         $settings['session']['name'] = $sessionName;
         $settings['session']['cookie']['lifetime'] = time() + 86400;
-        $settings['session']['cookie']['domain'] = $request->getServerName();
+        $settings['session']['cookie']['domain'] = $servletRequest->getServerName();
         $settings['session']['cookie']['path'] = $cookiePath;
         $settings['session']['cookie']['secure'] = false;
         $settings['session']['cookie']['httponly'] = false;
@@ -108,12 +114,12 @@ class PersistentSessionManager implements SessionManager
      * precedence. If no session id is found, a new one is created and assigned 
      * to the request.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request     The request instance
-     * @param string                                            $sessionName The session name
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
+     * @param string                                             $sessionName    The session name
      *
      * @return \TechDivision\ServletContainer\Session\ServletSession The requested session
      */
-    public function getSessionForRequest(Request $request, $sessionName = ServletSession::SESSION_NAME)
+    public function getSessionForRequest(ServletRequest $servletRequest, $sessionName = ServletSession::SESSION_NAME)
     {
         
         // try to load the session with the passed name
@@ -123,19 +129,19 @@ class PersistentSessionManager implements SessionManager
         
         // try to initialize the session ID
         $sessionId = null;
-        if ($request->getCookie($sessionName)) {
-            $sessionId = $request->getCookie($sessionName)->getValue();
+        if ($servletRequest->getCookie($sessionName)) {
+            $sessionId = $servletRequest->getCookie($sessionName)->getValue();
         }
         
         // try to retrieve the session id from the request query string
         $params = array();
-        parse_str($request->getQueryString(), $params);
+        parse_str($servletRequest->getQueryString(), $params);
         if (isset($params[$sessionName])) {
             $sessionId = $params[$sessionName];
         }
         
         // create a new session with the session ID found/or not
-        return $this->createSession($request, $sessionId, $sessionName);
+        return $this->createSession($servletRequest, $sessionId, $sessionName);
     }
 
     /**

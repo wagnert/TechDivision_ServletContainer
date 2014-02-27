@@ -3,6 +3,12 @@
 /**
  * TechDivision\ServletContainer\Service\Locator\ServletLocator
  *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
  * PHP version 5
  *
  * @category   Appserver
@@ -18,8 +24,8 @@
 namespace TechDivision\ServletContainer\Service\Locator;
 
 use TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface;
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Servlet;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Exceptions\ServletNotFoundException;
 
 /**
@@ -101,17 +107,17 @@ class ServletLocator implements ResourceLocatorInterface
     /**
      * Tries to locate a servlet for the passed request instance.
      *
-     * @param Request $request The request instance to return the servlet for
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance to return the servlet for
      *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
      * @throws \TechDivision\ServletContainer\Exceptions\ServletNotFoundException Is thrown if no servlet can be found for the passed request
      * @see \TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface::locate()
      */
-    public function locate(Request $request)
+    public function locate(ServletRequest $servletRequest)
     {
         
         // build the file-path of the request
-        $path = $this->getApplication()->normalizePathInfo($request);
+        $path = $servletRequest->getPathInfo();
         
         // iterate over all servlets and return the matching one
         foreach ($this->getServletMappings() as $urlPattern => $servletName) {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\Exceptions\IOException
+ * TechDivision\ServletContainer\Http\ServletResponse
  *
  * NOTICE OF LICENSE
  *
@@ -13,26 +13,40 @@
  *
  * @category   Appserver
  * @package    TechDivision_ServletContainer
- * @subpackage Exceptions
- * @author     Markus Stockbauer <ms@techdivision.com>
+ * @subpackage Http
+ * @author     Tim Wagner <tw@techdivision.com>
  * @copyright  2013 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 
-namespace TechDivision\ServletContainer\Exceptions;
+namespace TechDivision\ServletContainer\Http;
 
 /**
- * Is thrown if a servlet can't be serviced.
+ * A servlet request implementation.
  *
  * @category   Appserver
  * @package    TechDivision_ServletContainer
- * @subpackage Exceptions
- * @author     Markus Stockbauer <ms@techdivision.com>
+ * @subpackage Http
+ * @author     Tim Wagner <tw@techdivision.com>
  * @copyright  2013 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
-class IOException extends \Exception
+interface ServletResponse
 {
+
+    /**
+     * Prepares the headers for final processing
+     *
+     * @return void
+     */
+    public function prepareHeaders();
+
+    /**
+     * Prepares the content to be ready for sending to the client
+     *
+     * @return void
+     */
+    public function prepareContent();
 }
