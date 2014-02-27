@@ -280,7 +280,11 @@ class ServletSession
 
         if ($this->started === false) {
 
-            $this->sessionIdentifier = Algorithms::generateRandomString(32);
+            // only reset sessionIdentifier if not set before
+            if (!$this->sessionIdentifier) {
+                $this->sessionIdentifier = Algorithms::generateRandomString(32);
+            }
+
             $this->sessionCookie = new Cookie(
                 $this->sessionCookieName,
                 $this->sessionIdentifier,
