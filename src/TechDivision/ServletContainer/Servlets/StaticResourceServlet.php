@@ -88,7 +88,7 @@ class StaticResourceServlet extends HttpServlet
      */
     public function doPost(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
-        $this->doGet($servlerRequest, $servletResponse);
+        $this->doGet($servletRequest, $servletResponse);
     }
 
     /**
