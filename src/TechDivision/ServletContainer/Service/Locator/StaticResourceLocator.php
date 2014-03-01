@@ -26,6 +26,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\ServletContainer\Http\ServletRequest;
 use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Exceptions\FileNotFoundException;
+use TechDivision\ServletContainer\Exceptions\FileNotReadableException;
 use TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException;
 
 /**
@@ -48,13 +49,6 @@ class StaticResourceLocator extends AbstractResourceLocator
      * @var \TechDivision\ServletContainer\Interfaces\Servlet
      */
     protected $servlet;
-    
-    /**
-     * The applications absolute document root directory.
-     * 
-     * @var string
-     */
-    protected $webappPath;
 
     /**
      * Initializes the locator with the calling servlet.
@@ -66,7 +60,6 @@ class StaticResourceLocator extends AbstractResourceLocator
     public function __construct(Servlet $servlet)
     {
         $this->servlet = $servlet;
-        $this->webappPath = $this->getApplication()->getWebappPath();
     }
 
     /**
@@ -77,16 +70,6 @@ class StaticResourceLocator extends AbstractResourceLocator
     public function getServlet()
     {
         return $this->servlet;
-    }
-    
-    /**
-     * Returns applications absolute document root directory.
-     * 
-     * @return string The absolute document root directory
-     */
-    public function getWebappPath()
-    {
-        return $this->webappPath;
     }
     
     /**
@@ -146,6 +129,6 @@ class StaticResourceLocator extends AbstractResourceLocator
      */
     public function getFilePath(ServletRequest $servletRequest)
     {
-        return $this->getWebappPath() . $servletRequest->getPathInfo();
+        return $servletRequest->getServerVar('DOCUMENT_ROOT') . $servletRequest->getServerVar('REQUEST_URI');
     }
 }

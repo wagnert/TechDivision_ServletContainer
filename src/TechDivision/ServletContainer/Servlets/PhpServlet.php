@@ -27,7 +27,7 @@ use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Http\ServletRequest;
 use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
-use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
+use TechDivision\ServletContainer\Service\Locator\PhpResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
@@ -50,29 +50,37 @@ use TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException;
  */
 class PhpServlet extends StaticResourceServlet
 {
-    
-    /**
-     * Array with allowed index files.
-     * 
-     * @var array
-     */
-    protected $directoryIndex = array('index.php', 'index.phtml');
 
     /**
-     * The resource locator necessary to load static resources.
-     *
-     * @var \TechDivision\ServletContainer\Servlets\StaticResourceServlet
+     * The base directory of the actual webapp.
+     * 
+     * @var string
      */
-    protected $locator;
+    protected $webappPath;
     
     /**
-     * Returns array with the possible index files.
+     * Initializes the servlet with the passed configuration.
      *
-     * @return array The array with the possible index files
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to initialize the servlet with
+     *
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
+     * @return void
      */
-    protected function getDirectoryIndex()
+    public function init(ServletConfig $config)
     {
-        return $this->directoryIndex;
+        parent::init($config);
+        $this->locator = new PhpResourceLocator($this);
+        $this->webappPath = $this->getServletConfig()->getWebappPath();
+    }
+    
+    /**
+     * Returns the base directory of the actual webapp.
+     * 
+     * @return string The base directory
+     */
+    protected function getWebappPath()
+    {
+        return $this->webappPath;
     }
 
     /**
@@ -84,19 +92,10 @@ class PhpServlet extends StaticResourceServlet
      */
     protected function prepareGlobals(ServletRequest $servletRequest)
     {
-        
         // check if a XHttpRequest has to be handled
         if (($xRequestedWith = $servletRequest->getHeader(Header::HEADER_NAME_X_REQUESTED_WITH)) != null) {
             $servletRequest->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
         }
-        
-        // load the path info as script name from the Http request, NOT the servlet request
-        $scriptName = $servletRequest->getRequest()->getPathInfo();
-        
-        // set the script file information
-        $servletRequest->setServerVar('SCRIPT_FILENAME', $servletRequest->getServerVar('DOCUMENT_ROOT') . $scriptName);
-        $servletRequest->setServerVar('SCRIPT_NAME', $scriptName);
-        $servletRequest->setServerVar('PHP_SELF', $scriptName);
     }
 
     /**
@@ -110,9 +109,10 @@ class PhpServlet extends StaticResourceServlet
     {
         // init query parser
         $this->getQueryParser()->clear();
-        // iterate all files
         
+        // iterate all files
         foreach ($servletRequest->getParts() as $part) {
+            
             // check if filename is given, write and register it
             if ($part->getFilename()) {
                 // generate temp filename
@@ -129,6 +129,7 @@ class PhpServlet extends StaticResourceServlet
                 // clear tmp file
                 $tempName = '';
             }
+            
             // check if file has array info
             if (preg_match('/^([^\[]+)(\[.+)?/', $part->getName(), $matches)) {
                 
@@ -146,6 +147,7 @@ class PhpServlet extends StaticResourceServlet
                 $this->getQueryParser()->parseKeyValue($partGroup . '[size]' . $partArrayDefinition, $part->getSize());
             }
         }
+        
         // set files globals finally.
         return $this->getQueryParser()->getResult();
     }
@@ -259,22 +261,8 @@ class PhpServlet extends StaticResourceServlet
     public function doGet(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         
-        // temporary save the original URI
-        $originalUri = $servletRequest->getUri();
-        
-        do { // iterate over the possible index files if a directory has been passed as URI
-            
-            try {
-                
-                // try to locate the file
-                $file = $this->locator->locate($servletRequest);
-                break;
-                
-            } catch (\Exception $e) { // append the next available directory index file to the URI
-                $servletRequest->setUri($originalUri . $indexFile);
-            }
-            
-        } while ($indexFile = next($this->getDirectoryIndex()));
+        // try to locate the file
+        $fileInfo = $this->getLocator()->locate($servletRequest);
 
         // initialize the globals $_SERVER, $_REQUEST, $_POST, $_GET, $_COOKIE, $_FILES and set the headers
         $this->initGlobals($servletRequest);
@@ -286,7 +274,7 @@ class PhpServlet extends StaticResourceServlet
         ob_start();
         
         // load the file
-        require $file->getPathname();
+        require $fileInfo->getPathname();
         
         // store the file's contents in the response
         $servletResponse->setContent(ob_get_clean());

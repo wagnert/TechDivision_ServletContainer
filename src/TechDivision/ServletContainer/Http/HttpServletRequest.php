@@ -60,13 +60,6 @@ class HttpServletRequest implements ServletRequest
     protected $servletPath;
     
     /**
-     * T
-     * 
-     * @var string
-     */
-    protected $pathInfo;
-    
-    /**
      * Injects the passed request instance into this servlet request.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance used for initialization
@@ -141,7 +134,7 @@ class HttpServletRequest implements ServletRequest
      */
     public function setPathInfo($pathInfo)
     {
-        $this->pathInfo = $pathInfo;
+        $this->getRequest()->setPathInfo($pathInfo);
     }
     
     /**
@@ -152,7 +145,7 @@ class HttpServletRequest implements ServletRequest
      */
     public function getPathInfo()
     {
-        return $this->pathInfo;
+        return $this->getRequest()->getPathInfo();
     }
     
     /**

@@ -58,7 +58,7 @@ class StaticResourceServlet extends HttpServlet
     /**
      * The resource locator necessary to load static resources.
      *
-     * @var \TechDivision\ServletContainer\Servlets\StaticResourceServlet
+     * @var \TechDivision\ServletContainer\Interfaces\LocatorInterface
      */
     protected $locator;
 
@@ -75,6 +75,16 @@ class StaticResourceServlet extends HttpServlet
         parent::init($config);
         $this->locator = new StaticResourceLocator($this);
         $this->mimeTypeDictionary = new MimeTypeDictionary();
+    }
+    
+    /**
+     * Returns the resource locator that locates the requested resource.
+     * 
+     * @return \TechDivision\ServletContainer\Interfaces\LocatorInterface The resource locator
+     */
+    public function getLocator()
+    {
+        return $this->locator;
     }
 
     /**
@@ -105,7 +115,7 @@ class StaticResourceServlet extends HttpServlet
         try {
             
             // let the locator retrieve the file
-            $fileInfo = $this->locator->locate($servletRequest);
+            $fileInfo = $this->getLocator()->locate($servletRequest);
             
             // do not directly serve php files
             if (strpos($fileInfo->getFilename(), '.php') !== false) {
@@ -141,12 +151,12 @@ class StaticResourceServlet extends HttpServlet
             
         } catch (\FoundDirInsteadOfFileException $fdiofe) {
             
-            // load the information about the requested path
-            $pathInfo = $servletRequest->getPathInfo();
+            // load the information about the requested URI
+            $uri = $servletRequest->getUri();
             
             // if we found a folder AND ending slash is missing, redirect to same folder but with slash appended
-            if (substr($pathInfo, - 1) !== '/') {
-                $servletResponse->addHeader(Header::HEADER_NAME_LOCATION, $pathInfo . '/');
+            if (substr($uri, - 1) !== '/') {
+                $servletResponse->addHeader(Header::HEADER_NAME_LOCATION, $uri . '/');
                 $servletResponse->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
                 $servletResponse->setContent(PHP_EOL);
             }
@@ -154,7 +164,7 @@ class StaticResourceServlet extends HttpServlet
         } catch (\Exception $e) {
             
             // load the information about the requested path
-            $pathInfo = $servletRequest->getPathInfo();
+            $uri = $servletRequest->getUri();
             
             $servletResponse->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 OK');
             $servletResponse->setContent(
@@ -162,9 +172,9 @@ class StaticResourceServlet extends HttpServlet
                     '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
                      <html>
                          <head><title>404 Not Found</title></head>
-                         <body><h1>Not Found</h1><p>The requested URL %s was not found on this server.</p></body>
+                         <body><h1>Not Found</h1><p>The requested URI %s was not found on this server.</p></body>
                      </html>',
-                    $pathInfo
+                    $uri
                 )
             );
         }

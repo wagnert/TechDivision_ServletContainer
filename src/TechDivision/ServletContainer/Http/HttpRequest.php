@@ -284,9 +284,6 @@ class HttpRequest implements Request
         $this->setServerName($serverName);
         $this->setServerPort($serverPort);
 
-        // parse path info
-        $this->parsePathInfo($this->getUri());
-
         // set intial server vars and cookies
         $this->initServerVars();
         $this->initCookies();
@@ -403,18 +400,6 @@ class HttpRequest implements Request
     }
 
     /**
-     * Parsing URI for PathInfo
-     *
-     * @param string $uri The uri to parse
-     *
-     * @return void
-     */
-    public function parsePathInfo($uri)
-    {
-        $this->setPathInfo(parse_url($uri, PHP_URL_PATH));
-    }
-
-    /**
      * init basic Server Vars
      *
      * @return void
@@ -422,6 +407,8 @@ class HttpRequest implements Request
     public function initServerVars()
     {
         $this->server = array(
+            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
+            'GATEWAY_INTERFACE' => 'CGI/1.1',
             'HTTP_HOST' => $this->getHeader(Header::HEADER_NAME_HOST),
             'HTTP_CONNECTION' => $this->getHeader(Header::HEADER_NAME_CONNECTION),
             'HTTP_ACCEPT' => $this->getHeader(Header::HEADER_NAME_ACCEPT),
@@ -430,20 +417,19 @@ class HttpRequest implements Request
             'HTTP_ACCEPT_LANGUAGE' => $this->getHeader(Header::HEADER_NAME_ACCEPT_LANGUAGE),
             'HTTP_REFERER' => $this->getHeader(Header::HEADER_NAME_REFERER),
             'PATH' => '/opt/appserver/bin',
-            'GATEWAY_INTERFACE' => 'CGI/1.1',
+            'PATH_INFO' => $this->getPathInfo(),
+            'REMOTE_ADDR' => '127.0.0.1',
+            'REQUEST_METHOD' => $this->getMethod(),
+            'REQUEST_URI' => $this->getUri(),
+            'REQUEST_TIME' => time(),
+            'REQUEST_TIME_FLOAT' => microtime(true),
+            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
+            'SERVER_PROTOCOL' => $this->getVersion(),
             'SERVER_SIGNATURE' => '',
             'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
             'SERVER_NAME' => $this->getServerName(),
             'SERVER_ADDR' => gethostbyname($this->getServerName()),
-            'SERVER_PORT' => $this->getServerPort(),
-            'REMOTE_ADDR' => '127.0.0.1',
-            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
-            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
-            'SERVER_PROTOCOL' => $this->getVersion(),
-            'REQUEST_METHOD' => $this->getMethod(),
-            'REQUEST_URI' => $this->getUri(),
-            'REQUEST_TIME' => time(),
-            'REQUEST_TIME_FLOAT' => microtime(true)
+            'SERVER_PORT' => $this->getServerPort()
         );
 
         if ($cookie = $this->getHeader(Header::HEADER_NAME_COOKIE)) {
@@ -689,7 +675,7 @@ class HttpRequest implements Request
      *
      * @return string
      */
-    protected function setPathInfo($pathInfo)
+    public function setPathInfo($pathInfo)
     {
         return $this->pathInfo = $pathInfo;
     }

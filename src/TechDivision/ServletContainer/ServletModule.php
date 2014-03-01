@@ -156,11 +156,11 @@ class ServletModule implements ModuleInterface
             
             // prepare the path info for the servlet request
             if ($isVhost === true) {
-                $servletRequest->setPathInfo($request->getPathInfo());
+                $servletRequest->setPathInfo($request->getUri());
             } else {
                 // strip the context path if we're NOT in a vhost
-                $servletRequest->setPathInfo(
-                    substr_replace($request->getPathInfo(), '', 0, strlen($contextPath))
+                $servletRequest->setUri(
+                    substr_replace($request->getUri(), '', 0, strlen($contextPath))
                 );
             }
             

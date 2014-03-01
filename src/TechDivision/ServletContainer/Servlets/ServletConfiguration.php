@@ -180,8 +180,7 @@ class ServletConfiguration implements ServletConfig
     {
         return array(
             'SERVER_ADMIN' => $this->getConfiguration()->getServerAdmin(),
-            'SERVER_SOFTWARE' => $this->getConfiguration()->getServerAdmin(),
-            'DOCUMENT_ROOT' => $this->getWebappPath()
+            'SERVER_SOFTWARE' => $this->getConfiguration()->getServerAdmin()
         );
     }
 }
