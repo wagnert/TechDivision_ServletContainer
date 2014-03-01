@@ -14,7 +14,8 @@
  * @category  Appserver
  * @package   TechDivision_ServletContainer
  * @author    Johann Zelger <jz@techdivision.com>
- * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      http://www.appserver.io
  */
@@ -30,7 +31,8 @@ use TechDivision\ServletContainer\Session\PersistentSessionManager;
  * @category  Appserver
  * @package   TechDivision_ServletContainer
  * @author    Johann Zelger <jz@techdivision.com>
- * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @author    Tim Wagner <tw@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      http://www.appserver.io
  */
@@ -42,7 +44,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
      * 
      * @var integer
      */
-    const HANDLE_REQUESTS = 100;
+    const HANDLE_REQUESTS = 20;
 
     /**
      * The main function which will be called by doing start()
@@ -62,21 +64,13 @@ abstract class AbstractHttpWorker extends AbstractWorker
             // the counter with the number of requests to handle
             $handleRequests = AbstractHttpWorker::HANDLE_REQUESTS;
             
-            // initialize the session manager itself
-            $sessionManager = $this->newInstance(
-                'TechDivision\ServletContainer\Session\PersistentSessionManager',
-                array(
-                    $this->initialContext
-                )
-            );
-            
             // declare the arrays with the preinitialized clients, requests + client sockets
             $clients = array();
             $requests = array();
             $clientSockets = array();
             
             // preinitialize the clients
-            for ($z < 0; $z < $handleRequests; $z++) {
+            while ($z++ < $handleRequests) {
                 
                  // initialize the Http request
                 $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
@@ -92,7 +86,6 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 
                 // inject response und session manager
                 $request->injectResponse($response);
-                $request->injectSessionManager($sessionManager);
                 
                 // initialize a new Http client
                 $client = $this->initialContext->newInstance($this->getHttpClientClass());
@@ -101,7 +94,7 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 $client->setNewLine("\r\n\r\n");
                 
                 // add the initialize client to the array
-                $clients[] = $client;
+                $clients[$z] = $client;
             }
             
             // handle requests and then QUIT (to free client sockets and memory)
@@ -134,6 +127,14 @@ abstract class AbstractHttpWorker extends AbstractWorker
                     $requests[$i]->start(PTHREADS_INHERIT_ALL | PTHREADS_ALLOW_HEADERS);
                 }
             }
+            
+            // wait till all requests has been finished
+            foreach ($requests as $request) {
+                $request->join();
+            }
+            
+            // log a message that this worker has been closed successfully
+            $this->getInitialContext()->getSystemLogger()->debug(sprintf('Now closing worker %s', $this->getThreadId()));
             
         } catch (\Exception $e) { // catch the exception if thrown, e. g. when socket can't be accepted
             $this->getInitialContext()->getSystemLogger()->critical($e->__toString());

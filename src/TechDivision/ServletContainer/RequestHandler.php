@@ -14,7 +14,7 @@
  * @category  Appserver
  * @package   TechDivision_ServletContainer
  * @author    Johann Zelger <jz@techdivision.com>
- * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      http://www.appserver.io
  */
@@ -41,7 +41,7 @@ use TechDivision\ServletContainer\Exceptions\BadRequestException;
  * @category  Appserver
  * @package   TechDivision_ServletContainer
  * @author    Johann Zelger <jz@techdivision.com>
- * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      http://www.appserver.io
  */
@@ -186,6 +186,17 @@ class RequestHandler extends AbstractContextThread
             $client->setResource($resource = $this->getResource());
             $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
             
+            // initialize the session manager itself
+            $sessionManager = $this->newInstance(
+                'TechDivision\ServletContainer\Session\PersistentSessionManager',
+                array($this->getInitialContext())
+            );
+            
+            // initialize the authentication manager
+            $authenticationManager = $this->newInstance(
+                'TechDivision\ServletContainer\AuthenticationManager'
+            );
+            
             do { // let socket open as long as max request or socket timeout is not reached
                 
                 // receive request object from client
@@ -239,6 +250,10 @@ class RequestHandler extends AbstractContextThread
                 $servletRequest = $this->newInstance('TechDivision\ServletContainer\Http\HttpServletRequest', array($request));
                 $servletResponse = $this->newInstance('TechDivision\ServletContainer\Http\HttpServletResponse', array($response));
                 
+                // inject servlet response and session manager
+                $servletRequest->injectSessionManager($sessionManager);
+                $servletRequest->injectServletResponse($servletResponse);
+                
                 // set the application context path + Http document root (for legacy applications)
                 $servletRequest->setContextPath($contextPath = '/' . $application->getName());
                 $servletRequest->setServerVar('DOCUMENT_ROOT', $documentRoot);
@@ -271,9 +286,7 @@ class RequestHandler extends AbstractContextThread
                 );
 
                 // inject authentication manager
-                $servlet->injectAuthenticationManager(
-                    $this->newInstance('TechDivision\ServletContainer\AuthenticationManager')
-                );
+                $servlet->injectAuthenticationManager($authenticationManager);
 
                 // let the servlet process the request send it back to the client
                 $servlet->service($servletRequest, $servletResponse);

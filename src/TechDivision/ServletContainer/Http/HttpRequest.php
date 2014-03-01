@@ -16,7 +16,7 @@
  * @subpackage Http
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Philipp Dittert <p.dittert@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -26,9 +26,6 @@ namespace TechDivision\ServletContainer\Http;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Part;
-use TechDivision\ServletContainer\Session\SessionManager;
-use TechDivision\ServletContainer\Session\PersistentSessionManager;
-use TechDivision\ServletContainer\Session\ServletSession;
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 
@@ -40,7 +37,7 @@ use TechDivision\ServletContainer\Interfaces\QueryParser;
  * @subpackage Http
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Philipp Dittert <p.dittert@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -167,13 +164,6 @@ class HttpRequest implements Request
     protected $server = array();
 
     /**
-     * Session Manager instance.
-     *
-     * @var \TechDivision\ServletContainer\Session\SessionManager
-     */
-    protected $sessionManager;
-
-    /**
      * Holds the query parser.
      *
      * @var \TechDivision\ServletContainer\Interfaces\QueryParser
@@ -208,18 +198,6 @@ class HttpRequest implements Request
      * @var array
      */
     protected $cookies = array();
-
-    /**
-     * Inject the session manager into the request instance.
-     *
-     * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager The session manager instance
-     *
-     * @return void
-     */
-    public function injectSessionManager(SessionManager $sessionManager)
-    {
-        $this->sessionManager = $sessionManager;
-    }
 
     /**
      * Inject the query parser
@@ -788,18 +766,6 @@ class HttpRequest implements Request
     public function setVersion($version)
     {
         $this->version = $version;
-    }
-
-    /**
-     * Returns the session for this request.
-     *
-     * @param string $sessionName The name of the session to return/create
-     *
-     * @return \TechDivision\ServletContainer\Session\ServletSession The session instance
-     */
-    public function getSession($sessionName = ServletSession::SESSION_NAME)
-    {
-        return $this->sessionManager->getSessionForRequest($this, $sessionName);
     }
 
     /**

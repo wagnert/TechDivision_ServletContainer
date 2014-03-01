@@ -16,7 +16,7 @@
  * @subpackage Interfaces
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Markus Stockbauer <ms@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -31,7 +31,7 @@ namespace TechDivision\ServletContainer\Interfaces;
  * @subpackage Interfaces
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Markus Stockbauer <ms@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -212,15 +212,6 @@ interface Request
      * @return string
      */
     public function getVersion();
-
-    /**
-     * Returns the session for this request.
-     *
-     * @param string $sessionName The name of the session to return/create
-     *
-     * @return \TechDivision\ServletContainer\Session\ServletSession The session instance
-     */
-    public function getSession($sessionName = ServletSession::SESSION_NAME);
 
     /**
      * Returns server data

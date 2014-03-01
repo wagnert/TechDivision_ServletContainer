@@ -15,7 +15,7 @@
  * @package    TechDivision_ServletContainer
  * @subpackage Http
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -23,6 +23,9 @@
 namespace TechDivision\ServletContainer\Http;
 
 use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Session\SessionManager;
+use TechDivision\ServletContainer\Session\ServletSession;
+use TechDivision\ServletContainer\Session\PersistentSessionManager;
 
 /**
  * A servlet request implementation.
@@ -31,7 +34,7 @@ use TechDivision\ServletContainer\Interfaces\Request;
  * @package    TechDivision_ServletContainer
  * @subpackage Http
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -58,6 +61,20 @@ class HttpServletRequest implements ServletRequest
      * @var string
      */
     protected $servletPath;
+
+    /**
+     * Session Manager instance.
+     *
+     * @var \TechDivision\ServletContainer\Session\SessionManager
+     */
+    protected $sessionManager;
+    
+    /**
+     * The servlet response instance.
+     * 
+     * @var \TechDivision\ServletContainer\Http\ServletResponse
+     */
+    protected $servletResponse;
     
     /**
      * Injects the passed request instance into this servlet request.
@@ -79,6 +96,40 @@ class HttpServletRequest implements ServletRequest
     public function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * Inject the session manager into the request instance.
+     *
+     * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager The session manager instance
+     *
+     * @return void
+     */
+    public function injectSessionManager(SessionManager $sessionManager)
+    {
+        $this->sessionManager = $sessionManager;
+    }
+
+    /**
+     * Sets servlet response instance.
+     *
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The servlet response instance
+     *
+     * @return void
+     */
+    public function injectServletResponse(ServletResponse $servletResponse)
+    {
+        $this->servletResponse = $servletResponse;
+    }
+    
+    /**
+     * Returns the servlet response instance.
+     * 
+     * @return \TechDivision\ServletContainer\Http\ServletResponse The server response instance
+     */
+    public function getServletResponse()
+    {
+        return $this->servletResponse;
     }
     
     /**
@@ -123,6 +174,18 @@ class HttpServletRequest implements ServletRequest
     public function getServletPath()
     {
         return $this->servletPath;
+    }
+
+    /**
+     * Returns the session for this request.
+     *
+     * @param string $sessionName The name of the session to return/create
+     *
+     * @return \TechDivision\ServletContainer\Session\ServletSession The session instance
+     */
+    public function getSession($sessionName = ServletSession::SESSION_NAME)
+    {
+        return $this->sessionManager->getSessionForRequest($this, $sessionName);
     }
     
     /**
@@ -279,18 +342,6 @@ class HttpServletRequest implements ServletRequest
     public function getVersion()
     {
         return $this->getRequest()->getVersion();
-    }
-
-    /**
-     * Returns the session for this request.
-     *
-     * @param string $sessionName The name of the session to return/create
-     *
-     * @return \TechDivision\ServletContainer\Session\ServletSession The session instance
-     */
-    public function getSession($sessionName = ServletSession::SESSION_NAME)
-    {
-        return $this->getRequest()->getSession($sessionName);
     }
 
     /**

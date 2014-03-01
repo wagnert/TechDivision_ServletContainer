@@ -15,7 +15,7 @@
  * @package    TechDivision_ServletContainer
  * @subpackage Session
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -33,8 +33,8 @@ namespace TechDivision\ServletContainer\Session;
 use TechDivision\ServletContainer\Http\Cookie;
 use TechDivision\ApplicationServer\Utilities\Algorithms;
 use TechDivision\ApplicationServer\InitialContext\StorageInterface;
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Session\Exceptions\SessionNotStartedException;
 use TechDivision\ServletContainer\Session\Exceptions\OperationNotSupportedException;
 use TechDivision\ServletContainer\Session\Exceptions\DataNotSerializableException;
@@ -55,7 +55,7 @@ use TechDivision\ServletContainer\Session\Exceptions\InvalidRequestResponseExcep
  * @package    TechDivision_ServletContainer
  * @subpackage Session
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -203,7 +203,7 @@ class ServletSession
     ) {
         
         $this->servletRequest = $servletRequest;
-        $this->servletResponse = $servletRequest->getResponse();
+        $this->servletResponse = $servletRequest->getServletResponse();
 
         if ($sessionIdentifier !== null) {
             $this->sessionIdentifier = $sessionIdentifier;

@@ -16,7 +16,7 @@
  * @subpackage Authentication
  * @author     Florian Sydekum <fs@techdivision.com>
  * @author     Philipp Dittert <pd@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -37,7 +37,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
  * @subpackage Authentication
  * @author     Florian Sydekum <fs@techdivision.com>
  * @author     Philipp Dittert <pd@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */

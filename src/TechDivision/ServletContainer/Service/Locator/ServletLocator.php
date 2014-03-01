@@ -16,7 +16,7 @@
  * @subpackage Service
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -36,7 +36,7 @@ use TechDivision\ServletContainer\Exceptions\ServletNotFoundException;
  * @subpackage Service
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -117,19 +117,18 @@ class ServletLocator implements ResourceLocatorInterface
     {
         
         // build the file-path of the request
-        $uri = $servletRequest->getUri();
+        $pathInfo = $servletRequest->getPathInfo();
         
         // iterate over all servlets and return the matching one
         foreach ($this->getServletMappings() as $urlPattern => $servletName) {
-            if (fnmatch($urlPattern, $uri)) {
-                $servlet = $this->getServletManager()->getServlet($servletName);
-                return $servlet;
+            if (fnmatch($urlPattern, $pathInfo)) {
+                return $this->getServletManager()->getServlet($servletName);
             }
         }
         
-        // throw an exception if no servlet matches the URI
+        // throw an exception if no servlet matches the path info
         throw new ServletNotFoundException(
-            sprintf("Can't find servlet for requested URI %s", $uri)
+            sprintf("Can't find servlet for requested path info %s", $pathInfo)
         );
     }
 }
