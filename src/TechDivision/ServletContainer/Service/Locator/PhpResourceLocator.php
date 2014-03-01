@@ -69,7 +69,7 @@ class PhpResourceLocator extends StaticResourceLocator
      * @throws \TechDivision\ServletContainer\Exceptions\FileNotReadableException Is thrown if the requested file is not readable
      */
     public function locate(ServletRequest $servletRequest)
-    {   
+    {
         
         // load the request URI
         $uri = $servletRequest->getUri();
@@ -123,10 +123,10 @@ class PhpResourceLocator extends StaticResourceLocator
                     
                     // set the script file information in the server variables
                     $servletRequest->setServerVar(
-                        'PATH_INFO', 
+                        'PATH_INFO',
                         str_replace(
-                            $servletRequest->getServerVar('SCRIPT_NAME'), 
-                            '', 
+                            $servletRequest->getServerVar('SCRIPT_NAME'),
+                            '',
                             $servletRequest->getServerVar('REQUEST_URI')
                         )
                     );
