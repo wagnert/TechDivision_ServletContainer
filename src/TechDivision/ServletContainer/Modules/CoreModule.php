@@ -50,12 +50,32 @@ class CoreModule extends AbstractModule
      */
     protected $vhosts = array();
     
+    /**
+     * The containers document root directory.
+     * 
+     * @var string
+     */
     protected $documentRoot;
     
+    /**
+     * The containers binary path.
+     * 
+     * @var string
+     */
     protected $path;
     
+    /**
+     * The containers server software signature.
+     * 
+     * @var string
+     */
     protected $serverSoftware;
     
+    /**
+     * The containers server admin mail address.
+     * 
+     * @var string
+     */
     protected $serverAdmin;
     
     /**
@@ -68,23 +88,40 @@ class CoreModule extends AbstractModule
         return $this->vhosts;
     }
     
+    /**
+     * Returns the containers document root directory.
+     * 
+     * @return string The containers document root directory
+     */
     protected function getDocumentRoot()
     {
         return $this->documentRoot;
     }
     
+    /**
+     * Returns the containers binary path.
+     * 
+     * @return string The containers binary path
+     */
     protected function getPath()
     {
         return $this->path;
     }
     
+    /**
+     * Returns the containers server software signature.
+     * 
+     * @return string The containers server software signature
+     */
     protected function getServerSoftware()
     {
         return $this->serverSoftware;
     }
     
     /**
+     * Returns the containers server admin mail address.
      * 
+     *  @return string The containers server admin mail address
      */
     protected function getServerAdmin()
     {
