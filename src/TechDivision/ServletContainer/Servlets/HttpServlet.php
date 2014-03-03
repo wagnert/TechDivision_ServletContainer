@@ -178,24 +178,6 @@ abstract class HttpServlet extends GenericServlet
             return;
         }
         
-        // load the information about the requested URI
-        $uri = $servletRequest->getUri();
-        $documentRoot = $servletRequest->getServerVar('DOCUMENT_ROOT');
-        
-        // create a file info object to check if a directory is requested
-        $fileInfo = new \SplFileInfo($documentRoot . $uri);
-        
-        // check if a directory/webapp was been called without ending slash
-        if ($fileInfo->isDir() && strrpos($uri, '/') !== strlen($uri) - 1) {
-            
-            // redirect to path with ending slash
-            $servletResponse->addHeader(Header::HEADER_NAME_LOCATION, $uri . '/');
-            $servletResponse->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 301 OK');
-            $servletResponse->setContent(PHP_EOL);
-            
-            return;
-        }
-        
         // check the request method to invoke the appropriate method
         switch ($servletRequest->getMethod()) {
             case Request::CONNECT:

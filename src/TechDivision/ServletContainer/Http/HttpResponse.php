@@ -85,10 +85,10 @@ class HttpResponse implements Response
             array(
                 Header::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
                 Header::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                Header::HEADER_NAME_CONNECTION => 'keep-alive',
                 Header::HEADER_NAME_CONTENT_TYPE => 'text/html',
-                Header::HEADER_NAME_CACHE_CONTROL => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0',
-                Header::HEADER_NAME_PRAGMA => 'no-cache'
+                // Header::HEADER_NAME_CONNECTION => 'keep-alive',
+                // Header::HEADER_NAME_CACHE_CONTROL => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0',
+                // Header::HEADER_NAME_PRAGMA => 'no-cache'
             )
         );
     }
@@ -171,8 +171,11 @@ class HttpResponse implements Response
      */
     public function getHeadersAsString()
     {
+        
         $headers = "";
-
+        
+        $this->prepareHeaders();
+        
         foreach ($this->getHeaders() as $header => $value) {
 
             if ($header === Header::HEADER_NAME_STATUS) {
@@ -208,26 +211,7 @@ class HttpResponse implements Response
      */
     public function prepareContent()
     {
-        // check if encoding is available
-        foreach ($this->getAcceptedEncodings() as $acceptedEncoding) {
-            // check if gzip is possible
-            if ($acceptedEncoding == 'gzip') {
-                // set correct header encoding information
-                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'gzip');
-                // return content encoded by gzip
-                return $this->setContent(
-                    gzencode($this->getContent())
-                );
-                // check if deflate is possible
-            } elseif ($acceptedEncoding == 'deflate') {
-                // set correct header encoding information
-                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'deflate');
-                // return content deflate
-                return $this->setContent(
-                    gzdeflate($this->getContent())
-                );
-            }
-        }
+        return;
     }
 
     /**

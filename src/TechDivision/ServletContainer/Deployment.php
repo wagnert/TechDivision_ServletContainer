@@ -90,14 +90,14 @@ class Deployment extends AbstractDeployment
          *
          * The array looks something like this:
          *
-         * /^www.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/               => array(site, /opt/appserver/webapps/site)
-         * /^appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/                   => array(site, /opt/appserver/webapps/site)
-         * /^appserver.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                => array(site, /opt/appserver/webapps/site)
-         * /^neos.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                     => array(neos, /opt/appserver/webapps/site)
-         * /^neos.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/              => array(neos, /opt/appserver/webapps/site)
-         * /^[a-z0-9-.]*\/neos(\/([a-z0-9+\$_-]\.?)+)*\/?/              => array(neos, /opt/appserver/webapps)
-         * /^[a-z0-9-.]*\/example(\/([a-z0-9+\$_-]\.?)+)*\/?/           => array(example, /opt/appserver/webapps)
-         * /^[a-z0-9-.]*\/magento-1.8.1.0(\/([a-z0-9+\$_-]\.?)+)*\/?/   => array(magento-1.8.1.0, /opt/appserver/webapps)
+         * /^www.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/               => array(site, /opt/appserver/webapps/site, true)
+         * /^appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/                   => array(site, /opt/appserver/webapps/site, true)
+         * /^appserver.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                => array(site, /opt/appserver/webapps/site, true)
+         * /^neos.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                     => array(neos, /opt/appserver/webapps/site, true)
+         * /^neos.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/              => array(neos, /opt/appserver/webapps/site, true)
+         * /^[a-z0-9-.]*\/neos(\/([a-z0-9+\$_-]\.?)+)*\/?/              => array(neos, /opt/appserver/webapps, false)
+         * /^[a-z0-9-.]*\/example(\/([a-z0-9+\$_-]\.?)+)*\/?/           => array(example, /opt/appserver/webapps, false)
+         * /^[a-z0-9-.]*\/magento-1.8.1.0(\/([a-z0-9+\$_-]\.?)+)*\/?/   => array(magento-1.8.1.0, /opt/appserver/webapps, false)
          *
          * This should also match request URI's like:
          *

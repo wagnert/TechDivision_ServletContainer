@@ -117,7 +117,7 @@ class ServletLocator implements ResourceLocatorInterface
     {
         
         // build the file-path of the request
-        $pathInfo = $servletRequest->getPathInfo();
+        $pathInfo = $servletRequest->getUri();
         
         // iterate over all servlets and return the matching one
         foreach ($this->getServletMappings() as $urlPattern => $servletName) {

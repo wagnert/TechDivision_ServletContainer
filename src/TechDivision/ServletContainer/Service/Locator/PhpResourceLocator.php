@@ -40,23 +40,6 @@ use TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException;
  */
 class PhpResourceLocator extends StaticResourceLocator
 {
-    
-    /**
-     * Array with allowed index files.
-     * 
-     * @var array
-     */
-    protected $directoryIndex = array('index.php', 'index.phtml');
-    
-    /**
-     * Returns array with the possible index files.
-     *
-     * @return array The array with the possible index files
-     */
-    protected function getDirectoryIndex()
-    {
-        return $this->directoryIndex;
-    }
 
     /**
      * Tries to locate the file specified in the passed request instance.
@@ -70,82 +53,73 @@ class PhpResourceLocator extends StaticResourceLocator
      */
     public function locate(ServletRequest $servletRequest)
     {
+
+        error_log(__METHOD__ . ':' . __LINE__);
         
         // load the request URI
         $uri = $servletRequest->getUri();
         
+        error_log("Now try to find servlet for request URI: . $uri");
+        
         // initialize the path information and the directory to start with
-        $pathInfo = $uri;
-        $directoryName = $uri;
+        list ($dirname, $basename) = array_values(pathinfo($uri));
+        
+        error_log(var_export(pathinfo($uri), true));
         
         // initialize the webapp path (the document root)
         $documentRoot = $servletRequest->getServerVar('DOCUMENT_ROOT');
         
-        // load the available directory index files
-        $directoryIndex = $this->getDirectoryIndex();
-        
         do { // descent the directory structure down to find a excecutable PHP file
+            
+            try {
                 
-            do { // iterate over the possible index files if a directory has been passed as URI
-        
-                try {
-
-                    // initialize the path information with the directory name
-                    $pathInfo = $directoryName;
-                    
-                    // check if an index file has been specified
-                    if (isset($indexFile)) {
-                        $pathInfo = rtrim($directoryName, '/') . DIRECTORY_SEPARATOR . $indexFile;
-                    }
-                    
-                    // initialize the file information
-                    $fileInfo = new \SplFileInfo($documentRoot . $pathInfo);
-        
-                    // check if we have a directory
-                    if ($fileInfo->isDir()) {
-                        throw new FoundDirInsteadOfFileException(sprintf("Requested file %s is a directory", $path));
-                    }
-        
-                    // check if we have a real file (not a symlink for example)
-                    if ($fileInfo->isFile() === false) {
-                        throw new FileNotFoundException(sprintf('File %s not not found', $path));
-                    }
-                    
-                    // check if the file is readable
-                    if ($fileInfo->isReadable() === false) {
-                        throw new FileNotReadableException(sprintf('File %s is not readable', $path));
-                    }
-
-                    // initialize the server variables
-                    $servletRequest->setServerVar('PHP_SELF', $uri);
-                    $servletRequest->setServerVar('SCRIPT_NAME', $pathInfo);
-                    $servletRequest->setServerVar('SCRIPT_FILENAME', $fileInfo->getPathname());
-                    
-                    // set the script file information in the server variables
-                    $servletRequest->setServerVar(
-                        'PATH_INFO',
-                        str_replace(
-                            $servletRequest->getServerVar('SCRIPT_NAME'),
-                            '',
-                            $servletRequest->getServerVar('REQUEST_URI')
-                        )
-                    );
-                    
-                    // return the file information
-                    return $fileInfo;
-
-                } catch (\Exception $e) {
-                    // do nothing, try with the next directory index file instead
+                error_log("Now try to load file: " . $documentRoot . $dirname . DIRECTORY_SEPARATOR . $basename);
+                
+                // initialize the file information
+                $fileInfo = new \SplFileInfo($documentRoot . $dirname . DIRECTORY_SEPARATOR . $basename);
+    
+                // check if we have a directory
+                if ($fileInfo->isDir()) {
+                    throw new FoundDirInsteadOfFileException(sprintf("Requested file %s is a directory", $fileInfo));
+                }
+    
+                // check if we have a real file (not a symlink for example)
+                if ($fileInfo->isFile() === false) {
+                    throw new FileNotFoundException(sprintf('File %s not not found', $fileInfo));
                 }
                 
-            } while (list($key, $indexFile) = each($directoryIndex)); // load the next directory index file
+                // check if the file is readable
+                if ($fileInfo->isReadable() === false) {
+                    throw new FileNotReadableException(sprintf('File %s is not readable', $fileInfo));
+                }
 
-            // descendent  the directory tree
-            $directoryName = dirname($directoryName);
+                // initialize the server variables
+                $servletRequest->setServerVar('PHP_SELF', $uri);
+                $servletRequest->setServerVar('SCRIPT_NAME', $dirname . DIRECTORY_SEPARATOR . $basename);
+                $servletRequest->setServerVar('SCRIPT_FILENAME', $fileInfo->getPathname());
+                
+                // set the script file information in the server variables
+                $servletRequest->setPathInfo(
+                    $newPathInfo = str_replace(
+                        $servletRequest->getServerVar('SCRIPT_NAME'),
+                        '',
+                        $servletRequest->getServerVar('REQUEST_URI')
+                    )
+                );
+                
+                error_log("Set new path info to: $newPathInfo");
+                error_log(var_export($servletRequest->getServerVars(), true));
+                
+                // return the file information
+                return $fileInfo;
+
+            } catch (\Exception $e) {
+                // do nothing, try with the next directory index file instead
+            }
+
+            // descendent down the directory tree
+            list ($dirname, $basename) = array_values(pathinfo($dirname));
             
-            // reset the directory index files
-            reset($directoryIndex);
-            
-        } while ($directoryName !== '/'); // stop until we reached the root of the URI
+        } while ($dirname !== '/'); // stop until we reached the root of the URI
     }
 }

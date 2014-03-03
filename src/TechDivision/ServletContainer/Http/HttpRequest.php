@@ -198,6 +198,13 @@ class HttpRequest implements Request
      * @var array
      */
     protected $cookies = array();
+    
+    /**
+     * Flag that the request has been dispatched.
+     * 
+     * @var boolean
+     */
+    protected $dispatched = false;
 
     /**
      * Inject the query parser
@@ -589,7 +596,7 @@ class HttpRequest implements Request
      */
     protected function setServerName($serverName)
     {
-        return $this->serverName = $serverName;
+        return $this->setServerVar('SERVER_NAME', $this->serverName = $serverName);
     }
 
     /**
@@ -611,7 +618,7 @@ class HttpRequest implements Request
      */
     protected function setServerAddress($serverAddress)
     {
-        return $this->serverAddress = $serverAddress;
+        return $this->setServerVar('SERVER_ADDR', $this->serverAddress = $serverAddress);
     }
 
     /**
@@ -633,7 +640,7 @@ class HttpRequest implements Request
      */
     protected function setServerPort($serverPort)
     {
-        return $this->serverPort = $serverPort;
+        return $this->setServerVar('SERVER_PORT', $this->serverPort = $serverPort);
     }
 
     /**
@@ -655,7 +662,7 @@ class HttpRequest implements Request
      */
     public function setPathInfo($pathInfo)
     {
-        return $this->pathInfo = $pathInfo;
+        return $this->setServerVar('PATH_INFO', $this->pathInfo = $pathInfo);
     }
 
     /**
@@ -721,7 +728,7 @@ class HttpRequest implements Request
      */
     protected function setMethod($method)
     {
-        $this->method = $method;
+        $this->setServerVar('REQUEST_METHOD', $this->method = $method);
     }
 
     /**
@@ -743,7 +750,7 @@ class HttpRequest implements Request
      */
     public function setUri($uri)
     {
-        $this->uri = $uri;
+        $this->setServerVar('REQUEST_URI', $this->uri = $uri);
     }
 
     /**
@@ -765,7 +772,7 @@ class HttpRequest implements Request
      */
     public function setVersion($version)
     {
-        $this->version = $version;
+        $this->setServerVar('SERVER_PROTOCOL', $this->version = $version);
     }
 
     /**
@@ -963,5 +970,27 @@ class HttpRequest implements Request
         if ($this->hasCookie($cookieName)) {
             return $this->cookies[$cookieName];
         }
+    }
+    
+    /**
+     * Sets the flag to mark the request dispatched.
+     * 
+     * @param boolean $dispatched TRUE if the request has already been dispatched, else FALSE
+     * 
+     * @return void
+     */
+    public function setDispatched($dispatched = true)
+    {
+        $this->dispatched = $dispatched;
+    }
+    
+    /**
+     * Sets the flag that shows if the request has already been dispatched.
+     * 
+     * @return boolean TRUE if the request has already been dispatched, else FALSE
+     */
+    public function isDispatched()
+    {
+        return $this->dispatched;
     }
 }

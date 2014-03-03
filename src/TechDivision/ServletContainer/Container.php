@@ -37,24 +37,21 @@ use TechDivision\ServletContainer\Http\AccessLogger;
  */
 class Container extends AbstractContainer
 {
-
+    
     /**
-     * Holds access logger instance
-     *
-     * @var \TechDivision\ServletContainer\Http\AccessLogger
+     * The containers modules.
+     * 
+     * @var array
      */
-    protected $accessLogger;
+    protected $modules;
     
     /**
      * Initializes the container with the initial context, the unique container ID
      * and the deployed applications.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial context
-     *                                                                                               instance
-     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The container's
-     *                                                                                               UUID
-     * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application
-     *                                                                                               instance
+     * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial contextinstance
+     * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The containers UUID
+     * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application instance
      *
      * @return void
      * @todo Application deployment only works this way because of Thread compatibilty
@@ -65,8 +62,35 @@ class Container extends AbstractContainer
         // call parent constructor
         parent::__construct($initialContext, $containerNode, $applications);
         
-        // initialize the logger
-        $this->accessLogger = $this->newInstance('TechDivision\ServletContainer\Http\AccessLogger');
+        // @todo Add module names to system configuration
+        $moduleNames = array(
+            'TechDivision\ServletContainer\Modules\CoreModule',
+            'TechDivision\ServletContainer\Modules\LogModule',
+            'TechDivision\ServletContainer\Modules\DirectoryModule',
+            'TechDivision\ServletContainer\Modules\ServletModule'
+        );
+        
+        // initialize the array with the modules
+        $modules = array();
+        
+        // instanciate the module and initialize it
+        foreach ($moduleNames as $key => $className) {
+            $modules[$key] = $this->newInstance($className, array($this));
+            $modules[$key]->init();
+        }
+        
+        // set the array with the modules
+        $this->modules = $modules;
+    }
+    
+    /**
+     * Returns the array with the initialized modules
+     * 
+     * @return array The initialized modules
+     */
+    public function getModules()
+    {
+        return $this->modules;
     }
 
     /**
