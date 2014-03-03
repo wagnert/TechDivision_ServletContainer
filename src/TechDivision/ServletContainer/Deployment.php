@@ -90,14 +90,14 @@ class Deployment extends AbstractDeployment
          *
          * The array looks something like this:
          *
-         * /^www.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/               => array(site, /opt/appserver/webapps/site, true)
-         * /^appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/                   => array(site, /opt/appserver/webapps/site, true)
-         * /^appserver.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                => array(site, /opt/appserver/webapps/site, true)
-         * /^neos.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                     => array(neos, /opt/appserver/webapps/site, true)
-         * /^neos.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/              => array(neos, /opt/appserver/webapps/site, true)
-         * /^[a-z0-9-.]*\/neos(\/([a-z0-9+\$_-]\.?)+)*\/?/              => array(neos, /opt/appserver/webapps, false)
-         * /^[a-z0-9-.]*\/example(\/([a-z0-9+\$_-]\.?)+)*\/?/           => array(example, /opt/appserver/webapps, false)
-         * /^[a-z0-9-.]*\/magento-1.8.1.0(\/([a-z0-9+\$_-]\.?)+)*\/?/   => array(magento-1.8.1.0, /opt/appserver/webapps, false)
+         * /^www.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/               => application
+         * /^appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/                   => application
+         * /^appserver.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                => application
+         * /^neos.local(\/([a-z0-9+\$_-]\.?)+)*\/?/                     => application
+         * /^neos.appserver.io(\/([a-z0-9+\$_-]\.?)+)*\/?/              => application
+         * /^[a-z0-9-.]*\/neos(\/([a-z0-9+\$_-]\.?)+)*\/?/              => application
+         * /^[a-z0-9-.]*\/example(\/([a-z0-9+\$_-]\.?)+)*\/?/           => application
+         * /^[a-z0-9-.]*\/magento-1.8.1.0(\/([a-z0-9+\$_-]\.?)+)*\/?/   => application
          *
          * This should also match request URI's like:
          *
@@ -107,20 +107,14 @@ class Deployment extends AbstractDeployment
         // iterate over a applications vhost/alias configuration
         foreach ($application->getVhosts() as $vhost) {
         
-            // prepare the application information for A vhost request
-            $applicationInfo = array($application, $application->getWebappPath(), true);
-        
             // PREPEND the vhost/alias to the patterns array
-            $this->applications = array('/^' . $vhost->getName() . '(\/([a-z0-9+\$_-]\.?)+)*\/?/' => $applicationInfo) + $this->applications;
+            $this->applications = array('/^' . $vhost->getName() . '(\/([a-z0-9+\$_-]\.?)+)*\/?/' => $application) + $this->applications;
             foreach ($vhost->getAliases() as $alias) {
-                $this->applications = array('/^' . $alias . '(\/([a-z0-9+\$_-]\.?)+)*\/?/' => $applicationInfo) + $this->applications;
+                $this->applications = array('/^' . $alias . '(\/([a-z0-9+\$_-]\.?)+)*\/?/' => $application) + $this->applications;
             }
         }
         
-        // prepare the application information for a NON vhost request
-        $applicationInfo = array($application, $application->getBaseDirectory($application->getAppBase()), false);
-        
         // finally APPEND a wildcard pattern for each application to the patterns array
-        $this->applications = $this->applications + array('/^[a-z0-9-.]*\/' . $application->getName() . '(\/([a-z0-9+\$_-]\.?)+)*\/?/' => $applicationInfo);
+        $this->applications = $this->applications + array('/^[a-z0-9-.]*\/' . $application->getName() . '(\/([a-z0-9+\$_-]\.?)+)*\/?/' => $application);
     }
 }

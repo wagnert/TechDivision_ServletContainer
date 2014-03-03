@@ -166,7 +166,7 @@ class StaticResourceServlet extends HttpServlet
             // load the information about the requested path
             $uri = $servletRequest->getUri();
             
-            $servletResponse->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 OK');
+            $servletResponse->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
             $servletResponse->setContent(
                 sprintf(
                     '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">

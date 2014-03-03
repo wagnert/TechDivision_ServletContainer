@@ -48,7 +48,15 @@ class CoreModule extends AbstractModule
      * 
      * @var array
      */
-    protected $vhosts;
+    protected $vhosts = array();
+    
+    protected $documentRoot;
+    
+    protected $path;
+    
+    protected $serverSoftware;
+    
+    protected $serverAdmin;
     
     /**
      * Returns the array with the containers virtual host configuration.
@@ -60,6 +68,29 @@ class CoreModule extends AbstractModule
         return $this->vhosts;
     }
     
+    protected function getDocumentRoot()
+    {
+        return $this->documentRoot;
+    }
+    
+    protected function getPath()
+    {
+        return $this->path;
+    }
+    
+    protected function getServerSoftware()
+    {
+        return $this->serverSoftware;
+    }
+    
+    /**
+     * 
+     */
+    protected function getServerAdmin()
+    {
+        return $this->serverAdmin;
+    }
+    
     /**
      * Initializes the module.
      * 
@@ -69,11 +100,14 @@ class CoreModule extends AbstractModule
     public function init()
     {
         
+        // prepare server and path information
+        $this->documentRoot = $this->getContainer()->getWebappsDir();
+        $this->path = $this->getContainer()->getBaseDirectory(DIRECTORY_SEPARATOR . 'bin') . PATH_SEPARATOR . getenv('PATH');
+        $this->serverSoftware = $this->getContainer()->getContainerNode()->getHost()->getServerSoftware();
+        $this->serverAdmin = $this->getContainer()->getContainerNode()->getHost()->getServerAdmin();
+        
         // iterate over all registered applications of the container
-        foreach ($this->getContainer()->getApplications() as $urlPattern => $applicationInfo) {
-                
-            // explode the application information
-            list ($application, $documentRoot, $isVhost) = $applicationInfo;
+        foreach ($this->getContainer()->getApplications() as $urlPattern => $application) {
             
             // iterate over a applications vhost/alias configuration
             foreach ($application->getVhosts() as $vhost) {
@@ -107,12 +141,19 @@ class CoreModule extends AbstractModule
         
         // set the request to NOT dispatched
         $request->setDispatched(false);
-
+        
+        // set the server and the path information
+        $request->setServerVar('PATH', $this->getPath());
+        $request->setServerVar('SERVER_SOFTWARE', $this->getServerSoftware());
+        $request->setServerVar('SERVER_ADMIN', $this->getServerAdmin());
+        $request->setServerVar('DOCUMENT_ROOT', $this->getDocumentRoot());
+        
         // initialize response and add accepted encoding methods
         $response->initHeaders();
         $response->setAcceptedEncodings($request->getAcceptedEncodings());
         $response->addHeader(Header::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
         
+        // if the request is related with a vhost, prepare the document root
         if (array_key_exists($serverName = $request->getServerName(), $vhosts = $this->getVhosts()) === true) {
             $request->setServerVar('DOCUMENT_ROOT', $request->getServerVar('DOCUMENT_ROOT') . $vhosts[$serverName]);
         }

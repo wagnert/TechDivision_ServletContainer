@@ -152,7 +152,7 @@ class RequestHandler extends AbstractContextThread
                 if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
                     
                     // lower the request counter and the TTL
-                    $availableRequests --;
+                    $availableRequests--;
                     
                     // check if this will be the last requests handled by this thread
                     if ($availableRequests >= 0) {
@@ -164,7 +164,7 @@ class RequestHandler extends AbstractContextThread
                         $response->addHeader(Header::HEADER_NAME_KEEP_ALIVE, "max=$availableRequests, timeout=$ttl, thread={$this->getThreadId()}");
                     }
                     
-                } else { 
+                } else {
                     
                     // set request counter and TTL to 0
                     $availableRequests = 0;

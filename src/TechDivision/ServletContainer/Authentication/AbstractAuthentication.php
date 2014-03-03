@@ -83,8 +83,8 @@ abstract class AbstractAuthentication
     public function init(Servlet $servlet, ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         $this->setServlet($servlet);
-        $this->setServletResponse($servletRequest);
-        $this->setServletRequest($servletResponse);
+        $this->setServletRequest($servletRequest);
+        $this->setServletResponse($servletResponse);
     }
 
     /**

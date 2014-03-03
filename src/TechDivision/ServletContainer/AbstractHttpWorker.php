@@ -56,12 +56,6 @@ abstract class AbstractHttpWorker extends AbstractWorker
         
         try {
             
-            // prepare server and path information
-            $documentRoot = $this->getContainer()->getWebappsDir();
-            $path = $this->getContainer()->getBaseDirectory(DIRECTORY_SEPARATOR . 'bin') . PATH_SEPARATOR . getenv('PATH');
-            $serverSoftware = $this->getContainer()->getContainerNode()->getHost()->getServerSoftware();
-            $serverAdmin = $this->getContainer()->getContainerNode()->getHost()->getServerAdmin();
-            
             // the counter with the number of requests to handle
             $handleRequests = AbstractHttpWorker::HANDLE_REQUESTS;
             
@@ -75,12 +69,6 @@ abstract class AbstractHttpWorker extends AbstractWorker
                 
                  // initialize the Http request
                 $request = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpRequest');
-                
-                // set the server and the path information
-                $request->setServerVar('DOCUMENT_ROOT', $documentRoot);
-                $request->setServerVar('PATH', $path);
-                $request->setServerVar('SERVER_SOFTWARE', $serverSoftware);
-                $request->setServerVar('SERVER_ADMIN', $serverAdmin);
                 
                 // initialize the Http response/part
                 $response = $this->initialContext->newInstance('TechDivision\ServletContainer\Http\HttpResponse');

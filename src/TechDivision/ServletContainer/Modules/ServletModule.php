@@ -26,6 +26,7 @@ use TechDivision\ApplicationServer\Interfaces\ContainerInterface;
 use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Http\ServletRequest;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Exceptions\BadRequestException;
 
@@ -73,30 +74,18 @@ class ServletModule extends AbstractModule
      */
     public function handle(HttpClientInterface $client, Request $request, Response $response)
     {
-            
-        // try to locate the application and the servlet that could service the current request
-        $applicationInfo = $this->locate($request);
-        
-        // explode the application information
-        list ($application, $documentRoot, $isVhost) = $applicationInfo;
 
         // intialize servlet session, request + response
-        $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array($this->getInitialContext()));
         $servletRequest = $this->newInstance('TechDivision\ServletContainer\Http\HttpServletRequest', array($request));
         $servletResponse = $this->newInstance('TechDivision\ServletContainer\Http\HttpServletResponse', array($response));
-        
+        $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array($this->getInitialContext()));
+
         // inject servlet response and session manager
         $servletRequest->injectSessionManager($sessionManager);
         $servletRequest->injectServletResponse($servletResponse);
         
-        // set the application context path
-        $servletRequest->setContextPath('/' . $application->getName());
-        
-        // locate the servlet that has to handle the request
-        $servlet = $application->locate($servletRequest);
-        
-        // set the servlet path
-        $servletRequest->setServletPath(get_class($servlet));
+        // try to locate the application and the servlet that could service the current request
+        $servlet = $this->locate($servletRequest)->locate($servletRequest);
 
         // initialize the shutdown handler, the session manager and the authentication manager
         $shutdownHandler = $this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array($client, $servletResponse));
@@ -113,32 +102,44 @@ class ServletModule extends AbstractModule
     /**
      * Tries to find an application that matches the passed request.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance to locate the application for
+     * @param \TechDivision\ServletContainer\Htt\ServletRequest $servletRequest The request instance to locate the application for
      * 
      * @return array The application info that matches the request
      * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application matches the request
      */
-    public function locate(Request $request)
+    public function locate(ServletRequest $servletRequest)
     {
         
         // prepare the URI to be matched
-        $url = $request->getServerName() . $request->getUri();
+        $url = $servletRequest->getServerName() . $servletRequest->getUri();
         
         // try to find the application by match it one of the prepared patterns
-        foreach ($this->getApplications() as $pattern => $applicationInfo) {
+        foreach ($this->getApplications() as $pattern => $application) {
         
             // try to match a registered application with the passed request
             if (preg_match($pattern, $url) === 1) {
-                return $applicationInfo;
+                
+                // prepare and set the applications context path
+                $servletRequest->setContextPath($contextPath = '/' . $application->getName());
+                
+                // prepare the path information depending if we're a vhost or not
+                if ($application->isVhostOf($servletRequest->getServerName())) {
+                    $pathInfo = $servletRequest->getUri();
+                } else {
+                    $pathInfo = str_replace($contextPath, '', $servletRequest->getUri());
+                }
+                
+                // set the script file information in the server variables
+                $servletRequest->setPathInfo($pathInfo);
+                
+                // return the application instance
+                return $application;
             }
         }
         
         // if not throw a bad request exception
         throw new BadRequestException(
-            sprintf(
-                "Can't find application for URI %s",
-                $request->getUri()
-            )
+            sprintf("Can't find application for URI %s", $servletRequest->getUri())
         );
     }
     

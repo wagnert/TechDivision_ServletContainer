@@ -92,7 +92,7 @@ class PhpResourceLocator extends StaticResourceLocator
                 
                 // set the script file information in the server variables
                 $servletRequest->setPathInfo(
-                    $newPathInfo = str_replace(
+                    str_replace(
                         $servletRequest->getServerVar('SCRIPT_NAME'),
                         '',
                         $servletRequest->getServerVar('REQUEST_URI')
