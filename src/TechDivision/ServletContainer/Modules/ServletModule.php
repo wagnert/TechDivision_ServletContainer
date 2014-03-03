@@ -26,6 +26,7 @@ use TechDivision\ApplicationServer\Interfaces\ContainerInterface;
 use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Exceptions\BadRequestException;
 
 /**
@@ -63,25 +64,15 @@ class ServletModule extends AbstractModule
     /**
      * Processes the request.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $request  The request to be handled
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response instance
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The http client
+     * @param \TechDivision\ServletContainer\Interfaces\Request             $request  The request to be handled
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response instance
      * 
      * @return void
      * @see \TechDivision\ServletContainer\Modules\Module::handle()
      */
-    public function handle(Request $request, Response $response)
+    public function handle(HttpClientInterface $client, Request $request, Response $response)
     {
-            
-        // initialize the session manager itself
-        $sessionManager = $this->newInstance(
-            'TechDivision\ServletContainer\Session\PersistentSessionManager',
-            array($this->getInitialContext())
-        );
-        
-        // initialize the authentication manager
-        $authenticationManager = $this->newInstance(
-            'TechDivision\ServletContainer\AuthenticationManager'
-        );
             
         // try to locate the application and the servlet that could service the current request
         $applicationInfo = $this->locate($request);
@@ -89,7 +80,8 @@ class ServletModule extends AbstractModule
         // explode the application information
         list ($application, $documentRoot, $isVhost) = $applicationInfo;
 
-        // intialize servlet request/response
+        // intialize servlet session, request + response
+        $sessionManager = $this->newInstance('TechDivision\ServletContainer\Session\PersistentSessionManager', array($this->getInitialContext()));
         $servletRequest = $this->newInstance('TechDivision\ServletContainer\Http\HttpServletRequest', array($request));
         $servletResponse = $this->newInstance('TechDivision\ServletContainer\Http\HttpServletResponse', array($response));
         
@@ -105,22 +97,14 @@ class ServletModule extends AbstractModule
         
         // set the servlet path
         $servletRequest->setServletPath(get_class($servlet));
-        
-        /*
-        // inject shutdown handler
-        $servlet->injectShutdownHandler(
-            $this->newInstance(
-                'TechDivision\ServletContainer\Servlets\DefaultShutdownHandler',
-                array(
-                    $client,
-                    $servletResponse
-                )
-            )
-        );
-        */
 
-        // inject authentication manager
+        // initialize the shutdown handler, the session manager and the authentication manager
+        $shutdownHandler = $this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array($client, $servletResponse));
+        $authenticationManager = $this->newInstance('TechDivision\ServletContainer\AuthenticationManager');
+
+        // inject authentication manager and shutdown handler
         $servlet->injectAuthenticationManager($authenticationManager);
+        $servlet->injectShutdownHandler($shutdownHandler);
 
         // let the servlet process the request send it back to the client
         $servlet->service($servletRequest, $servletResponse);

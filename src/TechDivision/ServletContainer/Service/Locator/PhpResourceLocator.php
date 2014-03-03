@@ -53,18 +53,12 @@ class PhpResourceLocator extends StaticResourceLocator
      */
     public function locate(ServletRequest $servletRequest)
     {
-
-        error_log(__METHOD__ . ':' . __LINE__);
         
         // load the request URI
         $uri = $servletRequest->getUri();
         
-        error_log("Now try to find servlet for request URI: . $uri");
-        
         // initialize the path information and the directory to start with
         list ($dirname, $basename) = array_values(pathinfo($uri));
-        
-        error_log(var_export(pathinfo($uri), true));
         
         // initialize the webapp path (the document root)
         $documentRoot = $servletRequest->getServerVar('DOCUMENT_ROOT');
@@ -72,8 +66,6 @@ class PhpResourceLocator extends StaticResourceLocator
         do { // descent the directory structure down to find a excecutable PHP file
             
             try {
-                
-                error_log("Now try to load file: " . $documentRoot . $dirname . DIRECTORY_SEPARATOR . $basename);
                 
                 // initialize the file information
                 $fileInfo = new \SplFileInfo($documentRoot . $dirname . DIRECTORY_SEPARATOR . $basename);
@@ -106,9 +98,6 @@ class PhpResourceLocator extends StaticResourceLocator
                         $servletRequest->getServerVar('REQUEST_URI')
                     )
                 );
-                
-                error_log("Set new path info to: $newPathInfo");
-                error_log(var_export($servletRequest->getServerVars(), true));
                 
                 // return the file information
                 return $fileInfo;

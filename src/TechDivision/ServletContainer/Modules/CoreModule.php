@@ -25,6 +25,7 @@ namespace TechDivision\ServletContainer\Modules;
 use TechDivision\ServletContainer\Http\Header;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ApplicationServer\Interfaces\ContainerInterface;
 
 /**
@@ -68,8 +69,6 @@ class CoreModule extends AbstractModule
     public function init()
     {
         
-        error_log(__METHOD__ . ':' . __LINE__);
-        
         // iterate over all registered applications of the container
         foreach ($this->getContainer()->getApplications() as $urlPattern => $applicationInfo) {
                 
@@ -96,16 +95,15 @@ class CoreModule extends AbstractModule
      * Handles the passed request by extending the DOCUMENT_ROOT with the webapp path depending 
      * on the server name found in the passed request.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $request  The request to be handled
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response instance
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The http client
+     * @param \TechDivision\ServletContainer\Interfaces\Request             $request  The request to be handled
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response instance
      * 
      * @return void
      * @see \TechDivision\ServletContainer\Modules\Module::handle()
      */
-    public function handle(Request $request, Response $response)
+    public function handle(HttpClientInterface $client, Request $request, Response $response)
     {
-        
-        error_log(__METHOD__ . ':' . __LINE__);
         
         // set the request to NOT dispatched
         $request->setDispatched(false);

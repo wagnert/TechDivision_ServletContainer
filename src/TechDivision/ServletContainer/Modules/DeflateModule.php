@@ -24,6 +24,7 @@ namespace TechDivision\ServletContainer\Modules;
 
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ApplicationServer\Interfaces\ContainerInterface;
 
 /**
@@ -49,22 +50,20 @@ class DeflateModule extends AbstractModule
      */
     public function init()
     {
-        error_log(__METHOD__ . ':' . __LINE__);
     }
     
     /**
      * Logs the request in common log format.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $request  The request to be handled
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response instance
+     * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client   The http client
+     * @param \TechDivision\ServletContainer\Interfaces\Request             $request  The request to be handled
+     * @param \TechDivision\ServletContainer\Interfaces\Response            $response The response instance
      * 
      * @return void
      * @see \TechDivision\ServletContainer\Modules\Module::handle()
      */
-    public function handle(Request $request, Response $response)
+    public function handle(HttpClientInterface $client, Request $request, Response $response)
     {
-        
-        error_log(__METHOD__ . ':' . __LINE__);
         
         // check if encoding is available
         foreach ($response->getAcceptedEncodings() as $acceptedEncoding) {

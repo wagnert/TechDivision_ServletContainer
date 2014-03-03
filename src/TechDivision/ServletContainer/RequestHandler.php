@@ -178,9 +178,8 @@ class RequestHandler extends AbstractContextThread
                 
                 // let all modules prepare the request
                 foreach ($modules as $module) {
-                    $module->handle($request, $response);
+                    $module->handle($client, $request, $response);
                     if ($request->isDispatched() === true) {
-                        error_log("Found dispatched request after module: " . get_class($module));
                         break;
                     }
                 }
