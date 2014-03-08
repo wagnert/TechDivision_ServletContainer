@@ -30,9 +30,9 @@ namespace TechDivision\ServletContainer\Session;
  * 
  * The TYPO3 project - inspiring people to share!
  */
+use TechDivision\Storage\StorageInterface;
 use TechDivision\ServletContainer\Http\Cookie;
 use TechDivision\ApplicationServer\Utilities\Algorithms;
-use TechDivision\ApplicationServer\InitialContext\StorageInterface;
 use TechDivision\ServletContainer\Http\ServletRequest;
 use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Session\Exceptions\SessionNotStartedException;
@@ -74,7 +74,7 @@ class ServletSession
     /**
      * Cache storage for this session
      *
-     * @var \TechDivision\ApplicationServer\InitialContext\StorageInterface
+     * @var \TechDivision\Storage\StorageInterface
      */
     protected $storage;
 
@@ -218,7 +218,7 @@ class ServletSession
     /**
      * Injects the storage to persist session data.
      *
-     * @param \TechDivision\ApplicationServer\InitialContext\StorageInterface $storage The session storage to use
+     * @param \TechDivision\Storage\StorageInterface $storage The session storage to use
      *
      * @return void
      */

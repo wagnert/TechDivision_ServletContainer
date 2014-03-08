@@ -124,7 +124,7 @@ class ServletManager
             
             // it's no valid application without at least the web.xml file
             if (!file_exists($web = $folder . DIRECTORY_SEPARATOR . 'WEB-INF' . DIRECTORY_SEPARATOR . 'web.xml')) {
-                throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $folder));
+                throw new InvalidApplicationArchiveException(sprintf('Folder %s contains no valid webapp.', $web));
             }
             
             // add the default servlet (StaticResourceServlet)
