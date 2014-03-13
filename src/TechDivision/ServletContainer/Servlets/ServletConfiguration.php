@@ -1,6 +1,13 @@
 <?php
+
 /**
- * TechDivision\ServletContainer\ServletConfiguration
+ * TechDivision\ServletContainer\Servlets\ServletConfiguration
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -9,7 +16,7 @@
  * @subpackage Servlets
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -26,7 +33,7 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
  * @subpackage Servlets
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -130,6 +137,7 @@ class ServletConfiguration implements ServletConfig
      * Return's the servlet's name from the web.xml configuration file.
      * 
      * @return string The servlet name
+     * @see \TechDivision\ServletContainer\Interfaces\ServletConfig::getServletName()
      */
     public function getServletName()
     {
@@ -172,8 +180,7 @@ class ServletConfiguration implements ServletConfig
     {
         return array(
             'SERVER_ADMIN' => $this->getConfiguration()->getServerAdmin(),
-            'SERVER_SOFTWARE' => $this->getConfiguration()->getServerAdmin(),
-            'DOCUMENT_ROOT' => $this->getWebappPath()
+            'SERVER_SOFTWARE' => $this->getConfiguration()->getServerAdmin()
         );
     }
 }

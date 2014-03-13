@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\ServletManager
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -8,16 +15,16 @@
  * @package    TechDivision_ServletContainer
  * @subpackage Authentication
  * @author     Philipp Dittert <pd@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Authentication;
 
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Servlet;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 
 /**
  * Abstract class for authentication adapters.
@@ -26,7 +33,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
  * @package    TechDivision_ServletContainer
  * @subpackage Authentication
  * @author     Philipp Dittert <pd@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -46,38 +53,38 @@ abstract class AbstractAuthentication
     /**
      * Holds Servlet Object
      *
-     * @var Servlet
+     * @var \TechDivision\ServletContainer\Interfaces\Servlet
      */
     protected $servlet;
 
     /**
      * Holds Request object
      *
-     * @var Request
+     * @var \TechDivision\ServletContainer\Http\ServletRequest
      */
-    protected $request;
+    protected $servletRequest;
 
     /**
      * Holds Response
      *
-     * @var Response
+     * @var \TechDivision\ServletContainer\Http\ServletResponse
      */
-    protected $response;
+    protected $servletResponse;
 
     /**
      * alternative manuell called constructor
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Servlet  $servlet The servlet to process
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req     The request object
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res     The response object
+     * @param \TechDivision\ServletContainer\Interfaces\Servlet   $servlet         The servlet to process
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
      * @return void
      */
-    public function init(Servlet $servlet, Request $req, Response $res)
+    public function init(Servlet $servlet, ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         $this->setServlet($servlet);
-        $this->setResponse($res);
-        $this->setRequest($req);
+        $this->setServletRequest($servletRequest);
+        $this->setServletResponse($servletResponse);
     }
 
     /**
@@ -85,12 +92,11 @@ abstract class AbstractAuthentication
      *
      * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet A servlet instance
      *
-     * @return $this
+     * @return void
      */
     protected function setServlet($servlet)
     {
         $this->servlet = $servlet;
-        return $this;
     }
 
     /**
@@ -104,48 +110,46 @@ abstract class AbstractAuthentication
     }
 
     /**
-     * Sets Request object
+     * Sets servlet request object.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
-     * @return $this
+     * @return void
      */
-    protected function setRequest(Request $request)
+    protected function setServletRequest(ServletRequest $servletRequest)
     {
-        $this->request = $request;
-        return $this;
+        $this->servletRequest = $servletRequest;
     }
 
     /**
-     * Returns Request object
+     * Returns servlet request object.
      *
-     * @return \TechDivision\ServletContainer\Interfaces\Request
+     * @return \TechDivision\ServletContainer\Http\ServletRequest The servlet request instance
      */
-    protected function getRequest()
+    protected function getServletRequest()
     {
-        return $this->request;
+        return $this->servletRequest;
     }
 
     /**
-     * set Response object
+     * Sets servlet response object.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response The response instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletResponse The response instance
      *
-     * @return $this
+     * @return void
      */
-    protected function setResponse(Response $response)
+    protected function setServletResponse(ServletResponse $servletResponse)
     {
-        $this->response = $response;
-        return $this;
+        $this->servletResponse = $servletResponse;
     }
 
     /**
-     * Returns Response object
-     *
-     * @return Response
+     * Returns servlet response object.
+     * 
+     * @return \TechDivision\ServletContainer\Http\ServletResponse The servlet response instance
      */
-    protected function getResponse()
+    protected function getServletResponse()
     {
-        return $this->response;
+        return $this->servletResponse;
     }
 }
