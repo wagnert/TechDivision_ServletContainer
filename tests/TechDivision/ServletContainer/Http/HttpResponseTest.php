@@ -39,10 +39,9 @@ class HttpResponseTest extends \PHPUnit_Framework_TestCase {
      * Test default header settings after response object was instantiated.
      */
     public function testDefaultResponseObjectHeadersConstructor() {
-        $this->assertSame('HTTP/1.1 200 OK', $this->response->getHeader(HttpResponse::HEADER_NAME_STATUS));
-        $this->assertNotEmpty($this->response->getHeader(HttpResponse::HEADER_NAME_DATE));
-        $this->assertSame('keep-alive', $this->response->getHeader(HttpResponse::HEADER_NAME_CONNECTION));
-        $this->assertSame('text/html', $this->response->getHeader(HttpResponse::HEADER_NAME_CONTENT_TYPE));
+        $this->assertSame('HTTP/1.1 200 OK', $this->response->getHeader(Header::HEADER_NAME_STATUS));
+        $this->assertNotEmpty($this->response->getHeader(Header::HEADER_NAME_DATE));
+        $this->assertSame('text/html', $this->response->getHeader(Header::HEADER_NAME_CONTENT_TYPE));
     }
 
     /**
@@ -76,9 +75,9 @@ class HttpResponseTest extends \PHPUnit_Framework_TestCase {
      * Test if getCode returns the right code by giving various status lines.
      */
     public function testGetCodeFromCorrectStatusHeader() {
-        $this->response->addHeader(HttpResponse::HEADER_NAME_STATUS, 'HTTP/1.1 200 OK');
+        $this->response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 200 OK');
         $this->assertSame('200', $this->response->getCode());
-        $this->response->addHeader(HttpResponse::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
+        $this->response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
         $this->assertSame('404', $this->response->getCode());
     }
 
