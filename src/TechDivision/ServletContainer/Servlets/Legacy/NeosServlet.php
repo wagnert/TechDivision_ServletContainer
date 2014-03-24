@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Servlets\Legacy\NeosServlet
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -8,15 +15,15 @@
  * @package    TechDivision_ServletContainer
  * @subpackage Servlets
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 
 namespace TechDivision\ServletContainer\Servlets\Legacy;
 
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Servlets\PhpServlet;
 
 /**
@@ -26,7 +33,7 @@ use TechDivision\ServletContainer\Servlets\PhpServlet;
  * @package    TechDivision_ServletContainer
  * @subpackage Servlets
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -49,40 +56,40 @@ class NeosServlet extends PhpServlet
     /**
      * Prepares the passed request instance for generating the globals.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return void
      */
-    protected function prepareGlobals(Request $req)
+    protected function prepareGlobals(ServletRequest $servletRequest)
     {
         // overwrite DOCUMENT_ROOT + REQUEST_URI
-        $req->setServerVar('DOCUMENT_ROOT', $req->getServerVar('DOCUMENT_ROOT') . DIRECTORY_SEPARATOR . 'Web');
-        $req->setServerVar('REQUEST_URI', str_replace($this->getDirectoryIndex(), '', $req->getServerVar('REQUEST_URI')));
+        $servletRequest->setServerVar('DOCUMENT_ROOT', $servletRequest->getServerVar('DOCUMENT_ROOT') . DIRECTORY_SEPARATOR . 'Web');
+        $servletRequest->setServerVar('REQUEST_URI', str_replace($this->getDirectoryIndex(), '', $servletRequest->getServerVar('REQUEST_URI')));
         // prepare the globals
-        parent::prepareGlobals($req);
+        parent::prepareGlobals($servletRequest);
     }
 
     /**
      * Tries to load the requested file and adds the content to the response.
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     * 
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
-    public function doGet(Request $req, Response $res)
+    public function doGet(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         
         // include the TYPO3.Flow bootstrap file
         require ($this->getWebappPath() . '/Packages/Framework/TYPO3.Flow/Classes/TYPO3/Flow/Core/Bootstrap.php');
         
         // initialize the globals $_SERVER, $_REQUEST, $_POST, $_GET, $_COOKIE, $_FILES
-        $this->initGlobals($req);
+        $this->initGlobals($servletRequest);
         
         // this is a bad HACK because it's NOT possible to write to php://stdin
-        if ($req->getMethod() == Request::POST) {
-            $GLOBALS['HTTP_RAW_POST_DATA'] = $req->getContent();
+        if ($servletRequest->getMethod() == Request::POST) {
+            $GLOBALS['HTTP_RAW_POST_DATA'] = $servletRequest->getContent();
         }
         
         // initialize the TYPO3.Flow specific $_SERVER variables
@@ -102,6 +109,6 @@ class NeosServlet extends PhpServlet
         
         ob_start();
         $bootstrap->run();
-        $res->setContent(ob_get_clean());
+        $servletResponse->setContent(ob_get_clean());
     }
 }

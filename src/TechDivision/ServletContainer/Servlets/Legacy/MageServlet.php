@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Servlets\Legacy\MageServlet
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -8,7 +15,7 @@
  * @package    TechDivision_ServletContainer
  * @subpackage Servlets
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -16,19 +23,19 @@
 namespace TechDivision\ServletContainer\Servlets\Legacy;
 
 use TechDivision\ServletContainer\Http\HttpPart;
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
 use TechDivision\ServletContainer\Servlets\PhpServlet;
 
 /**
- * A servlet implementation for magento
+ * A servlet implementation for Magento.
  *
  * @category   Appserver
  * @package    TechDivision_ServletContainer
  * @subpackage Servlets
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -38,51 +45,49 @@ class MageServlet extends PhpServlet
     /**
      * Prepares the passed request instance for generating the globals.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return void
      */
-    protected function prepareGlobals(Request $req)
+    protected function prepareGlobals(ServletRequest $servletRequest)
     {
         // prepare the globals
-        parent::prepareGlobals($req);
+        parent::prepareGlobals($servletRequest);
         
         // if the application has not been called over a vhost configuration append application folder name
-        if ($this->getServletConfig()->getApplication()->isVhostOf($req->getServerName()) === true) {
-            $directoryIndex = $this->getDirectoryIndex();
+        if ($this->getServletConfig()->getApplication()->isVhostOf($servletRequest->getServerName()) === true) {
+            $directoryIndex = 'index.php';
         } else {
             $directoryToPrepend = DIRECTORY_SEPARATOR . $this->getServletConfig()->getApplication()->getName() . DIRECTORY_SEPARATOR;
-            $directoryIndex = $this->getDirectoryIndex($directoryToPrepend);
+            $directoryIndex = $directoryToPrepend . 'index.php';
         }
         
         // initialize the server variables
-        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $directoryIndex);
-        $req->setServerVar('SCRIPT_NAME', $directoryIndex);
-        $req->setServerVar('PHP_SELF', $directoryIndex);
+        $servletRequest->setServerVar('SCRIPT_FILENAME', $servletRequest->getServerVar('DOCUMENT_ROOT') . $directoryIndex);
+        $servletRequest->setServerVar('SCRIPT_NAME', $directoryIndex);
+        $servletRequest->setServerVar('PHP_SELF', $directoryIndex);
         
         // ATTENTION: This is necessary because of a Magento bug!!!!
-        $req->setServerVar('SERVER_PORT', null);
+        $servletRequest->setServerVar('SERVER_PORT', null);
     }
 
     /**
      * Tries to load the requested file and adds the content to the response.
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     * 
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
-    public function doGet(Request $req, Response $res)
+    public function doGet(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
         // load \Mage
         $this->load();
         // init globals
-        $this->initGlobals($req);
+        $this->initGlobals($servletRequest);
         // run \Mage and set content
-        $res->setContent($this->run($req));
-        // set headers
-        $this->addHeaders($res);
+        $servletResponse->setContent($this->run($servletRequest));
     }
 
     /**
@@ -98,11 +103,11 @@ class MageServlet extends PhpServlet
     /**
      * Runs the WebApplication
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The servlet request
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
-     * @return string The WebApplications content
+     * @return string The web applications content
      */
-    public function run(Request $req)
+    public function run(ServletRequest $servletRequest)
     {
         
         try {
@@ -128,9 +133,9 @@ class MageServlet extends PhpServlet
             appserver_set_headers_sent(false);
             ob_start();
             
-            // run and reset Magento
-            \Mage::run();
+            // reset and run Magento
             \Mage::reset();
+            \Mage::run();
             
             // write the session back after the request
             session_write_close();

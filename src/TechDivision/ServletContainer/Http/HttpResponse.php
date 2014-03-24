@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Http\HttpResponse
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -9,7 +16,7 @@
  * @subpackage Http
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Markus Stockbauer <ms@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -27,7 +34,7 @@ use TechDivision\ServletContainer\Http\Cookie;
  * @subpackage Http
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Markus Stockbauer <ms@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -78,10 +85,10 @@ class HttpResponse implements Response
             array(
                 Header::HEADER_NAME_STATUS => "HTTP/1.1 200 OK",
                 Header::HEADER_NAME_DATE => gmdate('D, d M Y H:i:s \G\M\T', time()),
-                Header::HEADER_NAME_CONNECTION => 'keep-alive',
                 Header::HEADER_NAME_CONTENT_TYPE => 'text/html',
-                Header::HEADER_NAME_CACHE_CONTROL => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0',
-                Header::HEADER_NAME_PRAGMA => 'no-cache'
+                // Header::HEADER_NAME_CONNECTION => 'keep-alive',
+                // Header::HEADER_NAME_CACHE_CONTROL => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0',
+                // Header::HEADER_NAME_PRAGMA => 'no-cache'
             )
         );
     }
@@ -164,8 +171,11 @@ class HttpResponse implements Response
      */
     public function getHeadersAsString()
     {
+        
         $headers = "";
-
+        
+        $this->prepareHeaders();
+        
         foreach ($this->getHeaders() as $header => $value) {
 
             if ($header === Header::HEADER_NAME_STATUS) {
@@ -201,26 +211,7 @@ class HttpResponse implements Response
      */
     public function prepareContent()
     {
-        // check if encoding is available
-        foreach ($this->getAcceptedEncodings() as $acceptedEncoding) {
-            // check if gzip is possible
-            if ($acceptedEncoding == 'gzip') {
-                // set correct header encoding information
-                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'gzip');
-                // return content encoded by gzip
-                return $this->setContent(
-                    gzencode($this->getContent())
-                );
-                // check if deflate is possible
-            } elseif ($acceptedEncoding == 'deflate') {
-                // set correct header encoding information
-                $this->addHeader(Header::HEADER_NAME_CONTENT_ENCODING, 'deflate');
-                // return content deflate
-                return $this->setContent(
-                    gzdeflate($this->getContent())
-                );
-            }
-        }
+        return;
     }
 
     /**

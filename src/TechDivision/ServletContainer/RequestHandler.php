@@ -1,13 +1,20 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\RequestHandler
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
  * @category  Appserver
  * @package   TechDivision_ServletContainer
  * @author    Johann Zelger <jz@techdivision.com>
- * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      http://www.appserver.io
  */
@@ -18,10 +25,10 @@ use TechDivision\SocketException;
 use TechDivision\StreamException;
 use TechDivision\ApplicationServer\AbstractContextThread;
 use TechDivision\ServletContainer\Http\Header;
-use TechDivision\ServletContainer\Http\AccessLogger;
 use TechDivision\ServletContainer\Http\HttpRequest;
 use TechDivision\ServletContainer\Http\HttpResponse;
 use TechDivision\ServletContainer\Socket\HttpClient;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\HttpClientInterface;
 use TechDivision\ServletContainer\Exceptions\ConnectionClosedByPeerException;
@@ -33,7 +40,7 @@ use TechDivision\ServletContainer\Exceptions\BadRequestException;
  * @category  Appserver
  * @package   TechDivision_ServletContainer
  * @author    Johann Zelger <jz@techdivision.com>
- * @copyright 2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      http://www.appserver.io
  */
@@ -55,13 +62,6 @@ class RequestHandler extends AbstractContextThread
     const RECEIVE_TIMEOUT = 5;
 
     /**
-     * Holds the container instance.
-     *
-     * @var Container
-     */
-    public $container;
-
-    /**
      * Holds the main socket resource.
      *
      * @var resource
@@ -74,6 +74,13 @@ class RequestHandler extends AbstractContextThread
      * @var \TechDivision\ServletContainer\Interfaces\HttpClientInterface
      */
     protected $client;
+    
+    /**
+     * Array containing the containers modules.
+     * 
+     * @var array
+     */
+    protected $modules;
 
     /**
      * Initializes the request with the client socket.
@@ -86,7 +93,11 @@ class RequestHandler extends AbstractContextThread
      */
     public function init(Container $container, $client, $resource)
     {
-        $this->container = $container;
+        
+        // load the initialized modules from the container
+        $this->modules = $container->getModules();
+        
+        // initialize socket client/resource
         $this->client = $client;
         $this->resource = $resource;
     }
@@ -101,13 +112,6 @@ class RequestHandler extends AbstractContextThread
      */
     public function send(HttpClientInterface $client, Response $response)
     {
-        // prepare the content to be ready for sending to client
-        $response->prepareContent();
-
-        // prepare the headers
-        $response->prepareHeaders();
-
-        // return the string representation of the response content to the client
         $client->send($response->getHeadersAsString() . "\r\n" . $response->getContent());
     }
 
@@ -118,6 +122,7 @@ class RequestHandler extends AbstractContextThread
      */
     public function main()
     {
+        
         try {
             
             // initialize variables to handle persistent HTTP/1.1 connections
@@ -131,17 +136,14 @@ class RequestHandler extends AbstractContextThread
             $client->setResource($resource = $this->getResource());
             $client->setReceiveTimeout($receiveTimeout = RequestHandler::RECEIVE_TIMEOUT);
             
+            // load the registered container modules
+            $modules = $this->getModules();
+            
             do { // let socket open as long as max request or socket timeout is not reached
                 
                 // receive request object from client
                 $request = $client->receive();
-                
-                // initialize response, set the actual date and add accepted encoding methods
-                $responseDate = gmdate('D, d M Y H:i:s \G\M\T', time());
                 $response = $request->getResponse();
-                $response->initHeaders();
-                $response->setAcceptedEncodings($request->getAcceptedEncodings());
-                $response->addHeader(Header::HEADER_NAME_STATUS, "{$request->getVersion()} 200 OK");
                 
                 // load the Connection Header (keep-alive/close)
                 $connection = strtolower($request->getHeader(Header::HEADER_NAME_CONNECTION));
@@ -150,7 +152,7 @@ class RequestHandler extends AbstractContextThread
                 if ($connection === 'keep-alive' && $request->getVersion() === 'HTTP/1.1') {
                     
                     // lower the request counter and the TTL
-                    $availableRequests --;
+                    $availableRequests--;
                     
                     // check if this will be the last requests handled by this thread
                     if ($availableRequests >= 0) {
@@ -162,39 +164,24 @@ class RequestHandler extends AbstractContextThread
                         $response->addHeader(Header::HEADER_NAME_KEEP_ALIVE, "max=$availableRequests, timeout=$ttl, thread={$this->getThreadId()}");
                     }
                     
-                } else { // set request counter and TTL to 0
+                } else {
+                    
+                    // set request counter and TTL to 0
                     $availableRequests = 0;
-                }
-                
-                // log the request
-                $this->getAccessLogger()->log($request, $response);
-                
-                // load the application to handle the request
-                $application = $this->findApplication($request);
-                
-                // try to locate a servlet which could service the current request
-                $servlet = $application->locate($request);
-                
-                // inject shutdown handler
-                $servlet->injectShutdownHandler($this->newInstance('TechDivision\ServletContainer\Servlets\DefaultShutdownHandler', array(
-                    $client,
-                    $response
-                )));
-
-                // inject authentication manager
-                $servlet->injectAuthenticationManager($this->newInstance('TechDivision\ServletContainer\AuthenticationManager', array()));
-
-                // let the servlet process the request send it back to the client
-                $servlet->service($request, $response);
-                
-                // check if this is the last request
-                if ($availableRequests < 1) {
                     
                     // add the Connection: close header
                     $response->addHeader(Header::HEADER_NAME_CONNECTION, 'close');
                     
                     // set the flag to close the connection
                     $connectionOpen = false;
+                }
+                
+                // let all modules prepare the request
+                foreach ($modules as $module) {
+                    $module->handle($client, $request, $response);
+                    if ($request->isDispatched() === true) {
+                        break;
+                    }
                 }
                 
                 // send the data back to the client
@@ -212,25 +199,51 @@ class RequestHandler extends AbstractContextThread
             $this->getInitialContext()->getSystemLogger()->debug($soe);
         } catch (StreamException $ste) { // streaming socket timeout reached
             $this->getInitialContext()->getSystemLogger()->debug($ste);
-        } catch (BadRequestException $bre) { // servlet can not be found
+        } catch (BadRequestException $bre) {
+            // application can not be found
             $this->getInitialContext()->getSystemLogger()->error($bre);
             // if the resource is available, send the stacktrace back to the client
             if (is_resource($resource)) {
                 // prepare stacktrace and send it back
-                $response->setContent('<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL ' . $request->getUri() . ' was not found on this server.</p></body></html>');
-                $response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 404 Not Found');
+                $response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 400 Bad Request');
+                $response->setContent(
+                    sprintf(
+                        '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+                         <html>
+                            <head><title>400 Bad Request</title></head>
+                            <body>
+                                <h1>Bad Request</h1>
+                                <p>The request with URL %s could not be understood by the server due to malformed syntax.</p>
+                            </body>
+                         </html>',
+                        $request->getUri()
+                    )
+                );
                 $this->send($client, $response);
                 // shutdown + close the client connection
                 $client->shutdown();
                 $client->close();
             }
-        } catch (\Exception $e) { // a servlet throws an exception -> pass it through to the client!
+        } catch (\Exception $e) {
+            // a servlet throws an exception -> pass it through to the client!
             $this->getInitialContext()->getSystemLogger()->error($e);
             // if the resource is available, send the stacktrace back to the client
             if (is_resource($resource)) {
                 // prepare stacktrace and send it back
-                $response->setContent('<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>505 Internal Server Error</title></head><body><h1>Internal Server Error</h1><p>' . $e->__toString() . '</p></body></html>');
                 $response->addHeader(Header::HEADER_NAME_STATUS, 'HTTP/1.1 500 Internal Server Error');
+                $response->setContent(
+                    sprintf(
+                        '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+                         <html>
+                             <head><title>505 Internal Server Error</title></head>
+                             <body>
+                                 <h1>Internal Server Error</h1>
+                                 <p>%s</p>
+                             </body>
+                         </html>',
+                        $e->__toString()
+                    )
+                );
                 $this->send($client, $response);
                 // shutdown + close the client connection
                 $client->shutdown();
@@ -260,45 +273,12 @@ class RequestHandler extends AbstractContextThread
     }
 
     /**
-     * Returns the access logger instance.
+     * Returns the array with the containers modules.
      *
-     * @return \TechDivision\ServletContainer\Http\AccessLogger The initialized access logger instance
+     * @return array The available modules
      */
-    public function getAccessLogger()
+    public function getModules()
     {
-        return $this->getContainer()->getAccessLogger();
-    }
-
-    /**
-     * Returns the container instance.
-     *
-     * @return \TechDivision\ServletContainer\Container The container instance
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    /**
-     * Returns the array with the available applications.
-     *
-     * @return array The available applications
-     */
-    public function getApplications()
-    {
-        return $this->getContainer()->getApplications();
-    }
-
-    /**
-     * Tries to find and return the application for the passed request.
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\Request $servletRequest The request to find and return the application instance for
-     *
-     * @return \TechDivision\ServletContainer\Application The application instance
-     * @throws \TechDivision\ServletContainer\Exceptions\BadRequestException Is thrown if no application can be found for the passed application name
-     */
-    public function findApplication($servletRequest)
-    {
-        return $this->getContainer()->findApplication($servletRequest);
+        return $this->modules;
     }
 }

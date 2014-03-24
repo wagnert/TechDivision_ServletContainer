@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Http\HttpRequest
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -9,7 +16,7 @@
  * @subpackage Http
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Philipp Dittert <p.dittert@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -19,9 +26,6 @@ namespace TechDivision\ServletContainer\Http;
 use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\Response;
 use TechDivision\ServletContainer\Interfaces\Part;
-use TechDivision\ServletContainer\Session\SessionManager;
-use TechDivision\ServletContainer\Session\PersistentSessionManager;
-use TechDivision\ServletContainer\Session\ServletSession;
 use TechDivision\ServletContainer\Exceptions\InvalidHeaderException;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 
@@ -33,7 +37,7 @@ use TechDivision\ServletContainer\Interfaces\QueryParser;
  * @subpackage Http
  * @author     Johann Zelger <jz@techdivision.com>
  * @author     Philipp Dittert <p.dittert@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -160,13 +164,6 @@ class HttpRequest implements Request
     protected $server = array();
 
     /**
-     * Session Manager instance.
-     *
-     * @var \TechDivision\ServletContainer\Session\SessionManager
-     */
-    protected $sessionManager;
-
-    /**
      * Holds the query parser.
      *
      * @var \TechDivision\ServletContainer\Interfaces\QueryParser
@@ -201,28 +198,13 @@ class HttpRequest implements Request
      * @var array
      */
     protected $cookies = array();
-
+    
     /**
-     * Inject the session manager into the request instance.
-     *
-     * @param \TechDivision\ServletContainer\Session\SessionManager $sessionManager The session manager instance
-     *
-     * @return void
+     * Flag that the request has been dispatched.
+     * 
+     * @var boolean
      */
-    public function injectSessionManager(SessionManager $sessionManager)
-    {
-        $this->sessionManager = $sessionManager;
-    }
-
-    /**
-     * Return's the session manager from the request instance.
-     *
-     * @return \TechDivision\ServletContainer\Session\SessionManager The session manager instance
-     */
-    public function getSessionManager()
-    {
-        return $this->sessionManager;
-    }
+    protected $dispatched = false;
 
     /**
      * Inject the query parser
@@ -249,13 +231,15 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns an part instance
+     * Sets response object
      *
-     * @return Part
+     * @param \TechDivision\ServletContainer\Interfaces\Response $response A response instance
+     *
+     * @return void
      */
-    public function getHttpPartInstance()
+    public function injectResponse(Response $response)
     {
-        return $this->part->getInstance();
+        $this->response = $response;
     }
 
     /**
@@ -284,9 +268,6 @@ class HttpRequest implements Request
         $this->setServerAddress(gethostbyname($serverName));
         $this->setServerName($serverName);
         $this->setServerPort($serverPort);
-
-        // parse path info
-        $this->parsePathInfo($this->getUri());
 
         // set intial server vars and cookies
         $this->initServerVars();
@@ -404,18 +385,6 @@ class HttpRequest implements Request
     }
 
     /**
-     * Parsing URI for PathInfo
-     *
-     * @param string $uri The uri to parse
-     *
-     * @return void
-     */
-    public function parsePathInfo($uri)
-    {
-        $this->setPathInfo(parse_url($uri, PHP_URL_PATH));
-    }
-
-    /**
      * init basic Server Vars
      *
      * @return void
@@ -423,6 +392,8 @@ class HttpRequest implements Request
     public function initServerVars()
     {
         $this->server = array(
+            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
+            'GATEWAY_INTERFACE' => 'CGI/1.1',
             'HTTP_HOST' => $this->getHeader(Header::HEADER_NAME_HOST),
             'HTTP_CONNECTION' => $this->getHeader(Header::HEADER_NAME_CONNECTION),
             'HTTP_ACCEPT' => $this->getHeader(Header::HEADER_NAME_ACCEPT),
@@ -431,20 +402,19 @@ class HttpRequest implements Request
             'HTTP_ACCEPT_LANGUAGE' => $this->getHeader(Header::HEADER_NAME_ACCEPT_LANGUAGE),
             'HTTP_REFERER' => $this->getHeader(Header::HEADER_NAME_REFERER),
             'PATH' => '/opt/appserver/bin',
-            'GATEWAY_INTERFACE' => 'CGI/1.1',
+            'PATH_INFO' => $this->getPathInfo(),
+            'REMOTE_ADDR' => '127.0.0.1',
+            'REQUEST_METHOD' => $this->getMethod(),
+            'REQUEST_URI' => $this->getUri(),
+            'REQUEST_TIME' => time(),
+            'REQUEST_TIME_FLOAT' => microtime(true),
+            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
+            'SERVER_PROTOCOL' => $this->getVersion(),
             'SERVER_SIGNATURE' => '',
             'SERVER_SOFTWARE' => $this->getServerVar('SERVER_SOFTWARE'),
             'SERVER_NAME' => $this->getServerName(),
             'SERVER_ADDR' => gethostbyname($this->getServerName()),
-            'SERVER_PORT' => $this->getServerPort(),
-            'REMOTE_ADDR' => '127.0.0.1',
-            'DOCUMENT_ROOT' => $this->getServerVar('DOCUMENT_ROOT'),
-            'SERVER_ADMIN' => $this->getServerVar('SERVER_ADMIN'),
-            'SERVER_PROTOCOL' => $this->getVersion(),
-            'REQUEST_METHOD' => $this->getMethod(),
-            'REQUEST_URI' => $this->getUri(),
-            'REQUEST_TIME' => time(),
-            'REQUEST_TIME_FLOAT' => microtime(true)
+            'SERVER_PORT' => $this->getServerPort()
         );
 
         if ($cookie = $this->getHeader(Header::HEADER_NAME_COOKIE)) {
@@ -493,6 +463,19 @@ class HttpRequest implements Request
     }
 
     /**
+     * Sets query string
+     *
+     * @param string $queryString The query string to set
+     *
+     * @return void
+     */
+    public function setQueryString($queryString)
+    {
+        $this->queryString = $queryString;
+        $this->setServerVar('QUERY_STRING', $queryString);
+    }
+
+    /**
      * validates the header
      *
      * @param string $buffer Inputstream from socket
@@ -529,25 +512,13 @@ class HttpRequest implements Request
     }
 
     /**
-     * Returns an array with all request parameters.
+     * Returns an part instance
      *
-     * @return array The array with the request parameters
+     * @return Part
      */
-    public function getParameterMap()
+    public function getHttpPartInstance()
     {
-        return $this->parameterMap;
-    }
-
-    /**
-     * Sets response object
-     *
-     * @param \TechDivision\ServletContainer\Interfaces\Response $response A response instance
-     *
-     * @return void
-     */
-    public function injectResponse(Response $response)
-    {
-        $this->response = $response;
+        return $this->part->getInstance();
     }
 
     /**
@@ -558,6 +529,16 @@ class HttpRequest implements Request
     public function getResponse()
     {
         return $this->response;
+    }
+
+    /**
+     * Returns an array with all request parameters.
+     *
+     * @return array The array with the request parameters
+     */
+    public function getParameterMap()
+    {
+        return $this->parameterMap;
     }
 
     /**
@@ -597,19 +578,6 @@ class HttpRequest implements Request
     }
 
     /**
-     * Sets query string
-     *
-     * @param string $queryString The query string to set
-     *
-     * @return void
-     */
-    public function setQueryString($queryString)
-    {
-        $this->queryString = $queryString;
-        $this->setServerVar('QUERY_STRING', $queryString);
-    }
-
-    /**
      * Returns server name
      *
      * @return string
@@ -628,7 +596,7 @@ class HttpRequest implements Request
      */
     protected function setServerName($serverName)
     {
-        return $this->serverName = $serverName;
+        return $this->setServerVar('SERVER_NAME', $this->serverName = $serverName);
     }
 
     /**
@@ -650,7 +618,7 @@ class HttpRequest implements Request
      */
     protected function setServerAddress($serverAddress)
     {
-        return $this->serverAddress = $serverAddress;
+        return $this->setServerVar('SERVER_ADDR', $this->serverAddress = $serverAddress);
     }
 
     /**
@@ -672,7 +640,7 @@ class HttpRequest implements Request
      */
     protected function setServerPort($serverPort)
     {
-        return $this->serverPort = $serverPort;
+        return $this->setServerVar('SERVER_PORT', $this->serverPort = $serverPort);
     }
 
     /**
@@ -692,9 +660,9 @@ class HttpRequest implements Request
      *
      * @return string
      */
-    protected function setPathInfo($pathInfo)
+    public function setPathInfo($pathInfo)
     {
-        return $this->pathInfo = $pathInfo;
+        return $this->setServerVar('PATH_INFO', $this->pathInfo = $pathInfo);
     }
 
     /**
@@ -760,7 +728,7 @@ class HttpRequest implements Request
      */
     protected function setMethod($method)
     {
-        $this->method = $method;
+        $this->setServerVar('REQUEST_METHOD', $this->method = $method);
     }
 
     /**
@@ -782,7 +750,7 @@ class HttpRequest implements Request
      */
     public function setUri($uri)
     {
-        $this->uri = $uri;
+        $this->setServerVar('REQUEST_URI', $this->uri = $uri);
     }
 
     /**
@@ -804,19 +772,7 @@ class HttpRequest implements Request
      */
     public function setVersion($version)
     {
-        $this->version = $version;
-    }
-
-    /**
-     * Returns the session for this request.
-     *
-     * @param string $sessionName The name of the session to return/create
-     *
-     * @return \TechDivision\ServletContainer\Session\ServletSession The session instance
-     */
-    public function getSession($sessionName = ServletSession::SESSION_NAME)
-    {
-        return $this->sessionManager->getSessionForRequest($this, $sessionName);
+        $this->setServerVar('SERVER_PROTOCOL', $this->version = $version);
     }
 
     /**
@@ -1014,5 +970,27 @@ class HttpRequest implements Request
         if ($this->hasCookie($cookieName)) {
             return $this->cookies[$cookieName];
         }
+    }
+    
+    /**
+     * Sets the flag to mark the request dispatched.
+     * 
+     * @param boolean $dispatched TRUE if the request has already been dispatched, else FALSE
+     * 
+     * @return void
+     */
+    public function setDispatched($dispatched = true)
+    {
+        $this->dispatched = $dispatched;
+    }
+    
+    /**
+     * Sets the flag that shows if the request has already been dispatched.
+     * 
+     * @return boolean TRUE if the request has already been dispatched, else FALSE
+     */
+    public function isDispatched()
+    {
+        return $this->dispatched;
     }
 }

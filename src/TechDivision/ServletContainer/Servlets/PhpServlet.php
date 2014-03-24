@@ -1,7 +1,13 @@
 <?php
 
 /**
- * TechDivision\ServletContainer\HttpServlet
+ * TechDivision\ServletContainer\Servlets\PhpServlet
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -11,20 +17,22 @@
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 namespace TechDivision\ServletContainer\Servlets;
 
 use TechDivision\ServletContainer\Http\Header;
-use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\ServletContainer\Interfaces\Request;
+use TechDivision\ServletContainer\Http\ServletRequest;
+use TechDivision\ServletContainer\Http\ServletResponse;
 use TechDivision\ServletContainer\Servlets\StaticResourceServlet;
-use TechDivision\ServletContainer\Service\Locator\StaticResourceLocator;
+use TechDivision\ServletContainer\Service\Locator\PhpResourceLocator;
 use TechDivision\ServletContainer\Exceptions\PermissionDeniedException;
+use TechDivision\ServletContainer\Interfaces\Request;
 use TechDivision\ServletContainer\Interfaces\QueryParser;
 use TechDivision\ServletContainer\Interfaces\ServletConfig;
+use TechDivision\ServletContainer\Exceptions\FoundDirInsteadOfFileException;
 
 /**
  * This servlet emulates an Apache webserver request by initializing the 
@@ -36,94 +44,75 @@ use TechDivision\ServletContainer\Interfaces\ServletConfig;
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 class PhpServlet extends StaticResourceServlet
 {
-    
+
     /**
-     * Default directory index file.
+     * The base directory of the actual webapp.
      * 
      * @var string
      */
-    protected $directoryIndex = 'index.php';
-
+    protected $webappPath;
+    
     /**
-     * The resource locator necessary to load static resources.
+     * Initializes the servlet with the passed configuration.
      *
-     * @var \TechDivision\ServletContainer\Servlets\StaticResourceServlet
-     */
-    protected $locator;
-
-    /**
-     * Set all headers for php script execution.
+     * @param \TechDivision\ServletContainer\Interfaces\ServletConfig $config The configuration to initialize the servlet with
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The HTTP response to append the headers to
-     *
+     * @throws \TechDivision\ServletContainer\Exceptions\ServletException Is thrown if the configuration has errors
      * @return void
      */
-    public function addHeaders(Response $res)
+    public function init(ServletConfig $config)
     {
-        $res->addHeader(Header::HEADER_NAME_X_POWERED_BY, get_class($this));
-        $res->addHeader(Header::HEADER_NAME_EXPIRES, '19 Nov 1981 08:52:00 GMT');
+        parent::init($config);
+        $this->locator = new PhpResourceLocator($this);
+        $this->webappPath = $this->getServletConfig()->getWebappPath();
     }
     
     /**
-     * Returns the directory index file that defaults to index.php.
+     * Returns the base directory of the actual webapp.
      * 
-     * @param string $directoryToPrepend Directory to prepend to the default directory index file
-     *
-     * @return string The directory index file prepended with the passed directory
+     * @return string The base directory
      */
-    protected function getDirectoryIndex($directoryToPrepend = DIRECTORY_SEPARATOR)
+    protected function getWebappPath()
     {
-        return $directoryToPrepend . $this->directoryIndex;
+        return $this->webappPath;
     }
 
     /**
      * Prepares the passed request instance for generating the globals.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return void
      */
-    protected function prepareGlobals(Request $req)
+    protected function prepareGlobals(ServletRequest $servletRequest)
     {
-        
         // check if a XHttpRequest has to be handled
-        if (($xRequestedWith = $req->getHeader(Header::HEADER_NAME_X_REQUESTED_WITH)) != null) {
-            $req->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
+        if (($xRequestedWith = $servletRequest->getHeader(Header::HEADER_NAME_X_REQUESTED_WITH)) != null) {
+            $servletRequest->setServerVar('HTTP_X_REQUESTED_WITH', $xRequestedWith);
         }
-        
-        // check if php script is called to set script and php info
-        if (pathinfo($req->getPathInfo(), PATHINFO_EXTENSION) == 'php') {
-            $scriptName = $req->getPathInfo();
-        } else {
-            $scriptName = $this->getDirectoryIndex();
-        }
-        
-        // set the script file information
-        $req->setServerVar('SCRIPT_FILENAME', $req->getServerVar('DOCUMENT_ROOT') . $scriptName);
-        $req->setServerVar('SCRIPT_NAME', $scriptName);
-        $req->setServerVar('PHP_SELF', $scriptName);
     }
 
     /**
      * Returns the array with the $_FILES vars.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return array The $_FILES vars
      */
-    protected function initFileGlobals(Request $req)
+    protected function initFileGlobals(ServletRequest $servletRequest)
     {
         // init query parser
         $this->getQueryParser()->clear();
-        // iterate all files
         
-        foreach ($req->getParts() as $part) {
+        // iterate all files
+        foreach ($servletRequest->getParts() as $part) {
+            
             // check if filename is given, write and register it
             if ($part->getFilename()) {
                 // generate temp filename
@@ -140,6 +129,7 @@ class PhpServlet extends StaticResourceServlet
                 // clear tmp file
                 $tempName = '';
             }
+            
             // check if file has array info
             if (preg_match('/^([^\[]+)(\[.+)?/', $part->getName(), $matches)) {
                 
@@ -157,6 +147,7 @@ class PhpServlet extends StaticResourceServlet
                 $this->getQueryParser()->parseKeyValue($partGroup . '[size]' . $partArrayDefinition, $part->getSize());
             }
         }
+        
         // set files globals finally.
         return $this->getQueryParser()->getResult();
     }
@@ -164,14 +155,14 @@ class PhpServlet extends StaticResourceServlet
     /**
      * Returns the array with the $_COOKIE vars.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return array The $_COOKIE vars
      */
-    protected function initCookieGlobals(Request $req)
+    protected function initCookieGlobals(ServletRequest $servletRequest)
     {
         $cookie = array();
-        foreach (explode('; ', $req->getHeader(Header::HEADER_NAME_COOKIE)) as $cookieLine) {
+        foreach (explode('; ', $servletRequest->getHeader(Header::HEADER_NAME_COOKIE)) as $cookieLine) {
             list ($key, $value) = explode('=', $cookieLine);
             $cookie[$key] = $value;
         }
@@ -181,26 +172,26 @@ class PhpServlet extends StaticResourceServlet
     /**
      * Returns the array with the $_REQUEST vars.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return array The $_REQUEST vars
      */
-    protected function initRequestGlobals(Request $req)
+    protected function initRequestGlobals(ServletRequest $servletRequest)
     {
-        return $req->getParameterMap();
+        return $servletRequest->getParameterMap();
     }
 
     /**
      * Returns the array with the $_POST vars.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return array The $_POST vars
      */
-    protected function initPostGlobals(Request $req)
+    protected function initPostGlobals(ServletRequest $servletRequest)
     {
-        if ($req->getMethod() == Request::POST) {
-            return $req->getParameterMap();
+        if ($servletRequest->getMethod() == Request::POST) {
+            return $servletRequest->getParameterMap();
         } else {
             return array();
         }
@@ -209,17 +200,17 @@ class PhpServlet extends StaticResourceServlet
     /**
      * Returns the array with the $_GET vars.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return array The $_GET vars
      */
-    protected function initGetGlobals(Request $req)
+    protected function initGetGlobals(ServletRequest $servletRequest)
     {
         // check post type and set params to globals
-        if ($req->getMethod() == 'POST') {
-            parse_str($req->getQueryString(), $parameterMap);
+        if ($servletRequest->getMethod() == Request::POST) {
+            parse_str($servletRequest->getQueryString(), $parameterMap);
         } else {
-            $parameterMap = $req->getParameterMap();
+            $parameterMap = $servletRequest->getParameterMap();
         }
         return $parameterMap;
     }
@@ -227,80 +218,79 @@ class PhpServlet extends StaticResourceServlet
     /**
      * Returns the array with the $_SERVER vars.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return array The $_SERVER vars
      */
-    protected function initServerGlobals(Request $req)
+    protected function initServerGlobals(ServletRequest $servletRequest)
     {
-        return $req->getServerVars();
+        return $servletRequest->getServerVars();
     }
 
     /**
      * Initialize the PHP globals necessary for legacy mode and backward compatibility 
      * for standard applications.
      * 
-     * @param \TechDivision\ServletContainer\Interfaces\Request $req The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance
      *
      * @return void
      */
-    protected function initGlobals(Request $req)
+    protected function initGlobals(ServletRequest $servletRequest)
     {
+        
         // prepare the request before initializing the globals
-        $this->prepareGlobals($req);
+        $this->prepareGlobals($servletRequest);
+        
         // initialize the globals
-        $_SERVER = $this->initServerGlobals($req);
-        $_REQUEST = $this->initRequestGlobals($req);
-        $_POST = $this->initPostGlobals($req);
-        $_GET = $this->initGetGlobals($req);
-        $_COOKIE = $this->initCookieGlobals($req);
-        $_FILES = $this->initFileGlobals($req);
+        $_SERVER = $this->initServerGlobals($servletRequest);
+        $_REQUEST = $this->initRequestGlobals($servletRequest);
+        $_POST = $this->initPostGlobals($servletRequest);
+        $_GET = $this->initGetGlobals($servletRequest);
+        $_COOKIE = $this->initCookieGlobals($servletRequest);
+        $_FILES = $this->initFileGlobals($servletRequest);
     }
 
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
-     *
-     * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
+     * 
      * @return void
      */
-    public function doGet(Request $req, Response $res)
+    public function doGet(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
-        // let the locator retrieve the file
-        $file = $this->locator->locate($req);
         
-        // do not directly serve php files
-        if (strpos($file->getFilename(), '.php') === false) {
-            throw new PermissionDeniedException(sprintf('403 - You do not have permission to access %s', $file->getFilename()));
-        }
+        // try to locate the file
+        $fileInfo = $this->getLocator()->locate($servletRequest);
 
         // initialize the globals $_SERVER, $_REQUEST, $_POST, $_GET, $_COOKIE, $_FILES and set the headers
-        $this->initGlobals($req);
-        $this->addHeaders($res);
+        $this->initGlobals($servletRequest);
+        
+        // add this header to prevent .php request to be cached
+        $servletResponse->addHeader(Header::HEADER_NAME_EXPIRES, '19 Nov 1981 08:52:00 GMT');
         
         // start output buffering
         ob_start();
         
         // load the file
-        require $file->getPathname();
+        require $fileInfo->getPathname();
         
         // store the file's contents in the response
-        $res->setContent(ob_get_clean());
+        $servletResponse->setContent(ob_get_clean());
     }
 
     /**
      * Tries to load the requested file and adds the content to the response.
      *
-     * @param \TechDivision\ServletContainer\Interfaces\Request  $req The servlet request
-     * @param \TechDivision\ServletContainer\Interfaces\Response $res The servlet response
+     * @param \TechDivision\ServletContainer\Http\ServletRequest  $servletRequest  The request instance
+     * @param \TechDivision\ServletContainer\Http\ServletResponse $servletResponse The response instance
      *
      * @throws \TechDivision\ServletContainer\Exceptions\PermissionDeniedException Is thrown if the request tries to execute a PHP file
      * @return void
      */
-    public function doPost(Request $req, Response $res)
+    public function doPost(ServletRequest $servletRequest, ServletResponse $servletResponse)
     {
-        $this->doGet($req, $res);
+        $this->doGet($servletRequest, $servletResponse);
     }
 }

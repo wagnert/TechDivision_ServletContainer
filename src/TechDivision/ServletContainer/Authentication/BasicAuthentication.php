@@ -1,6 +1,13 @@
 <?php
+
 /**
  * TechDivision\ServletContainer\Authentication\BasicAuthentication
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  *
  * PHP version 5
  *
@@ -8,7 +15,7 @@
  * @package    TechDivision_ServletContainer
  * @subpackage Authentication
  * @author     Philipp Dittert <pd@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -24,7 +31,7 @@ use TechDivision\ServletContainer\Http\Header;
  * @package    TechDivision_ServletContainer
  * @subpackage Authentication
  * @author     Philipp Dittert <pd@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -38,8 +45,8 @@ class BasicAuthentication extends AbstractAuthentication
     public function authenticate()
     {
         $config = $this->getServlet()->getSecuredUrlConfig();
-        $req = $this->getRequest();
-        $res = $this->getResponse();
+        $req = $this->getServletRequest();
+        $res = $this->getServletResponse();
 
         $realm = $config['realm'];
         $adapterType = $config['adapter_type'];

@@ -3,6 +3,12 @@
 /**
  * TechDivision\ServletContainer\Service\Locator\ResourceLocatorInterface
  *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
  * PHP version 5
  *
  * @category   Appserver
@@ -11,14 +17,13 @@
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
 namespace TechDivision\ServletContainer\Service\Locator;
 
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Servlet;
+use TechDivision\ServletContainer\Http\ServletRequest;
 
 /**
  * Interface for the resource locator instances.
@@ -29,7 +34,7 @@ use TechDivision\ServletContainer\Interfaces\Servlet;
  * @author     Markus Stockbauer <ms@techdivision.com>
  * @author     Tim Wagner <tw@techdivision.com>
  * @author     Johann Zelger <jz@techdivision.com>
- * @copyright  2013 TechDivision GmbH <info@techdivision.com>
+ * @copyright  2014 TechDivision GmbH <info@techdivision.com>
  * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.appserver.io
  */
@@ -39,9 +44,9 @@ interface ResourceLocatorInterface
     /**
      * Tries to locate the resource related with the request.
      *
-     * @param Request $request The request instance to return the servlet for
+     * @param \TechDivision\ServletContainer\Http\ServletRequest $servletRequest The request instance to return the servlet for
      *
      * @return \TechDivision\ServletContainer\Interfaces\Servlet The requested servlet
      */
-    public function locate(Request $request);
+    public function locate(ServletRequest $servletRequest);
 }
