@@ -52,7 +52,7 @@ class Container extends AbstractContainer
      * @param \TechDivision\ApplicationServer\InitialContext                         $initialContext The initial contextinstance
      * @param \TechDivision\ApplicationServer\Api\Node\ContainerNode                 $containerNode  The containers UUID
      * @param array<\TechDivision\ApplicationServer\Interfaces\ApplicationInterface> $applications   The application instance
-     * 
+     *
      * @todo Application deployment only works this way because of Thread compatibilty
      */
     public function __construct($initialContext, $containerNode, $applications)
