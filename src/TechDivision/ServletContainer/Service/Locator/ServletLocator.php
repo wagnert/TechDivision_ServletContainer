@@ -61,8 +61,6 @@ class ServletLocator implements ResourceLocatorInterface
      * Initializes the locator with the actual servlet manager instance.
      *
      * @param \TechDivision\ServletContainer\ServletManager $servletManager The servlet manager instance
-     *
-     * @return void
      */
     public function __construct($servletManager)
     {

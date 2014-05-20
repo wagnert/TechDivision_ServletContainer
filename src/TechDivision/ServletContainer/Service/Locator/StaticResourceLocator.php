@@ -54,8 +54,6 @@ class StaticResourceLocator extends AbstractResourceLocator
      * Initializes the locator with the calling servlet.
      *
      * @param \TechDivision\ServletContainer\Interfaces\Servlet $servlet The servlet instance
-     *
-     * @return void
      */
     public function __construct(Servlet $servlet)
     {

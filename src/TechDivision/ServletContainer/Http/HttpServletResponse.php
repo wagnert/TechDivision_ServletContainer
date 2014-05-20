@@ -49,8 +49,6 @@ class HttpServletResponse implements ServletResponse
      * Injects the passed response instance into this servlet response.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Response $response The response instance used for initialization
-     * 
-     * @return void
      */
     public function __construct(Response $response)
     {

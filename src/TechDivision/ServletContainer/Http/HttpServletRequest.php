@@ -80,8 +80,6 @@ class HttpServletRequest implements ServletRequest
      * Injects the passed request instance into this servlet request.
      * 
      * @param \TechDivision\ServletContainer\Interfaces\Request $request The request instance used for initialization
-     * 
-     * @return void
      */
     public function __construct(Request $request)
     {

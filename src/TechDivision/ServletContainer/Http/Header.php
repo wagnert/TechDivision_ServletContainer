@@ -247,8 +247,6 @@ class Header
     /**
      * This is a utility class, so protect it against direct
      * instantiation.
-     *
-     * @return void
      */
     private function __construct()
     {

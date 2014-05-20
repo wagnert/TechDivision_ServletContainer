@@ -62,8 +62,6 @@ class DefaultShutdownHandler implements ShutdownHandler
      *
      * @param \TechDivision\ServletContainer\Interfaces\HttpClientInterface $client          The Http client
      * @param \TechDivision\ServletContainer\Http\ServletResponse           $servletResponse The Http response instance
-     *
-     * @return void
      */
     public function __construct(HttpClientInterface $client, ServletResponse $servletResponse)
     {
