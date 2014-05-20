@@ -77,11 +77,10 @@ class HttpPart implements Part
     /**
      * Initiates a http form part object
      *
-     * @param string $streamWrapper The stream wrapper to use per default temp stream wrapper
-     * @param long   $maxMemory     MaxMemory in bytes per default to 5 MB.
+     * @param string  $streamWrapper The stream wrapper to use per default temp stream wrapper
+     * @param integer $maxMemory     MaxMemory in bytes per default to 5 MB.
      *
      * @throws \Exception
-     * @return void
      */
     public function __construct($streamWrapper = self::STREAM_WRAPPER_TEMP, $maxMemory = 5242880)
     {
@@ -155,8 +154,6 @@ class HttpPart implements Part
      * Gets the orig firm filename
      *
      * @return string The file's name
-     *
-     * @return string
      */
     public function getFilename()
     {

@@ -91,8 +91,6 @@ class ServletManager
      * Set's the application instance.
      *
      * @param \TechDivision\ServletContainer\Application $application The application instance
-     *
-     * @return void
      */
     public function __construct($application)
     {
